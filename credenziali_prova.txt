@@ -1,0 +1,5 @@
+username: andrea_visi
+public: 0x172b68d6440adE8dB01281652940204Ee84feF52
+private: 0xcf3f75e56cc7bcb8492692c111c59bc0e6bd523d8745c4e6c661a7c55fda2c59
+role: patient
+pass: To5sODRnPr+J2IFF
