@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 from colorama import Fore, Style, init
-from database.database_operations import DatabaseOperations
+from database.database_operation import DatabaseOperations
 from session.session import Session
 from models.credentials import Credentials
  
@@ -61,7 +61,7 @@ class Controller:
         else:
             return -2, None
    
-    def insert_user_info(self, username: str, name: str, lastname: str, user_role: str, birthday: str, mail: str, phone: str, company_name: str, carbon_credit: int):
+    def insert_user(self, username: str, name: str, lastname: str, user_role: str, birthday: str, mail: str, phone: str, company_name: str, carbon_credit: int):
         """
         Inserts user information into the database.
  
@@ -244,18 +244,7 @@ class Controller:
    
     def get_public_key_by_username(self, username):
         return self.db_ops.get_public_key_by_username(username)
-   
-    def get_medic_by_username(self, username):
-        return self.db_ops.get_medic_by_username(username)
-   
-    def get_reports_list_by_username(self, username):
-        return self.db_ops.get_reports_list_by_username(username)
-   
-    def get_treatplan_list_by_username(self, username):
-        return self.db_ops.get_treatplan_list_by_username(username)
-   
+    
     def get_role_by_username(self, username):
         return self.db_ops.get_role_by_username(username)
    
-    def get_patients(self):
-        return self.db_ops.get_patients()

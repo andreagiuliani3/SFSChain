@@ -1,4 +1,6 @@
+from colorama import Fore, Style, init
 from models.model_base import Model
+
 class Credentials(Model):
     """
     This class represents the Credentials model that stores user authentication and authorization information,

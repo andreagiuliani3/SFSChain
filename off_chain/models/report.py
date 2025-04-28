@@ -1,4 +1,6 @@
 import datetime
+from colorama import Fore, Style, init
+from models.model_base import Model
 
 class Report:
     def __init__(self, id_report, creation_date, start_date, end_date, username, user_role, operations):
@@ -14,6 +16,10 @@ class Report:
     def get_id_report(self): return self.id_report
 
     def get_creation_date(self): return self.creation_date
+    
+    def get_start_date(self): return self.start_date
+
+    def get_end_date(self): return self.end_date
 
     def get_username(self): return self.username
 

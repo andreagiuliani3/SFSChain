@@ -4,11 +4,11 @@ import re
  
 from eth_utils import *
 from eth_keys import *
-"""from controllers.controller import Controller
-from controllers.action_controller import ActionController"""
+from controllers.controller import Controller
+from controllers.action_controller import ActionController
 from session.session import Session
-"""from db.db_operations import DatabaseOperations
-from cli.utils import Utils"""
+from database.database_operation import DatabaseOperations
+from cli.utils import Utils
 from colorama import Fore, Style, init
 
 class CommandLineInterface:
@@ -16,7 +16,10 @@ class CommandLineInterface:
     def __init__(self, session):
 
         self.session = session
-        """self.controller = controller"""
+        self.controller = Controller(session)
+        self.act_controller = ActionController()
+        self.ops = DatabaseOperations()
+        self.util = Utils(session)
 
         self.menu = {
             1: 'Register New Account',
@@ -314,3 +317,23 @@ class CommandLineInterface:
             except ValueError:
                 print(Fore.RED + "Invalid Input! Please enter a valid number." + Style.RESET_ALL)
 
+    def view_userview(self, username):
+        """
+        This method retrieves and displays the profile information of the patient 
+        identified by the given username. It presents details such as username, name, 
+        lastname, birthday, birth place, residence, autonomous status, and phone number.
+
+        Args:
+            username (str): The username of the patient whose profile is to be viewed.
+        """
+        userview = self.controller.get_user_by_username(username)
+        print(Fore.CYAN + "\nUser INFO\n" + Style.RESET_ALL)
+        print("Username: ", userview.get_username())
+        print("Name: ", userview.get_name())
+        print("Last Name: ", userview.get_lastname())
+        print("Birthday: ", userview.get_birthday())
+        print("Company Name: ", userview.get_birth_place())
+        print("Role: ", userview.get_residence())
+        print("Phone: ", userview.get_phone())
+        print("Carbon Credit: ", userview.get_phone())
+        input("\nPress Enter to exit\n")
