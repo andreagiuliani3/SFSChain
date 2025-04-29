@@ -1,0 +1,23 @@
+username: marco
+public: 0xF4D9556391F78122EA83d7DFA82e39Ea8B183a43
+private: 0xfdd0ad68a6a6554d9c29c8022ca1a0bb144977b89531062cb69e9e229511965c
+role: farmer
+pass: To5sODRnPr+J2IFF
+
+username: stefamari
+public: 0xD83201B3d96a497d9d725DAB07658Ee9502Dd21B
+private: 0xa89e5e9f48b6e87bb493aeb905a1c97312e58d9a7f2c534a59502259191e2e6f
+role: carrier
+pass: Gh2vUKPcSx$M3BRW
+
+username: andregiu
+public: 0x645631c6dc133CFE65f78fb3A30D26382097bB8e
+private: 0x23fd0ae40785930941b286ffa95b4144848e25d687659bec1eb71f9c79a38e23
+role: producer
+pass: Gh2vUKPcSx$M3BRW
+
+username: usernameprova
+public: 0x7FcE9220130546be931E336c45296066184D1046
+private: 0x6d850a48edcc3879ef064cd9e887aa3ff0fe945b0f271789b45a36d20380d36f
+role: seller
+pass: Fp9yADQmVz*E6XNC
