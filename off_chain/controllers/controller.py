@@ -61,7 +61,7 @@ class Controller:
         else:
             return -2, None
    
-    def insert_user(self, username: str, name: str, lastname: str, user_role: str, birthday: str, mail: str, phone: str, company_name: str, carbon_credit: int):
+    def insert_user_info(self, username: str, name: str, lastname: str, user_role: str, birthday: str, mail: str, phone: str, company_name: str, carbon_credit: int):
         """
         Inserts user information into the database.
  
@@ -75,7 +75,7 @@ class Controller:
         :param company_name: The company of the user (if it exists).
         :return: An insertion code indicating success (0) or failure.
         """
-        insertion_code = self.db_ops.insert_user(username, name, lastname, birthday, user_role, mail, phone, company_name, carbon_credit)
+        insertion_code = self.db_ops.insert_user(username, name, lastname, user_role, birthday, mail, phone, company_name, carbon_credit)
  
         if insertion_code == 0:
             user = self.db_ops.get_user_by_username(username)
@@ -168,6 +168,7 @@ class Controller:
         :return: Returns True if the phone number contains only digits (after removing spaces and hyphens)
                  and if its length is between 7 and 15 characters. Returns False otherwise.
         """
+        print("prova1")
         if phone_number.replace('-', '').replace(' ', '').isdigit():
             if 7 <= len(phone_number) <= 15:
                 return True

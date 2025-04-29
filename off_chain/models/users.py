@@ -13,7 +13,7 @@ class User:
         self.mail = mail
         self.birthday = birthday
         self.carbon_credit = carbon_credit
-        self.role = role
+        self.user_role = role
 
     def get_username(self): return self.username
     
@@ -29,7 +29,7 @@ class User:
 
     def get_birth_date(self): return self.birth_date
 
-    def get_role(self): return self.role
+    def get_user_role(self): return self.role
 
 
     def set_username(self, username): self.username = username
@@ -55,9 +55,14 @@ class User:
         """
         try:
             if self.username is None:
-                # Insert new medic record
-                self.cur.execute('''INSERT INTO Users (username, name, lastname, birthday, company_name, carbon_credit, role, mail, phone)
-                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''', (self.username, self.name, self.lastname, self.birthday, self.company_name, self.carbon_credit, self.role, self.mail, self.phone))
+                # Insert new Users record
+                self.cur.execute("""
+                            INSERT INTO Users
+                            (username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) """,
+                            (
+                                self.username, self.name, self.lastname, self.user_role, self.birthday, self.email, self.phone, self.company_name, self.carbon_credit
+                            ))
             else:
                 # Update existing medic details
                 self.cur.execute('''UPDATE Users SET name=?, lastname=?, birthday=?, company_name=?, carbon_credit=?, role=?, mail=?, phone=? WHERE username=?''',

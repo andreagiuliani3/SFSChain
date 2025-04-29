@@ -103,8 +103,10 @@ class ActionController:
         Returns:
             The transaction receipt object.
         """
+        print("prova10")
         if not from_address:
             raise ValueError("Invalid 'from_address' provided. It must be a non-empty string representing an Ethereum address.")
+        print("prova11")
         tx_parameters = {
             'from': from_address,
             'gas': gas,
@@ -115,7 +117,7 @@ class ActionController:
             function = getattr(self.contract.functions, function_name)(*args)
             tx_hash = function.transact(tx_parameters)
             receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
-
+            print("prova12")
             log_msg(f"Transaction {function_name} executed. From: {from_address}, Tx Hash: {tx_hash.hex()}, Gas: {gas}, Gas Price: {tx_parameters['gasPrice']}")
             return receipt
 
@@ -145,10 +147,10 @@ class ActionController:
 
     def register_entity(self, entity_type, *args, from_address):
         """
-        Registers a new entity of a specified type in the contract.
+        Registers a new user in the contract.
 
         Args:
-            entity_type (str): Type of the entity to register, e.g., 'medic', 'patient', 'caregiver'.
+            entity_type (str): Type of the user (can be used internally but maps to a single function).
             *args: Additional arguments required by the contract function.
             from_address (str): The Ethereum address to send the transaction from.
 
@@ -156,17 +158,15 @@ class ActionController:
             The transaction receipt object.
         
         Raises:
-            ValueError: If no function is available for the specified entity type or the from_address is invalid.
+            ValueError: If from_address is not provided.
         """
+        print("preif")
         if not from_address:
             raise ValueError(Fore.RED + "A valid Ethereum address must be provided as 'from_address'." + Style.RESET_ALL)
-        entity_functions = {
-            'user': 'addUser',
-        }
-        function_name = entity_functions.get(entity_type)
-        if not function_name:
-            raise ValueError(Fore.RED + f"No function available for entity type {entity_type}" + Style.RESET_ALL)
-        return self.write_data(function_name, from_address, *args)
+        print("postif")
+        function_name = 'addUser'  # Assume the smart contract now has a unified function
+        return self.write_data(function_name, from_address, entity_type, *args)
+
 
     def update_entity(self, entity_type, *args, from_address):
         """

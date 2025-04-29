@@ -84,7 +84,7 @@ class CommandLineInterface:
         while True:
             proceed = input("In order to register, you need to deploy. Do you want to proceed with deployment and initialization of the contract? (Y/n): ")
             if proceed.strip().upper() == "Y":
-                self.act_controller.deploy_and_initialize('../../on_chain/CarbonCredit.sol')
+                self.act_controller.deploy_and_initialize('../../on_chain/CarbonCreditRecords.sol')
                 break  # Exit the loop after deployment
             elif proceed.strip().upper() == "N":
                 print(Fore.RED + "Deployment cancelled. Please deploy the contract when you are ready to register." + Style.RESET_ALL)
@@ -186,6 +186,8 @@ class CommandLineInterface:
 
             reg_code = self.controller.registration(username, password, user_role, public_key, private_key)
             if reg_code == 0:
+                print(username)
+                print(user_role)
                 self.insert_user_info(username, user_role)
             elif reg_code == -1:
                 print(Fore.RED + 'Your username has been taken.\n' + Style.RESET_ALL)
@@ -203,9 +205,8 @@ class CommandLineInterface:
         on the blockchain.
  
         Args:
-            username (str): The username of the patient.
-            role (str): The role of the patient.
-            autonomous_flag (bool): Flag indicating whether the patient is autonomous or not. Default set to 1.
+            username (str): The username of the users.
+            role (str): The role of the user.
         """
  
         print("\nProceed with the insertion of a few personal information.")
@@ -232,8 +233,18 @@ class CommandLineInterface:
                 if self.controller.check_unique_phone_number(phone) == 0: break
                 else: print(Fore.RED + "This phone number has already been inserted. \n" + Style.RESET_ALL)
             else: print(Fore.RED + "Invalid phone number format.\n" + Style.RESET_ALL)
+        print("prova4")
         carbon_credit = 0
-        
+        from_address_users = self.controller.get_public_key_by_username(username)
+        print("prova5")
+        self.act_controller.register_entity(user_role, name, lastname, from_address=from_address_users)
+        print("prova6")
+        insert_code = self.controller.insert_user_info(username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit)
+        if insert_code == 0:
+            print(Fore.GREEN + 'Information saved correctly!' + Style.RESET_ALL)
+            self.user_menu(username,user_role)
+        elif insert_code == -1:
+            print(Fore.RED + 'Internal error!' + Style.RESET_ALL)
 
     def login_menu(self):
         """

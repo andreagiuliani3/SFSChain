@@ -90,7 +90,7 @@ contract HealthCareRecords {
      * @param role Medical specialization of the medic.
      * @notice Only authorized users can add medic records.
      */
-    function addUser(string memory name, string memory lastname, string memory role) public onlyAuthorized {
+    function addUser(string memory name, string memory lastname, string memory role) public {
         require(!users[msg.sender].isRegistered, "User already registered");
         users[msg.sender] = Users(name, lastname, role, true);
         logAction("Create", msg.sender, "User added");

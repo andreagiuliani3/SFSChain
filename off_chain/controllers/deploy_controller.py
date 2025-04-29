@@ -12,7 +12,7 @@ class DeployController:
 
     init(convert=True)
 
-    def __init__(self, http_provider='http://ganache:8545', solc_version='0.8.0'):
+    def __init__(self, http_provider='http://ganache:7545', solc_version='0.8.0'):
         """
         Initializes the deployment controller with Ethereum HTTP provider and Solidity 
         compiler version.
@@ -21,8 +21,8 @@ class DeployController:
             http_provider (str): The HTTP URL to connect to an Ethereum node.
             solc_version (str): The version of the Solidity compiler to use for compiling contracts.
         """
-        #http://ganache:8545
-        #http://127.0.0.1:8545
+        #http://ganache:7545
+        #http://127.0.0.1:7545
         self.http_provider = http_provider
         self.solc_version = solc_version
         self.w3 = Web3(Web3.HTTPProvider(self.http_provider))

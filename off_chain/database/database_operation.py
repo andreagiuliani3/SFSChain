@@ -56,11 +56,11 @@ class DatabaseOperations:
                     name TEXT NOT NULL,
                     lastname TEXT NOT NULL,
                     birthday DATE NOT NULL,
+                    user_role TEXT CHECK(user_role IN ('FARMER', 'CARRIER', 'PRODUCER', 'SELLER')) NOT NULL,
+                    email TEXT NOT NULL,
+                    phone TEXT,
                     company_name TEXT,
                     carbon_credit INTEGER,
-                    role TEXT CHECK(role IN ('FARMER', 'CARRIER', 'PRODUCER', 'SELLER')) NOT NULL,
-                    mail TEXT NOT NULL,
-                    phone TEXT,
                     FOREIGN KEY(username) REFERENCES Credentials(username)
                     );''')
         self.cur.execute('''CREATE TABLE IF NOT EXISTS Operations(
@@ -130,31 +130,20 @@ class DatabaseOperations:
 
     def check_unique_phone_number(self, phone):
         """
-            Checks if a phone number is unique across multiple tables in the database.
+        Checks if a phone number is unique in the Users table.
 
-            Args:
-                phone (str): The phone number to check for uniqueness.
+        Args:
+            phone (str): The phone number to check for uniqueness.
 
-            Returns:
-                int: 0 if the phone number is not found in any records (unique), -1 if it is found (not unique).
+        Returns:
+            int: 0 if the phone number is not found (unique), -1 if it is found (not unique).
         """
-        # Normalizza il numero di telefono rimuovendo caratteri non numerici
-        phone = phone.replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
-
-        # Verifica se il numero di telefono è vuoto
-        if not phone:
-            return 0  # Numero vuoto, considerato unico
-
-        # Esegui la query per cercare il numero di telefono
-        query_users = "SELECT COUNT(*) FROM Users WHERE phone = ?"
-        self.cur.execute(query_users, (phone,))
-        result = self.cur.fetchone()
-
-        # Se il risultato è maggiore di 0, il numero non è unico
-        if result[0] > 0:
-            return -1  # Non unico
-        return 0  # Unico
-
+        print("prova2")
+        query = "SELECT COUNT(*) FROM Users WHERE phone = ?"
+        self.cur.execute(query, (phone,))
+        count = self.cur.fetchone()[0]
+        print("prova3")
+        return 0 if count == 0 else -1
         
     def encrypt_private_k(self, private_key, passwd):
         """
@@ -234,7 +223,7 @@ class DatabaseOperations:
             print(Fore.RED + f"An error occurred: {e}" + Style.RESET_ALL)
             return False 
         
-    def insert_user(self, username, name, lastname, company_name, phone, mail, birthday, carbon_credit, role):
+    def insert_user(self, username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit):
         """
         Inserts a new patient record into the Patients table in the database.
         DA MODIFICARE
@@ -258,22 +247,15 @@ class DatabaseOperations:
         try:
             self.cur.execute("""
                             INSERT INTO Users
-                            (username, name, lastname, company_name, phone, mail, birthday, carbon_credit, role)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?) """,
+                            (username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) """,
                             (
-                                username,
-                                name, 
-                                lastname,
-                                company_name,
-                                phone,
-                                mail,
-                                birthday,
-                                carbon_credit,
-                                role
+                                username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit
                             ))
             self.conn.commit()
             return 0
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError as e:
+            print(f"Errore di integrità: {e}")
             return -1
         
     def insert_report(self, id_report, creation_date, start_date, end_date, username, user_role, operations):
@@ -382,7 +364,7 @@ class DatabaseOperations:
         """
         # Query the database for the user by username
         user_data = self.cur.execute("""
-                                    SELECT username, name, lastname, company_name, phone, mail, birthday, carbon_credit, role
+                                    SELECT username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit
                                     FROM Users
                                     WHERE username = ?
                                     """, (username,)).fetchone()
