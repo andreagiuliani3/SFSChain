@@ -2,7 +2,7 @@ from colorama import Fore, Style, init
 from models.model_base import Model
 
 class User:
-    def __init__(self, username, name, lastname, company_name, phone, mail, birthday, carbon_credit, role):
+    def __init__(self, username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit):
 
         super().__init__()
         self.username = username
@@ -10,16 +10,16 @@ class User:
         self.lastname = lastname
         self.company_name = company_name
         self.phone = phone
-        self.mail = mail
+        self.email = email
         self.birthday = birthday
         self.carbon_credit = carbon_credit
-        self.user_role = role
+        self.user_role = user_role
 
     def get_username(self): return self.username
     
     def get_name(self): return self.name
 
-    def get_last_name(self): return self.last_name
+    def get_lastname(self): return self.lastname
 
     def get_company_name(self): return self.company_name
 
@@ -27,16 +27,16 @@ class User:
 
     def get_email(self): return self.email
 
-    def get_birth_date(self): return self.birth_date
+    def get_birthday(self): return self.birthday
 
-    def get_user_role(self): return self.role
+    def get_user_role(self): return self.user_role
 
 
     def set_username(self, username): self.username = username
     
     def set_name(self, name): self.name = name
 
-    def set_last_name(self, last_name): self.last_name = last_name
+    def set_lastname(self, lastname): self.last_name = lastname
 
     def set_company_name(self, company_name): self.company_name = company_name
 
@@ -44,9 +44,9 @@ class User:
 
     def set_email(self, email): self.email = email
 
-    def set_birth_date(self, birth_date): self.birth_date = birth_date
+    def set_birthday(self, birthday): self.birthday = birthday
 
-    def set_role(self, role): self.role = role
+    def set_user_role(self, user_role): self.user_role = user_role
 
     def save(self):
         """

@@ -186,8 +186,6 @@ class CommandLineInterface:
 
             reg_code = self.controller.registration(username, password, user_role, public_key, private_key)
             if reg_code == 0:
-                print(username)
-                print(user_role)
                 self.insert_user_info(username, user_role)
             elif reg_code == -1:
                 print(Fore.RED + 'Your username has been taken.\n' + Style.RESET_ALL)
@@ -224,7 +222,9 @@ class CommandLineInterface:
             else: print(Fore.RED + "\nInvalid birthdate or incorrect format." + Style.RESET_ALL)
         while True:
             email = input('E-mail: ')
-            if self.controller.check_null_info(email): break
+            if self.controller.check_null_info(email):
+                if self.controller.check_unique_email(email) == 0: break
+                else: print(Fore.RED + "This e-mail has already been inserted. \n" + Style.RESET_ALL)
             else: print(Fore.RED + '\nPlease insert information.' + Style.RESET_ALL)
         company_name = input('Company name: ')
         while True:
@@ -233,12 +233,9 @@ class CommandLineInterface:
                 if self.controller.check_unique_phone_number(phone) == 0: break
                 else: print(Fore.RED + "This phone number has already been inserted. \n" + Style.RESET_ALL)
             else: print(Fore.RED + "Invalid phone number format.\n" + Style.RESET_ALL)
-        print("prova4")
         carbon_credit = 0
         from_address_users = self.controller.get_public_key_by_username(username)
-        print("prova5")
         self.act_controller.register_entity(user_role, name, lastname, from_address=from_address_users)
-        print("prova6")
         insert_code = self.controller.insert_user_info(username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit)
         if insert_code == 0:
             print(Fore.GREEN + 'Information saved correctly!' + Style.RESET_ALL)
@@ -296,7 +293,8 @@ class CommandLineInterface:
             2: "View profile",
             3: "Update profile",
             4: "Change password",
-            5: "Log out"
+            5: "Make an Action",
+            6: "Log out"
         }
  
         while True:
@@ -318,8 +316,11 @@ class CommandLineInterface:
                
                     elif choice == 4:
                         self.util.change_passwd(username)
- 
-                    elif choice == 5:
+                    
+                    elif choice ==5:
+                        self.make_operation(username, user_role)
+
+                    elif choice == 6:
                         confirm = input("\nDo you really want to leave? (Y/n): ").strip().upper()
                         if confirm == 'Y':
                             print(Fore.CYAN + "\nThank you for using the service!\n" + Style.RESET_ALL)
@@ -346,8 +347,22 @@ class CommandLineInterface:
         print("Username: ", userview.get_username())
         print("Name: ", userview.get_name())
         print("Last Name: ", userview.get_lastname())
-        print("Birth Date: ", userview.get_birth_date())
+        print("Birth Date: ", userview.get_birthday())
         print("Company Name: ", userview.get_company_name())
-        print("Role: ", userview.get_role())  # Corrected field here
+        print("Role: ", userview.get_user_role())  # Corrected field here
         print("Phone: ", userview.get_phone())
         input("\nPress Enter to exit\n")
+
+    def make_operation(self, username, user_role):
+        print(Fore.CYAN + "\nMake an Operation"  + Style.RESET_ALL)
+        while True:
+            creation_date = input('Insert today date (YYYY-MM-DD): ')
+            if self.controller.check_birthdate_format(creation_date): break
+            else: print(Fore.RED + "\nInvalid birthdate or incorrect format." + Style.RESET_ALL)
+        operation = str(input("Insert the descripion of the Operation: "))
+        insert_code = self.controller.insert_operation_info(creation_date, username, user_role, operation)
+        if insert_code == 0:
+            print(Fore.GREEN + 'Information saved correctly!' + Style.RESET_ALL)
+            self.user_menu(username,user_role)
+        elif insert_code == -1:
+            print(Fore.RED + 'Internal error!' + Style.RESET_ALL)

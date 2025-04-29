@@ -21,18 +21,18 @@ cur.execute('''CREATE TABLE Credentials(
             public_key TEXT NOT NULL,
             private_key TEXT NOT NULL
             );''')
-cur.execute('''CREATE TABLE Users(
-            username TEXT NOT NULL,
-            name TEXT NOT NULL,
-            lastname TEXT NOT NULL,
-            birthday DATE NOT NULL,
-            company_name TEXT,
-            carbon_credit INTEGER,
-            role TEXT CHECK(role IN ('FARMER', 'CARRIER', 'PRODUCER', 'SELLER')) NOT NULL,
-            mail TEXT NOT NULL,
-            phone TEXT,
-            FOREIGN KEY(username) REFERENCES Credentials(username)
-            );''')
+cur.execute('''CREATE TABLE IF NOT EXISTS Users(
+                    username TEXT NOT NULL,
+                    name TEXT NOT NULL,
+                    lastname TEXT NOT NULL,
+                    birthday DATE NOT NULL,
+                    user_role TEXT CHECK(role IN ('FARMER', 'CARRIER', 'PRODUCER', 'SELLER')) NOT NULL,
+                    mail TEXT NOT NULL,
+                    phone TEXT,
+                    company_name TEXT,
+                    carbon_credit INTEGER,
+                    FOREIGN KEY(username) REFERENCES Credentials(username)
+                    );''')
 cur.execute('''CREATE TABLE Operations(
             id_operation INTEGER PRIMARY KEY AUTOINCREMENT,
             creation_date DATE NOT NULL,

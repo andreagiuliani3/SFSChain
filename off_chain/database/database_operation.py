@@ -13,6 +13,7 @@ from cryptography.fernet import Fernet
 from colorama import Fore, Style, init
 from config import config
 from models.users import User
+from models.operation import Operation
 from models.credentials import Credentials
 
 
@@ -138,11 +139,9 @@ class DatabaseOperations:
         Returns:
             int: 0 if the phone number is not found (unique), -1 if it is found (not unique).
         """
-        print("prova2")
         query = "SELECT COUNT(*) FROM Users WHERE phone = ?"
         self.cur.execute(query, (phone,))
         count = self.cur.fetchone()[0]
-        print("prova3")
         return 0 if count == 0 else -1
         
     def encrypt_private_k(self, private_key, passwd):
@@ -295,7 +294,7 @@ class DatabaseOperations:
         except sqlite3.IntegrityError:
             return -1
 
-    def insert_operation(self, id_operation, creation_date, username, role, operation):
+    def insert_operation(self, creation_date, username, role, operation):
         """
         Inserts a new patient record into the Patients table in the database.
         DA MODIFICARE
@@ -319,10 +318,9 @@ class DatabaseOperations:
         try:
             self.cur.execute("""
                             INSERT INTO Operations
-                            (id_operation, creation_date, username, role, operation)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?) """,
+                            (creation_date, username, role, operation)
+                            VALUES (?, ?, ?, ?) """,
                             (
-                                id_operation, 
                                 creation_date, 
                                 username, 
                                 role, 
@@ -372,6 +370,29 @@ class DatabaseOperations:
         if user_data:
             # Return a user object with the fetched data (you may want to define a User class)
             return User(*user_data)  # Assuming 'User' is a class that takes the tuple fields as arguments
+        
+        return None  # Return None if the user does not exist
+    
+    def get_operation_by_username(self, username, cretion_date):
+        """
+        Retrieves a user's detailed information from the Users table based on their username.
+
+        Args:
+            username (str): The username of the user whose detailed information is being requested.
+
+        Returns:
+            User|None: A User object containing the user's details if the user exists, otherwise None.
+        """
+        # Query the database for the user by username
+        operation_data = self.cur.execute("""
+                                    SELECT creation_date, username, role, operation
+                                    FROM Operations
+                                    WHERE username = ? AND creation_date = ?
+                                    """, (username,cretion_date)).fetchone()
+
+        if operation_data:
+            # Return a user object with the fetched data (you may want to define a User class)
+            return Operation(*operation_data)  # Assuming 'User' is a class that takes the tuple fields as arguments
         
         return None  # Return None if the user does not exist
     

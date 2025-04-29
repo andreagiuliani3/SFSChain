@@ -103,10 +103,8 @@ class ActionController:
         Returns:
             The transaction receipt object.
         """
-        print("prova10")
         if not from_address:
             raise ValueError("Invalid 'from_address' provided. It must be a non-empty string representing an Ethereum address.")
-        print("prova11")
         tx_parameters = {
             'from': from_address,
             'gas': gas,
@@ -117,7 +115,6 @@ class ActionController:
             function = getattr(self.contract.functions, function_name)(*args)
             tx_hash = function.transact(tx_parameters)
             receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
-            print("prova12")
             log_msg(f"Transaction {function_name} executed. From: {from_address}, Tx Hash: {tx_hash.hex()}, Gas: {gas}, Gas Price: {tx_parameters['gasPrice']}")
             return receipt
 

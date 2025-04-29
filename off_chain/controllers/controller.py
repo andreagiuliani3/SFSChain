@@ -83,6 +83,17 @@ class Controller:
             print(Fore.GREEN + 'DONE' + Style.RESET_ALL)
  
         return insertion_code
+    
+    def insert_operation_info(self, creation_date: str, username: str, user_role: str, operation: str):
+        insertion_code = self.db_ops.insert_operation(creation_date, username, user_role, operation)
+ 
+        if insertion_code == 0:
+            operation = self.db_ops.get_operation_by_username(operation, creation_date)
+            self.session.set_operation(operation)
+            print(Fore.GREEN + 'DONE' + Style.RESET_ALL)
+ 
+        return insertion_code
+ 
  
     def check_null_info(self, info):
         """
@@ -168,7 +179,6 @@ class Controller:
         :return: Returns True if the phone number contains only digits (after removing spaces and hyphens)
                  and if its length is between 7 and 15 characters. Returns False otherwise.
         """
-        print("prova1")
         if phone_number.replace('-', '').replace(' ', '').isdigit():
             if 7 <= len(phone_number) <= 15:
                 return True

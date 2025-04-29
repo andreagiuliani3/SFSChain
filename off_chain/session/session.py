@@ -17,6 +17,7 @@ class Session:
         and no login error timestamp.
         """
         self.__user = None
+        self._operation = None
         self.__attempts = 0
         self.__login_error_timestamp = 0
 
@@ -31,6 +32,12 @@ class Session:
         Sets the user for the session.
         """
         self.__user = user
+
+    def get_operation(self):
+        return self._operation
+
+    def set_operation(self, operation):
+        self._operation = operation
 
     def get_attempts(self):
         """

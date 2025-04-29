@@ -97,7 +97,7 @@ class Utils:
                 print("Okay\n")
             break
             
-    def update_profile(self, username, role):
+    def update_profile(self, username, user_role):
         """
         Updates the profile information of a user.
 
@@ -113,8 +113,6 @@ class Utils:
         us = self.controller.get_user_by_username(username)
         us.set_name(click.prompt('Name ', default=us.get_name()))
         us.set_lastname(click.prompt('Lastname ', default=us.get_lastname()))
-
-        print("\nEnter your new Information...")
         while True:
                 birthday = click.prompt('Date of birth (YYYY-MM-DD) ', default=us.get_birthday())
                 if self.controller.check_birthdate_format(birthday): 
@@ -127,14 +125,9 @@ class Utils:
                     us.set_phone(phone)
                     break
                 else: print(Fore.RED + "Invalid phone number format."  + Style.RESET_ALL)
-        autonomous_flag = int(us.get_autonomous())
         name = us.get_name()
         lastname = us.get_lastname()
-        if autonomous_flag == 1:
-            try:
-                    public_key = self.controller.get_public_key_by_username(username)
-                    self.act_controller.update_entity(role, name, lastname, autonomous_flag, public_key)
-            except Exception as e:
-                    log_error(e)
+        public_key = self.controller.get_public_key_by_username(username)
+        self.act_controller.update_entity(user_role, name, lastname, from_address=public_key)
 
         us.save()
