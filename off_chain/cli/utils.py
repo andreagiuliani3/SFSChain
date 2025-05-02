@@ -14,6 +14,7 @@ from rich.table import Table
 
 from controllers.controller import Controller
 from controllers.action_controller import ActionController
+from database.database_operation import DatabaseOperations
 from session.session import Session
 from session.logging import log_error
 
@@ -53,6 +54,7 @@ class Utils:
 
         self.session = session
         self.controller = Controller(session)
+        self.database_operation = DatabaseOperations()
         self.act_controller = ActionController()
         self.today_date = str(datetime.date.today())
 
@@ -131,3 +133,17 @@ class Utils:
         self.act_controller.update_entity(user_role, name, lastname, from_address=public_key)
 
         us.save()
+
+    def make_operation(self, username, user_role):
+        print(Fore.CYAN + "\nMake an Operation"  + Style.RESET_ALL)
+        while True:
+            creation_date = input('Insert today date (YYYY-MM-DD): ')
+            if self.controller.check_birthdate_format(creation_date): break
+            else: print(Fore.RED + "\nInvalid birthdate or incorrect format." + Style.RESET_ALL)
+        operation = str(input("Insert the descripion of the Operation: "))
+        insert_code = self.controller.insert_operation_info(creation_date, username, user_role, operation)
+        if insert_code == 0:
+            print(Fore.GREEN + 'Information saved correctly!' + Style.RESET_ALL)
+            self.user_menu(username,user_role)
+        elif insert_code == -1:
+            print(Fore.RED + 'Internal error!' + Style.RESET_ALL)

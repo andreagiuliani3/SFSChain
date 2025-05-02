@@ -258,4 +258,7 @@ class Controller:
     
     def get_role_by_username(self, username):
         return self.db_ops.get_role_by_username(username)
+    
+    def get_credit_by_username(self, username):
+        return self.db_ops.get_credit_by_username(username)
    

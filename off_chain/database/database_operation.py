@@ -373,7 +373,7 @@ class DatabaseOperations:
         
         return None  # Return None if the user does not exist
     
-    def get_operation_by_username(self, username, cretion_date):
+    def get_operation_by_username(self, username, creation_date):
         """
         Retrieves a user's detailed information from the Users table based on their username.
 
@@ -388,7 +388,7 @@ class DatabaseOperations:
                                     SELECT creation_date, username, role, operation
                                     FROM Operations
                                     WHERE username = ? AND creation_date = ?
-                                    """, (username,cretion_date)).fetchone()
+                                    """, (username,creation_date)).fetchone()
 
         if operation_data:
             # Return a user object with the fetched data (you may want to define a User class)
@@ -419,6 +419,17 @@ class DatabaseOperations:
             return role[0]  # role[0] is the actual role value from the tuple
         return None
 
+    def get_credit_by_username(self, username):
+        credits = self.cur.execute("""
+                                SELECT carbon_credit
+                                FROM Users
+                                WHERE username = ?
+                                """, (username,)).fetchone()
+
+        # If a role is found, return it as a string, otherwise return None
+        if credits:
+            return credits[0]  # role[0] is the actual role value from the tuple
+        return None
             
     def get_public_key_by_username(self, username):
         """
