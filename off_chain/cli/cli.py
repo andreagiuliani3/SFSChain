@@ -320,8 +320,10 @@ class CommandLineInterface:
                     
                     elif choice ==5:
                         self.util.make_operation(username, user_role)
+
                     elif choice ==6:
                         self.view_balance(username)
+                        
                     elif choice == 7:
                         confirm = input("\nDo you really want to leave? (Y/n): ").strip().upper()
                         if confirm == 'Y':

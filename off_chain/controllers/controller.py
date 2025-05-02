@@ -249,7 +249,13 @@ class Controller:
             return True
         else:
             return False
-       
+    
+    def check_balance(self,username):
+        if self.db_ops.get_credit_by_username(username) > 0:
+            return True
+        else:
+            return False
+        
     def get_creds_by_username(self, username):
         return self.db_ops.get_creds_by_username(username)
    
