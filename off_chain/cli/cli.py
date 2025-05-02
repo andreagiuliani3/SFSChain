@@ -295,7 +295,8 @@ class CommandLineInterface:
             4: "Change password",
             5: "Make an Action",
             6: "Check Balance",
-            7: "Log out"
+            7: "Give a Credit",
+            8: "Log out"
         }
  
         while True:
@@ -321,10 +322,13 @@ class CommandLineInterface:
                     elif choice ==5:
                         self.util.make_operation(username, user_role)
 
-                    elif choice ==6:
+                    elif choice == 6:
                         self.view_balance(username)
-                        
+                    
                     elif choice == 7:
+                        self.util.give_credit(username,user_role)
+
+                    elif choice == 8:
                         confirm = input("\nDo you really want to leave? (Y/n): ").strip().upper()
                         if confirm == 'Y':
                             print(Fore.CYAN + "\nThank you for using the service!\n" + Style.RESET_ALL)

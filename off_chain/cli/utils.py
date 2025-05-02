@@ -11,6 +11,7 @@ import getpass
 from colorama import Fore, Style, init
 from rich.console import Console
 from rich.table import Table
+from datetime import date
 
 from controllers.controller import Controller
 from controllers.action_controller import ActionController
@@ -151,3 +152,32 @@ class Utils:
                 print(Fore.RED + 'Internal error!' + Style.RESET_ALL)
         else:
             print("\nYou haven't enough carbon credit!")
+
+    def give_credit(self, username, user_role):
+        operation_code = self.controller.check_balance(username)
+        if operation_code:
+            while True:
+                username_credit = str(input("Insert the username of the account you want to give 1 credit:\n"))
+                if username != username_credit:
+                    if self.controller.check_username(username_credit) == -1: break
+                    else: print(Fore.RED + 'The username is not correct/not exist.\n' + Style.RESET_ALL)
+                else: print("You can't give a credit to yourself!")
+            proceed = input("Do you want to proceed with the operation? (Y/n): ")
+            if proceed.strip().upper() == "Y":
+                creation_date = date.today()
+                operation = "Credit give to: "+username_credit
+                credit_code = self.controller.give_credit(username, username_credit)
+                operation_code = self.controller.insert_operation_info(creation_date, username, user_role, operation)        
+                print(operation_code)
+                print(credit_code)       
+                if operation_code == 0 and credit_code == 0:
+                    print(Fore.GREEN + 'Your credit is succesfully give to!', username_credit + Style.RESET_ALL)
+                elif operation_code == -1 or credit_code == -1:
+                    print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+            elif proceed.strip().upper() == "N":
+                    print(Fore.RED + "Operation Cancelled." + Style.RESET_ALL)
+            else:
+                    print(Fore.RED + 'Wrong input, please insert Y or N!' + Style.RESET_ALL)
+        else:
+            print("\nYou can't give a carbon credit, your balance is 0!")
+    

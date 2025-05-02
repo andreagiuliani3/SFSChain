@@ -90,7 +90,7 @@ class Controller:
         if insertion_code == 0:
             operation = self.db_ops.get_operation_by_username(operation, creation_date)
             self.session.set_operation(operation)
-            print(Fore.GREEN + 'DONE' + Style.RESET_ALL)
+            print(Fore.GREEN + 'Your operation has been registered' + Style.RESET_ALL)
  
         return insertion_code
  
@@ -268,3 +268,5 @@ class Controller:
     def get_credit_by_username(self, username):
         return self.db_ops.get_credit_by_username(username)
    
+    def give_credit(self, username, username_credit):
+        return self.db_ops.give_credit(username, username_credit)

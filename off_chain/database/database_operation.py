@@ -294,42 +294,51 @@ class DatabaseOperations:
         except sqlite3.IntegrityError:
             return -1
 
+    def give_credit(self, username, username_credit):
+        user_credit = self.get_credit_by_username(username) - 1
+        second_user_credit = self.get_credit_by_username(username_credit) + 1
+        try:
+            self.cur.execute("""
+                UPDATE Users
+                SET carbon_credit = ?
+                WHERE username = ?""", (user_credit, username))
+
+            self.cur.execute("""
+                UPDATE Users
+                SET carbon_credit = ?
+                WHERE username = ?""", (second_user_credit, username_credit))
+
+            self.conn.commit()
+            return 0
+        except Exception as e:
+            self.conn.rollback()
+            print("Errore durante il trasferimento crediti:", e)
+            return -1
+
     def insert_operation(self, creation_date, username, role, operation):
         """
-        Inserts a new patient record into the Patients table in the database.
-        DA MODIFICARE
-        Args:
-            username (str): The unique username for the patient.
-            name (str): The first name of the patient.
-            lastname (str): The last name of the patient.
-            birthday (str): The birth date of the patient in YYYY-MM-DD format.
-            birth_place (str): The birthplace of the patient.
-            residence (str): The current residence address of the patient.
-            autonomous (int): An integer (0 or 1) indicating whether the patient is autonomous.
-            phone (str): The phone number of the patient.
+        Inserts a new operation record into the Operations table in the database.
 
         Returns:
-            int: 0 if the insertion was successful, -1 if an integrity error occurred (e.g., duplicate username).
-
-        Exceptions:
-            sqlite3.IntegrityError: Catches and handles integrity errors from the database if, for instance, the
-                                    username is not unique, preventing the patient's data from being inserted.
+            int: 0 if the insertion was successful, -1 if an error occurred.
         """
         try:
             self.cur.execute("""
-                            INSERT INTO Operations
-                            (creation_date, username, role, operation)
-                            VALUES (?, ?, ?, ?) """,
-                            (
-                                creation_date, 
-                                username, 
-                                role, 
-                                operation
-                            ))
+                INSERT INTO Operations (creation_date, username, role, operation)
+                VALUES (?, ?, ?, ?)""",
+                (creation_date, username, role, operation)
+            )
             self.conn.commit()
             return 0
-        except sqlite3.IntegrityError:
-            return -1   
+        except sqlite3.IntegrityError as e:
+            self.conn.rollback()
+            print("Errore di integrità durante insert_operation:", e)
+            return -1
+        except Exception as e:
+            self.conn.rollback()
+            print("Errore generale durante insert_operation:", e)
+            return -1
+
 
     def get_creds_by_username(self, username):
         """
