@@ -4,6 +4,12 @@ private: 0xfdd0ad68a6a6554d9c29c8022ca1a0bb144977b89531062cb69e9e229511965c
 role: farmer
 pass: To5sODRnPr+J2IFF
 
+username: marco
+public: 0xE2B7BB66f9276Fe9970584De8a83677c66B38E65
+private: 0x13804299b14fb8d1424a08c65927c2a8f1f490e1cb24ddbba2c4da0abea42c13
+role: carrier
+pass: To5sODRnPr+J2IFF
+
 username: stefamari
 public: 0x1407471e60FC5959cEd5e9Fe855ee6456Bf4a304
 private: 0x41f2ab46e66e3b2de48c6a08aed2eb9355fd8c06a59d04f98c51a66e736ad38f

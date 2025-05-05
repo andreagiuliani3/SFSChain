@@ -39,6 +39,12 @@ class Session:
     def set_operation(self, operation):
         self._operation = operation
 
+    def get_report(self):
+        return self._report
+    
+    def set_report(self, report):
+        self._report = report
+
     def get_attempts(self):
         """
         Returns the number of login attempts.

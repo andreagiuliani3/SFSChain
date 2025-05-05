@@ -15,6 +15,7 @@ from config import config
 from models.users import User
 from models.operation import Operation
 from models.credentials import Credentials
+from models.report import Report
 
 
 class DatabaseOperations:
@@ -180,7 +181,7 @@ class DatabaseOperations:
         plaintext = cipher_suite.decrypt(encrypted_private_k.decode('utf-8'))
         return plaintext.decode('utf-8')
     
-    def check_unique_email(self, mail):
+    def check_unique_email(self, email):
         """
         Checks if an email address is unique within the Users table in the database.
 
@@ -190,8 +191,8 @@ class DatabaseOperations:
         Returns:
             int: 0 if the email address is not found in the Users records (unique), -1 if it is found (not unique).
         """
-        query_users = "SELECT COUNT(*) FROM Medics WHERE mail = ?"
-        self.cur.execute(query_users, (mail,))
+        query_users = "SELECT COUNT(*) FROM Users WHERE email = ?"
+        self.cur.execute(query_users, (email,))
         count_users = self.cur.fetchone()[0]
 
         if count_users == 0:
@@ -257,43 +258,6 @@ class DatabaseOperations:
             print(f"Errore di integrità: {e}")
             return -1
         
-    def insert_report(self, id_report, creation_date, start_date, end_date, username, user_role, operations):
-        """
-        Inserts a new report into the Reports table in the database.
-
-        Args:
-            username_patient (str): The username of the patient to whom the report pertains.
-            username_medic (str): The username of the medic who is creating the report.
-            analyses (str): Descriptions of any analyses that were performed as part of the medical evaluation.
-            diagnosis (str): The diagnosis given to the patient based on the analyses.
-
-        Returns:
-            int: 0 if the insertion was successful, -1 if an integrity error occurred, such as duplicate entries
-                or reference integrity issues.
-
-        Exceptions:
-            sqlite3.IntegrityError: Handles integrity errors that occur during the insertion process, typically
-                                    related to database constraints like unique keys or foreign key constraints.
-        """
-        try:
-            self.cur.execute("""
-                            INSERT INTO Reports
-                            (id_report, creation_date, start_date, end_date, username, user_role, operations)
-                            VALUES (?, ?, ?, ?, ?) """,
-                            (
-                                id_report, 
-                                creation_date, 
-                                start_date, 
-                                end_date, 
-                                username, 
-                                user_role, 
-                                operations
-                            ))
-            self.conn.commit()
-            return 0
-        except sqlite3.IntegrityError:
-            return -1
-
     def give_credit(self, username, username_credit):
         user_credit = self.get_credit_by_username(username) - 1
         second_user_credit = self.get_credit_by_username(username_credit) + 1
@@ -338,7 +302,6 @@ class DatabaseOperations:
             self.conn.rollback()
             print("Errore generale durante insert_operation:", e)
             return -1
-
 
     def get_creds_by_username(self, username):
         """
@@ -404,6 +367,69 @@ class DatabaseOperations:
             return Operation(*operation_data)  # Assuming 'User' is a class that takes the tuple fields as arguments
         
         return None  # Return None if the user does not exist
+    
+    def get_operation_by_username_grouped_by_date(self, username, start_date, end_date):
+        """
+        Retrieves all operations performed by a user, grouped by date, within a given date range.
+
+        Args:
+            username (str): The username of the user whose operations are being requested.
+            start_date (str): The start date of the range (inclusive), in 'YYYY-MM-DD' format.
+            end_date (str): The end date of the range (inclusive), in 'YYYY-MM-DD' format.
+
+        Returns:
+            list[Operation]: A list of Operation objects grouped by date, or an empty list if no operations exist.
+        """
+        operation_data = self.cur.execute("""
+            SELECT creation_date, username, role, 
+                GROUP_CONCAT(operation, ', ') AS operations
+            FROM Operations
+            WHERE username = ?
+            AND creation_date BETWEEN ? AND ?
+            GROUP BY creation_date, username, role
+            ORDER BY creation_date
+        """, (username, start_date, end_date)).fetchall()
+
+        if operation_data:
+            return [Operation(*row) for row in operation_data]
+        
+        return None
+    
+    def insert_report(self, creation_date, username, start_date, end_date):
+        # Ottieni tutte le operazioni dell'utente nel range richiesto, raggruppate per data
+        try:
+            operations = self.get_operation_by_username_grouped_by_date(username, start_date, end_date)
+            for op in operations:
+                # Inserisci ogni riga nel database report
+                self.cur.execute("""
+                    INSERT INTO Reports (creation_date, start_date, end_date, username, role, operations)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (creation_date, start_date, end_date, op.username, op.role, op.operation))
+            
+            self.conn.commit()  # Non dimenticare il commit per salvare i dati!
+            return 0
+
+        except sqlite3.IntegrityError as e:
+            self.conn.rollback()
+            print("Errore di integrità durante insert_report_info:", e)
+            return -1
+
+        except Exception as e:
+            self.conn.rollback()
+            print("Errore generale durante insert_report_info:", e)
+            return -1
+        
+    def get_report_by_username(self, username):
+        report_data = self.cur.execute("""
+                                  SELECT creation_date, start_date, end_date, username, role, operations
+                                  FROM Reports
+                                  WHERE creation_date = ?
+                                  """, (username,)).fetchone()
+        if report_data:
+            # Return a user object with the fetched data (you may want to define a User class)
+            return Report(*report_data)  # Assuming 'User' is a class that takes the tuple fields as arguments
+        
+        return None
     
     def get_role_by_username(self, username):
         """

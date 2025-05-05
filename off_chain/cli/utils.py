@@ -140,14 +140,14 @@ class Utils:
         if operation_code:
             print(Fore.CYAN + "\nMake an Operation"  + Style.RESET_ALL)
             while True:
-                creation_date = input('Insert today date (YYYY-MM-DD): ')
+                from datetime import date
+                creation_date = date.today().strftime("%Y-%m-%d")
                 if self.controller.check_birthdate_format(creation_date): break
                 else: print(Fore.RED + "\nInvalid birthdate or incorrect format." + Style.RESET_ALL)
             operation = str(input("Insert the descripion of the Operation: "))
             insert_code = self.controller.insert_operation_info(creation_date, username, user_role, operation)
             if insert_code == 0:
                 print(Fore.GREEN + 'Information saved correctly!' + Style.RESET_ALL)
-                self.user_menu(username,user_role)
             elif insert_code == -1:
                 print(Fore.RED + 'Internal error!' + Style.RESET_ALL)
         else:
@@ -181,3 +181,18 @@ class Utils:
         else:
             print("\nYou can't give a carbon credit, your balance is 0!")
     
+    def create_report(self, username, user_role):
+        creation_date = date.today()
+        while True:
+            start_date = input("Insert the first day of the operation you want to insert in the report (YYYY-MM-DD): ")
+            if self.controller.check_birthdate_format(start_date): break
+            else: print(Fore.RED + "\nInvalid date or incorrect format." + Style.RESET_ALL)
+        while True:
+            end_date = input("Insert the date of the last operation you want to put into the report (YYYY-MM-DD): ")
+            if self.controller.check_birthdate_format(end_date): break
+            else: print(Fore.RED + "\nInvalid date or incorrect format." + Style.RESET_ALL)
+        report_code = self.controller.insert_report_info(creation_date, start_date, end_date, username)
+        if report_code == 0:
+            print(Fore.GREEN + 'Your report is ready' + Style.RESET_ALL)
+        else:
+            print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)

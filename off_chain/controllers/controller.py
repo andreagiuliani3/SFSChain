@@ -93,8 +93,16 @@ class Controller:
             print(Fore.GREEN + 'Your operation has been registered' + Style.RESET_ALL)
  
         return insertion_code
- 
- 
+    
+    def insert_report_info(self, creation_date: str, start_date: str, end_date: str, username: str):
+        report_code = self.db_ops.insert_report(creation_date, username, start_date, end_date)
+
+        if report_code == 0:
+            report = self.db_ops.get_report_by_username(username)
+            self.session.set_report(report)
+            print(Fore.GREEN + 'Your report has been created' + Style.RESET_ALL)
+        return report_code
+    
     def check_null_info(self, info):
         """
         Checks if the provided information is non-null (or truthy).
@@ -258,7 +266,7 @@ class Controller:
         
     def get_creds_by_username(self, username):
         return self.db_ops.get_creds_by_username(username)
-   
+    
     def get_public_key_by_username(self, username):
         return self.db_ops.get_public_key_by_username(username)
     
@@ -270,3 +278,6 @@ class Controller:
    
     def give_credit(self, username, username_credit):
         return self.db_ops.give_credit(username, username_credit)
+    
+    def get_report_by_username(self, username):
+        return self.db_ops.get_report_by_username(username)

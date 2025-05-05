@@ -10,6 +10,7 @@ from session.session import Session
 from database.database_operation import DatabaseOperations
 from cli.utils import Utils
 from colorama import Fore, Style, init
+from datetime import date
 
 class CommandLineInterface:
 
@@ -296,7 +297,8 @@ class CommandLineInterface:
             5: "Make an Action",
             6: "Check Balance",
             7: "Give a Credit",
-            8: "Log out"
+            8: "Report",
+            9: "Log out"
         }
  
         while True:
@@ -329,6 +331,9 @@ class CommandLineInterface:
                         self.util.give_credit(username,user_role)
 
                     elif choice == 8:
+                        self.view_user_report(username,user_role)
+
+                    elif choice == 9:
                         confirm = input("\nDo you really want to leave? (Y/n): ").strip().upper()
                         if confirm == 'Y':
                             print(Fore.CYAN + "\nThank you for using the service!\n" + Style.RESET_ALL)
@@ -336,7 +341,7 @@ class CommandLineInterface:
                             return
                         else:
                             print(Fore.RED + "Invalid choice! Please try again." + Style.RESET_ALL)
- 
+
             except ValueError:
                 print(Fore.RED + "Invalid Input! Please enter a valid number." + Style.RESET_ALL)
 
@@ -367,4 +372,11 @@ class CommandLineInterface:
         print("Your balance is: ", balance)
         input("\nPress Enter to exit\n")
         
-    
+    def view_user_report(self, username, user_role):
+        self.util.create_report(username, user_role)
+        reportview = self.controller.get_report_by_username(username)
+        print(Fore.CYAN + "\nREPORT\n" + Style.RESET_ALL)
+        print("Username: ",reportview.get_username())
+        print("Date: ", reportview.get_creation_date)
+        print("Operation: ", reportview.get_operations)
+        input("\nPress Enter to exit\n")
