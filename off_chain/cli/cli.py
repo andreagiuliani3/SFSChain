@@ -284,56 +284,35 @@ class CommandLineInterface:
     def user_menu(self, username, user_role):
         """
         This method presents users with a menu of options tailored to their role.
- 
+
         Args:
-            username (str): The username of the logged-in medic.
+            username (str): The username of the logged-in user.
         """
- 
         user_options = {
-            1: "View report",
-            2: "View profile",
-            3: "Update profile",
-            4: "Change password",
-            5: "Make an Action",
-            6: "Check Balance",
-            7: "Give a Credit",
-            8: "Report",
-            9: "Log out"
+            1: "Profile",
+            2: "Operation",
+            3: "Report",  # Triggers the sub-menu
+            4: "Log out"
         }
- 
+
         while True:
-            print(Fore.CYAN + "\nMENU" + Style.RESET_ALL)                          
+            print(Fore.CYAN + "\nMENU" + Style.RESET_ALL)
             for key, value in user_options.items():
                 print(f"{key} -- {value}")
-                                               
-            try:                                    
+
+            try:
                 choice = int(input("Choose an option: "))
                 if choice in user_options:
                     if choice == 1:
-                        self.view_user_report(username)
- 
+                        self.profile_submenu(username, user_role)
+
                     elif choice == 2:
-                        self.view_userview(username)
- 
-                    elif choice == 3:                          
-                        self.util.update_profile(username, user_role)
-               
+                        self.credit_submenu(username, user_role)
+
+                    elif choice == 3:
+                        self.report_submenu(username)
+
                     elif choice == 4:
-                        self.util.change_passwd(username)
-                    
-                    elif choice ==5:
-                        self.util.make_operation(username, user_role)
-
-                    elif choice == 6:
-                        self.view_balance(username)
-                    
-                    elif choice == 7:
-                        self.util.give_credit(username,user_role)
-
-                    elif choice == 8:
-                        self.view_user_report(username,user_role)
-
-                    elif choice == 9:
                         confirm = input("\nDo you really want to leave? (Y/n): ").strip().upper()
                         if confirm == 'Y':
                             print(Fore.CYAN + "\nThank you for using the service!\n" + Style.RESET_ALL)
@@ -344,6 +323,109 @@ class CommandLineInterface:
 
             except ValueError:
                 print(Fore.RED + "Invalid Input! Please enter a valid number." + Style.RESET_ALL)
+
+    def profile_submenu(self, username, user_role):
+        """
+        This method presents a sub-menu for profile-related actions.
+        Press Enter without typing anything to go back.
+        """
+        report_options = {
+            1: "View Profile",
+            2: "Update Profile",
+            3: "Change Password"
+        }
+
+        while True:
+            print(Fore.CYAN + "\nPROFILE MENU (press Enter to go back)" + Style.RESET_ALL)
+            for key, value in report_options.items():
+                print(f"{key} -- {value}")
+
+            choice = input("Choose an option: ").strip()
+            if choice == "":
+                break  # Uscita dal submenu
+
+            try:
+                choice = int(choice)
+                if choice in report_options:
+                    if choice == 1:
+                        self.view_userview(username)
+                    elif choice == 2:
+                        self.util.update_profile(username, user_role)
+                    elif choice == 3:
+                        self.util.change_passwd(username)
+                else:
+                    print(Fore.RED + "Invalid choice! Please try again." + Style.RESET_ALL)
+            except ValueError:
+                print(Fore.RED + "Invalid Input! Please enter a valid number." + Style.RESET_ALL)
+
+
+    def credit_submenu(self, username, user_role):
+        """
+        This method presents a sub-menu for credit-related actions.
+        Press Enter without typing anything to go back.
+        """
+        report_options = {
+            1: "Check Balance",
+            2: "Give Credit",
+            3: "Make Operation"
+        }
+
+        while True:
+            print(Fore.CYAN + "\nCREDIT MENU (press Enter to go back)" + Style.RESET_ALL)
+            for key, value in report_options.items():
+                print(f"{key} -- {value}")
+
+            choice = input("Choose an option: ").strip()
+            if choice == "":
+                break
+
+            try:
+                choice = int(choice)
+                if choice in report_options:
+                    if choice == 1:
+                        self.view_balance(username)
+                    elif choice == 2:
+                        self.util.give_credit(username, user_role)
+                    elif choice == 3:
+                        self.util.make_operation(username, user_role)
+                else:
+                    print(Fore.RED + "Invalid choice! Please try again." + Style.RESET_ALL)
+            except ValueError:
+                print(Fore.RED + "Invalid Input! Please enter a valid number." + Style.RESET_ALL)
+
+
+    def report_submenu(self, username):
+        """
+        This method presents a sub-menu for report-related actions.
+        Press Enter without typing anything to go back.
+        """
+        report_options = {
+            1: "View Reports",
+            2: "Generate New Report"
+        }
+
+        while True:
+            print(Fore.CYAN + "\nREPORT MENU (press Enter to go back)" + Style.RESET_ALL)
+            for key, value in report_options.items():
+                print(f"{key} -- {value}")
+
+            choice = input("Choose an option: ").strip()
+            if choice == "":
+                break
+
+            try:
+                choice = int(choice)
+                if choice in report_options:
+                    if choice == 1:
+                        self.view_user_report(username)
+                    elif choice == 2:
+                        self.util.create_report(username)
+                else:
+                    print(Fore.RED + "Invalid choice! Please try again." + Style.RESET_ALL)
+            except ValueError:
+                print(Fore.RED + "Invalid Input! Please enter a valid number." + Style.RESET_ALL)
+
+
 
     def view_userview(self, username):
         """
@@ -372,11 +454,47 @@ class CommandLineInterface:
         print("Your balance is: ", balance)
         input("\nPress Enter to exit\n")
         
-    def view_user_report(self, username, user_role):
-        self.util.create_report(username, user_role)
+    def view_user_report(self, username):
+        """
+        Visualize the user report and allow the user to select a specific report based on the date.
+
+        Args:
+            username (str): The username of the logged-in user.
+        """
         reportview = self.controller.get_report_by_username(username)
-        print(Fore.CYAN + "\nREPORT\n" + Style.RESET_ALL)
-        print("Username: ",reportview.get_username())
-        print("Date: ", reportview.get_creation_date)
-        print("Operation: ", reportview.get_operations)
-        input("\nPress Enter to exit\n")
+        if not reportview:
+            print("No reports found for this user.")
+            return  # Uscita immediata se non ci sono report
+
+        available_dates = [report.get_creation_date() for report in reportview]
+        print("\nAvailable report:")
+        for date in available_dates:
+            print("- " + date)
+
+        while True:
+            user_input_date = input("Insert the date of the report you want to see (YYYY-MM-DD): ").strip()
+            if user_input_date == "":
+                print("Returning to previous menu.")
+                return
+
+            if not self.controller.check_birthdate_format(user_input_date):
+                print(Fore.RED + "\nInvalid date or incorrect format." + Style.RESET_ALL)
+                continue
+
+            if user_input_date not in available_dates:
+                print(Fore.RED + "\nNo report found for the date entered." + Style.RESET_ALL)
+                continue
+
+            print(f"Displaying the report for {user_input_date}...")
+            break
+
+        reportdateview = self.controller.get_report_by_date(username, user_input_date)
+        if reportdateview:
+            for report in reportdateview:
+                print("Date: ", report.get_operation_date())
+                print("Operation: ", report.get_operations())
+        else:
+            print("Report not found.")
+
+        input("\nPress Enter to return to the menu...\n")
+

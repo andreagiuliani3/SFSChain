@@ -5,7 +5,7 @@ from config import config
  
 class Model:
     """Base model to be extended for implementing other models."""
-    db_path = "CARBONChain"
+    db_path = "SFS.db"
  
     def __init__(self):
         """Constructor that initializes the database connection."""

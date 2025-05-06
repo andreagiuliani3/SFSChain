@@ -75,8 +75,7 @@ class DatabaseOperations:
         self.cur.execute('''CREATE TABLE IF NOT EXISTS Reports(
                     id_report INTEGER PRIMARY KEY AUTOINCREMENT,
                     creation_date DATE NOT NULL,
-                    start_date DATE,
-                    end_date DATE,
+                    operation_date DATE NOT NULL,
                     username TEXT NOT NULL,
                     role TEXT CHECK(role IN ('FARMER', 'CARRIER', 'PRODUCER', 'SELLER')) NOT NULL,
                     operations TEXT
@@ -381,7 +380,7 @@ class DatabaseOperations:
             list[Operation]: A list of Operation objects grouped by date, or an empty list if no operations exist.
         """
         operation_data = self.cur.execute("""
-            SELECT creation_date, username, role, 
+            SELECT MIN(id_operation) AS id_operation, creation_date, username, role, 
                 GROUP_CONCAT(operation, ', ') AS operations
             FROM Operations
             WHERE username = ?
@@ -393,20 +392,37 @@ class DatabaseOperations:
         if operation_data:
             return [Operation(*row) for row in operation_data]
         
-        return None
+        return []
+
     
     def insert_report(self, creation_date, username, start_date, end_date):
-        # Ottieni tutte le operazioni dell'utente nel range richiesto, raggruppate per data
+        """
+        Inserisce nel database un report per ogni giorno in cui l'utente ha effettuato operazioni
+        tra start_date ed end_date. Ogni report contiene le operazioni concatenate di quel giorno.
+
+        Args:
+            creation_date (str): Data di creazione del report.
+            username (str): Nome utente.
+            start_date (str): Data di inizio intervallo.
+            end_date (str): Data di fine intervallo.
+
+        Returns:
+            int: 0 se l'inserimento ha avuto successo, -1 in caso di errore.
+        """
         try:
             operations = self.get_operation_by_username_grouped_by_date(username, start_date, end_date)
-            for op in operations:
-                # Inserisci ogni riga nel database report
-                self.cur.execute("""
-                    INSERT INTO Reports (creation_date, start_date, end_date, username, role, operations)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                """, (creation_date, start_date, end_date, op.username, op.role, op.operation))
             
-            self.conn.commit()  # Non dimenticare il commit per salvare i dati!
+            if not operations:
+                print(f"Nessuna operazione trovata per l'utente {username} tra {start_date} e {end_date}.")
+                return 0
+            
+            for op in operations:
+                self.cur.execute("""
+                    INSERT INTO Reports (creation_date, operation_date, username, role, operations)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (creation_date, op.creation_date, op.username, op.role, op.operations))
+            
+            self.conn.commit()
             return 0
 
         except sqlite3.IntegrityError as e:
@@ -418,18 +434,36 @@ class DatabaseOperations:
             self.conn.rollback()
             print("Errore generale durante insert_report_info:", e)
             return -1
+
         
     def get_report_by_username(self, username):
         report_data = self.cur.execute("""
-                                  SELECT creation_date, start_date, end_date, username, role, operations
-                                  FROM Reports
-                                  WHERE creation_date = ?
-                                  """, (username,)).fetchone()
+                                SELECT id_report, creation_date, operation_date, username, role, operations
+                                FROM Reports
+                                WHERE username = ?
+                                """, (username,)).fetchall()  # fetchall() restituisce tutte le righe
+
         if report_data:
-            # Return a user object with the fetched data (you may want to define a User class)
-            return Report(*report_data)  # Assuming 'User' is a class that takes the tuple fields as arguments
-        
+            # Restituisci una lista di Report, una per ogni riga
+            return [Report(*row) for row in report_data]
+
         return None
+    
+    def get_report_by_date(self, username, creation_date):
+        report_data = self.cur.execute("""
+                                SELECT id_report, creation_date, operation_date, username, role, operations
+                                FROM Reports
+                                WHERE username = ? AND creation_date = ?
+                                """, (username, creation_date)).fetchall()  # fetchall() restituisce tutte le righe
+
+        if report_data:
+            # Restituisci una lista di Report, una per ogni riga
+            return [Report(*row) for row in report_data]
+
+        return None
+
+
+
     
     def get_role_by_username(self, username):
         """

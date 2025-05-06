@@ -181,7 +181,7 @@ class Utils:
         else:
             print("\nYou can't give a carbon credit, your balance is 0!")
     
-    def create_report(self, username, user_role):
+    def create_report(self, username):
         creation_date = date.today()
         while True:
             start_date = input("Insert the first day of the operation you want to insert in the report (YYYY-MM-DD): ")

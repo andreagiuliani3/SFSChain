@@ -42,9 +42,8 @@ cur.execute('''CREATE TABLE Operations(
             );''')
 cur.execute('''CREATE TABLE Reports(
             id_report INTEGER PRIMARY KEY AUTOINCREMENT,
-            creation_date DATE NOT NULL,
-            start_date DATE,
-            end_date DATE,
+            creation_date DATE NOT NULL
+            operation_date DATE NOT NULL
             username TEXT NOT NULL,
             role TEXT CHECK(role IN ('FARMER', 'CARRIER', 'PRODUCER', 'SELLER')) NOT NULL
             operations TEXT

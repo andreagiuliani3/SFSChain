@@ -281,3 +281,6 @@ class Controller:
     
     def get_report_by_username(self, username):
         return self.db_ops.get_report_by_username(username)
+    
+    def get_report_by_date(self, username, creation_date):
+        return self.db_ops.get_report_by_date(username, creation_date)

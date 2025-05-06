@@ -1,47 +1,45 @@
-from colorama import Fore, Style, init
 from models.model_base import Model
 
-class Operation:
-    def __init__(self, id_operation, creation_date, username, role, operation):
-
-        super.__init__()
+class Operation(Model):
+    def __init__(self, id_operation, creation_date, username, role, operations):
+        super().__init__()
         self.id_operation = id_operation
         self.creation_date = creation_date
         self.username = username
         self.role = role
-        self.operation = operation
+        self.operations = operations
 
-        def get_id_operation(self): return self.id_operation
+    def get_id_operation(self): return self.id_operation
+    def get_creation_date(self): return self.creation_date
+    def get_username(self): return self.username
+    def get_role(self): return self.role
+    def get_operations(self): return self.operations
 
-        def get_creation_date(self): return self.creation_date
-
-        def get_username(self): return self.username
-
-        def get_role(self): return self.role
-
-        def get_operation(self): return self.operation
-
-    def save(self):
+    def save(self, cur, conn):
         """
-        Saves a new or updates an existing Credentials record in the database.
-        Implements SQL queries to insert or update credentials based on the presence of an ID.
+        Inserts or updates an Operation in the database.
+        Requires an open cursor and connection.
         """
-        if self.id is None:
-            # Insert new credentials record
-            self.cur.execute('''INSERT INTO Credentials (username, hash_password, role, public_key, private_key)
-                                VALUES (?, ?, ?, ?)''', (self.creation_date, self.username, self.role, self.operation))
-                                #I punti interrogativi come placeholder servono per la prevenzione di attacchi SQL Injection
+        if self.id_operation is None:
+            # Insert new operation
+            cur.execute('''
+                INSERT INTO Operations (creation_date, username, role, operation)
+                VALUES (?, ?, ?, ?)
+            ''', (self.creation_date, self.username, self.role, self.operations))
+            self.id_operation = cur.lastrowid
         else:
-            # Update existing credentials record
-            self.cur.execute('''UPDATE Operation SET creation_date=?, username=?, role=?, operation=? WHERE id=?''',
-                             (self.creation_date, self.username, self.role, self.operation))
-        self.conn.commit()
-        self.id = self.cur.lastrowid # Update the ID with the last row inserted ID if new record
- 
-    def delete(self):
+            # Update existing operation
+            cur.execute('''
+                UPDATE Operations 
+                SET creation_date=?, username=?, role=?, operation=? 
+                WHERE id=?
+            ''', (self.creation_date, self.username, self.role, self.operations, self.id_operation))
+        conn.commit()
+
+    def delete(self, cur, conn):
         """
-        Deletes a Credentials record from the database based on its ID.
+        Deletes an Operation from the database.
         """
-        if self.id is not None:
-            self.cur.execute('DELETE FROM Credentials WHERE id=?', (self.id,))
-            self.conn.commit()
+        if self.id_operation is not None:
+            cur.execute('DELETE FROM Operations WHERE id=?', (self.id_operation,))
+            conn.commit()
