@@ -1,20 +1,14 @@
-username: marco
-public: 0xF4D9556391F78122EA83d7DFA82e39Ea8B183a43
-private: 0xfdd0ad68a6a6554d9c29c8022ca1a0bb144977b89531062cb69e9e229511965c
+username: marcoprova
+public: 0xEFBBC9D0756C87B61DA5Acf3f20c4942f2440b4d
+private: 0x1dccd03d4ea4d3964cbb0124b8df8749acc2ba36987abce031f6d2b984f5206e
 role: farmer
-pass: To5sODRnPr+J2IFF
-
-username: marco
-public: 0xE2B7BB66f9276Fe9970584De8a83677c66B38E65
-private: 0x13804299b14fb8d1424a08c65927c2a8f1f490e1cb24ddbba2c4da0abea42c13
-role: carrier
-pass: To5sODRnPr+J2IFF
-
-username: stefamari
-public: 0x1407471e60FC5959cEd5e9Fe855ee6456Bf4a304
-private: 0x41f2ab46e66e3b2de48c6a08aed2eb9355fd8c06a59d04f98c51a66e736ad38f
-role: carrier
 pass: Gh2vUKPcSx$M3BRW
+
+username: marcoprova2
+public: 0x2F97d0A56972127D20D6CebC7d28eb673F6463ac
+private: 0xf8675c70046e84d4fe986ccf79eeae582262cec16f3fa69ab89fc323418f0178
+role: carrier
+pass: To5sODRnPr+J2IFF
 
 username: andregiu
 public: 0x645631c6dc133CFE65f78fb3A30D26382097bB8e

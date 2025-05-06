@@ -452,7 +452,7 @@ class CommandLineInterface:
         balance = self.controller.get_credit_by_username(username)
         print(Fore.CYAN + "\nBalance:\n" + Style.RESET_ALL)
         print("Your balance is: ", balance)
-        input("\nPress Enter to exit\n")
+        return
         
     def view_user_report(self, username):
         """
@@ -466,7 +466,9 @@ class CommandLineInterface:
             print("No reports found for this user.")
             return  # Uscita immediata se non ci sono report
 
-        available_dates = [report.get_creation_date() for report in reportview]
+        available_dates = list({report.get_creation_date() for report in reportview})  # set per eliminare i duplicati, list per ordinabilità
+        available_dates.sort()  # opzionale: ordina le date
+
         print("\nAvailable report:")
         for date in available_dates:
             print("- " + date)
