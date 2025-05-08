@@ -200,7 +200,7 @@ class CommandLineInterface:
         """
         This method guides users through the process of providing personal information.
         It validates user inputs and ensures data integrity before inserting the
-        information into the system. Additionally, it registers the patient entity
+        information into the system. Additionally, it registers the user entity
         on the blockchain.
  
         Args:
@@ -236,6 +236,7 @@ class CommandLineInterface:
             else: print(Fore.RED + "Invalid phone number format.\n" + Style.RESET_ALL)
         carbon_credit = 5
         from_address_users = self.controller.get_public_key_by_username(username)
+        print(from_address_users)
         self.act_controller.register_entity(user_role, name, lastname, from_address=from_address_users)
         insert_code = self.controller.insert_user_info(username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit)
         if insert_code == 0:
@@ -433,9 +434,6 @@ class CommandLineInterface:
         identified by the given username. It presents details such as username, 
         name, lastname, birthday, birth place, residence, autonomous status, 
         and phone number.
-
-        Args:
-            username (str): The username of the user whose profile is to be viewed.
         """
         userview = self.controller.get_user_by_username(username)
         print(Fore.CYAN + "\nUser INFO\n" + Style.RESET_ALL)

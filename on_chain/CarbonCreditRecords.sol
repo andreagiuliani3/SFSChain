@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-//Documentation for this contract written in NatSpec format
+// Documentation for this contract written in NatSpec format
 /**
  * @title Health Care Records System
  * @dev Manages healthcare records for patients, medics, and caregivers.
@@ -16,7 +16,21 @@ contract HealthCareRecords {
         bool isRegistered;
     }
 
-    //Struct to log actions for every previous struct
+    struct Report {
+        uint256 reportId;
+        address userAddress;
+        string operation_date;
+        string operation;
+    }
+
+    struct Operation {
+        uint256 planId;
+        address userAddress;
+        string creation_date;
+        string operation;
+    }
+
+    // Struct to log actions for every previous struct
     struct ActionLog {
         uint256 actionId;
         string actionType;
@@ -25,14 +39,17 @@ contract HealthCareRecords {
         string details;
     }
 
-    //State variables and mapping
+    // State variables and mapping
     uint256 private actionCounter = 0;
-    mapping(address  => Users) public users;
+    uint256 public operationCounter = 1;  // Counter for unique operation IDs
+    mapping(address => Users) public users;
+    mapping(uint256 => Operation) public operation;
+    mapping(uint256 => Report) public report;
     mapping(uint256 => ActionLog) public actionLogs;
     mapping(address => bool) public authorizedEditors;
     address public owner;
 
-    //Events for actions
+    // Events for actions
     event EntityRegistered(string entityType, address indexed entityAddress);
     event EntityUpdated(string entityType, address indexed entityAddress);
     event ActionLogged(uint256 indexed actionId, string actionType, address indexed initiator, uint256 indexed timestamp, string details);
@@ -45,7 +62,7 @@ contract HealthCareRecords {
         authorizedEditors[owner] = true;
     }
 
-    //Modifiers
+    // Modifiers
     /**
      * @dev Restricts function access to the contract owner only.
      */
@@ -90,11 +107,88 @@ contract HealthCareRecords {
      * @param role Medical specialization of the medic.
      * @notice Only authorized users can add medic records.
      */
-    function addUser(string memory name, string memory lastname, string memory role) public {
+    function addUser(string memory name, string memory lastname, string memory role) public onlyAuthorized {
         require(!users[msg.sender].isRegistered, "User already registered");
         users[msg.sender] = Users(name, lastname, role, true);
         logAction("Create", msg.sender, "User added");
         emit EntityRegistered(role, msg.sender);
     }
 
+    /**
+     * @dev Updates an existing user's information.
+     * @param name First name of the medic.
+     * @param lastname Last name of the medic.
+     * @param role Medical specialization of the medic.
+     * @notice Only authorized users can update medic records.
+     */
+    function updateUser(string memory name, string memory lastname, string memory role) public onlyAuthorized {
+        require(users[msg.sender].isRegistered, "User not found");
+        Users storage user = users[msg.sender];
+        user.name = name;
+        user.lastName = lastname;
+        user.role = role;
+        logAction("Update", msg.sender, "User updated");
+        emit EntityUpdated("User", msg.sender);
+    }
+
+    /**
+     * @dev Adds a new operation record.
+     * @param creation_date Date when the operation was created.
+     * @param operation_description Description of the operation.
+     * @notice Only authorized users can add operation records.
+     */
+    function addOperation(string memory creation_date, string memory operation_description) public onlyAuthorized {
+        uint256 operationId = operationCounter++;  // Increment the counter for unique operation ID
+        operation[operationId] = Operation(operationId, msg.sender, creation_date, operation_description);
+        logAction("Create", msg.sender, "Operation added");
+    }
+
+    /**
+     * @dev Updates an existing operation record.
+     * @param operationId ID of the operation to update.
+     * @param creation_date New creation date of the operation.
+     * @param operation_description New operation description.
+     * @notice Only authorized users or the creator of the operation can update it.
+     */
+    function updateOperation(uint256 operationId, string memory creation_date, string memory operation_description) public onlyAuthorized {
+        // Controllo che il chiamante sia l'owner o il creatore dell'operazione
+        require(msg.sender == owner || msg.sender == operation[operationId].userAddress, "Unauthorized");
+
+        // Aggiornamento dei campi
+        operation[operationId].creation_date = creation_date;
+        operation[operationId].operation = operation_description;
+
+        // Log dell'azione
+        logAction("Update", msg.sender, "Operation updated");
+        emit EntityUpdated("Operation", msg.sender);
+    }
+
+    /**
+     * @dev Adds a new report record.
+     * @param operation_date Date of the operation the report refers to.
+     * @param operation_description Description of the operation.
+     * @notice Only authorized users can add report records.
+     */
+    function addReport(string memory operation_date, string memory operation_description) public onlyAuthorized {
+        uint256 reportId = uint256(keccak256(abi.encodePacked(msg.sender, operation_date, operation_description, block.timestamp)));
+        report[reportId] = Report(reportId, msg.sender, operation_date, operation_description);
+        logAction("Create", msg.sender, "Report added");
+    }
+
+    /**
+     * @dev Updates an existing report record.
+     * @param reportId ID of the report to update.
+     * @param operationDate New date of the operation.
+     * @param operationDescription New description of the operation.
+     * @notice Only authorized users or the creator of the report can update it.
+     */
+    function updateReport(uint256 reportId, string memory operationDate, string memory operationDescription) public onlyAuthorized {
+        require(report[reportId].userAddress != address(0), "Report not found");
+        require(msg.sender == owner || msg.sender == report[reportId].userAddress, "Unauthorized");
+
+        report[reportId].operation_date = operationDate;
+        report[reportId].operation = operationDescription;
+
+        logAction("Update", msg.sender, "Report updated");
+    }
 }

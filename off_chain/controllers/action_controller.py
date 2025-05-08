@@ -105,20 +105,59 @@ class ActionController:
         """
         if not from_address:
             raise ValueError("Invalid 'from_address' provided. It must be a non-empty string representing an Ethereum address.")
+        
+        # Print to debug the from_address
+        print(f"[DEBUG] from_address: {from_address}")
+        
+        # Get the current balance of the address to check if there are enough funds
+        balance = self.w3.eth.get_balance(from_address)
+        print(f"[DEBUG] Balance of {from_address}: {self.w3.from_wei(balance, 'ether')} ETH")
+        
+        # Set default gas price if not provided
+        gas_price = gas_price or self.w3.eth.gas_price
+
+        # Ensure nonce is set properly
+        nonce = nonce or self.w3.eth.get_transaction_count(from_address)
+
         tx_parameters = {
             'from': from_address,
             'gas': gas,
-            'gasPrice': gas_price or self.w3.eth.gas_price,
-            'nonce': nonce or self.w3.eth.get_transaction_count(from_address)
+            'gasPrice': gas_price,
+            'nonce': nonce
         }
-        try:
-            function = getattr(self.contract.functions, function_name)(*args)
-            tx_hash = function.transact(tx_parameters)
-            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
-            log_msg(f"Transaction {function_name} executed. From: {from_address}, Tx Hash: {tx_hash.hex()}, Gas: {gas}, Gas Price: {tx_parameters['gasPrice']}")
-            return receipt
 
+        # Print transaction parameters for debugging
+        print(f"[DEBUG] Transaction Parameters: {tx_parameters}")
+        
+        try:
+            # Checking the contract method and args before the transaction
+            print(f"[DEBUG] Calling function: {function_name} with arguments: {args}")
+            function = getattr(self.contract.functions, function_name)(*args)
+            
+            # Print the estimated gas for the transaction
+            estimated_gas = function.estimate_gas(tx_parameters)
+            print(f"[DEBUG] Estimated Gas for the transaction: {estimated_gas}")
+            
+            # Execute the transaction
+            tx_hash = function.transact(tx_parameters)
+            
+            # Wait for the transaction receipt
+            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            
+            # Log the successful transaction
+            print(f"[DEBUG] Transaction receipt: {receipt}")
+            
+            if receipt['status'] == 0:
+                raise Exception(f"Transaction failed with status 0: {tx_hash.hex()}")
+            
+            print(f"[INFO] Transaction {function_name} executed successfully. From: {from_address}, Tx Hash: {tx_hash.hex()}, Gas: {gas}, Gas Price: {tx_parameters['gasPrice']}")
+            
+            return receipt
+    
         except Exception as e:
+            # Print the error and log it
+            print(f"[ERROR] Error executing transaction: {str(e)}")
+            # Assuming you have a logging function to log the error
             log_error(f"Error executing {function_name} from {from_address}. Error: {str(e)}")
             raise e
 
@@ -157,10 +196,8 @@ class ActionController:
         Raises:
             ValueError: If from_address is not provided.
         """
-        print("preif")
         if not from_address:
             raise ValueError(Fore.RED + "A valid Ethereum address must be provided as 'from_address'." + Style.RESET_ALL)
-        print("postif")
         function_name = 'addUser'  # Assume the smart contract now has a unified function
         return self.write_data(function_name, from_address, entity_type, *args)
 
@@ -214,5 +251,56 @@ class ActionController:
         if not function_name:
             raise ValueError(Fore.RED + f"No function available for action {action}" + Style.RESET_ALL)
         return self.write_data(function_name, from_address, *args)
+    
+    def manage_operation(self, action, *args, from_address):
+        """
+        Manages treatment plans by adding or updating them.
 
-"MANAGE OPERATION?"
+        Args:
+            action (str): The action to be performed, such as 'add' or 'update'.
+            *args: Additional arguments required by the contract function.
+            from_address (str): The Ethereum address to send the transaction from.
+
+        Returns:
+            The transaction receipt object.
+
+        Raises:
+            ValueError: If no function is available for the specified action or the from_address is invalid.
+        """
+        if not from_address:
+            raise ValueError(Fore.RED + "A valid Ethereum address must be provided as 'from_address'." + Style.RESET_ALL)
+        treatment_plan_functions = {
+            'add': 'addOperation',
+            'update': 'updateOperation'
+        }
+        function_name = treatment_plan_functions.get(action)
+        if not function_name:
+            raise ValueError(Fore.RED + f"No function available for action {action}" + Style.RESET_ALL)
+        return self.write_data(function_name, from_address, *args)
+    
+    def manage_report(self, action, *args, from_address):
+        """
+        Manages reports by adding new reports.
+
+        Args:
+            action (str): The action to be performed, currently only 'add' is supported.
+            *args: Additional arguments required by the contract function.
+            from_address (str): The Ethereum address to send the transaction from.
+
+        Returns:
+            The transaction receipt object.
+
+        Raises:
+            ValueError: If no function is available for the specified action or the from_address is invalid.
+        """
+        if not from_address:
+            raise ValueError(Fore.RED + "A valid Ethereum address must be provided as 'from_address'." + Style.RESET_ALL)
+        report_functions = {
+            'add': 'addReport',
+        }
+        function_name = report_functions.get(action)
+        if not function_name:
+            raise ValueError(Fore.RED + f"No function available for action {action}" + Style.RESET_ALL)
+        return self.write_data(function_name, from_address, *args)
+
+    

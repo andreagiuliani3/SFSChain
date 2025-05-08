@@ -64,7 +64,7 @@ class User:
                                 self.username, self.name, self.lastname, self.user_role, self.birthday, self.email, self.phone, self.company_name, self.carbon_credit
                             ))
             else:
-                # Update existing medic details
+                # Update existing Users details
                 self.cur.execute('''UPDATE Users SET name=?, lastname=?, birthday=?, company_name=?, carbon_credit=?, role=?, mail=?, phone=? WHERE username=?''',
                                 (self.username, self.name, self.lastname, self.birthday, self.company_name, self.carbon_credit, self.role, self.mail, self.phone))
             self.conn.commit()

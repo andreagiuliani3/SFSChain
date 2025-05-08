@@ -256,21 +256,32 @@ class DatabaseOperations:
         except sqlite3.IntegrityError as e:
             print(f"Errore di integrità: {e}")
             return -1
-        
-    def give_credit(self, username, username_credit):
-        user_credit = self.get_credit_by_username(username) - 1
-        second_user_credit = self.get_credit_by_username(username_credit) + 1
+    
+    def delete_credit(self,username):
+        user_credit = self.get_credit_by_username(username)-1
         try:
+            
             self.cur.execute("""
                 UPDATE Users
                 SET carbon_credit = ?
                 WHERE username = ?""", (user_credit, username))
+            
+            self.conn.commit()
+            return 0
+        except Exception as e:
+            self.conn.rollback()
+            print("Errore durante il trasferimento crediti:", e)
+            return -1
+
+    def give_credit(self, username):
+        user_credit = self.get_credit_by_username(username) + 1
+        try:
 
             self.cur.execute("""
                 UPDATE Users
                 SET carbon_credit = ?
-                WHERE username = ?""", (second_user_credit, username_credit))
-
+                WHERE username = ?""", (user_credit, username))
+            
             self.conn.commit()
             return 0
         except Exception as e:

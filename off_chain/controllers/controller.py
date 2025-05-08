@@ -276,8 +276,11 @@ class Controller:
     def get_credit_by_username(self, username):
         return self.db_ops.get_credit_by_username(username)
    
-    def give_credit(self, username, username_credit):
-        return self.db_ops.give_credit(username, username_credit)
+    def give_credit(self, username):
+        return self.db_ops.give_credit(username)
+    
+    def delete_credit(self,username):
+        return self.db_ops.delete_credit(username)
     
     def get_report_by_username(self, username):
         return self.db_ops.get_report_by_username(username)

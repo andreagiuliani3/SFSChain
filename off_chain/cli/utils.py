@@ -1,8 +1,3 @@
-"""This module provides various utility functions for handling user input, updating profiles, changing passwords, 
-displaying data, managing reports and treatment plans, and navigating through pages of patient records, reports, 
-and treatment plans. It also includes functions for adding new reports and treatment plans.
-"""
-
 import datetime
 import math
 import re
@@ -24,8 +19,7 @@ from session.logging import log_error
 class Utils:
     """
     This class provides various utility methods for handling user input, updating profiles, changing passwords, 
-    displaying data, managing reports and treatment plans, and navigating through pages of patient records, reports, 
-    and treatment plans. It also includes methods for adding new reports and treatment plans.
+    displaying data, and navigating through pages of the user.
 
     Attributes:
         PAGE_SIZE (int): The number of items to display per page.
@@ -145,11 +139,17 @@ class Utils:
                 if self.controller.check_birthdate_format(creation_date): break
                 else: print(Fore.RED + "\nInvalid birthdate or incorrect format." + Style.RESET_ALL)
             operation = str(input("Insert the descripion of the Operation: "))
+            credit_core = self.controller.delete_credit(username)
             insert_code = self.controller.insert_operation_info(creation_date, username, user_role, operation)
-            if insert_code == 0:
+            try:
+                from_address_user = self.controller.get_public_key_by_username(username)
+                self.act_controller.manage_operation('add', creation_date, operation, from_address=from_address_user)
+            except Exception as e:
+                log_error(e)  
+            if insert_code == 0 and credit_core == 0:
                 print(Fore.GREEN + 'Information saved correctly!' + Style.RESET_ALL)
-            elif insert_code == -1:
-                print(Fore.RED + 'Internal error!' + Style.RESET_ALL)
+            elif insert_code == -1 or credit_core == -1:
+                print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
         else:
             print("\nYou haven't enough carbon credit!")
 
@@ -166,13 +166,17 @@ class Utils:
             if proceed.strip().upper() == "Y":
                 creation_date = date.today()
                 operation = "Credit give to: "+username_credit
-                credit_code = self.controller.give_credit(username, username_credit)
-                operation_code = self.controller.insert_operation_info(creation_date, username, user_role, operation)        
-                print(operation_code)
-                print(credit_code)       
-                if operation_code == 0 and credit_code == 0:
-                    print(Fore.GREEN + 'Your credit is succesfully give to!', username_credit + Style.RESET_ALL)
-                elif operation_code == -1 or credit_code == -1:
+                credit_code = self.controller.give_credit(username)
+                credit_user_code = self.controller.delete_credit(username)
+                operation_code = self.controller.insert_operation_info(creation_date, username, user_role, operation) 
+                try:
+                    from_address_user = self.controller.get_public_key_by_username(username)
+                    self.act_controller.manage_operation('add', creation_date, operation, from_address=from_address_user)
+                except Exception as e:
+                    log_error(e)           
+                if operation_code == 0 and credit_code == 0 and credit_user_code == 0:
+                    print(Fore.GREEN + 'Your credit is succesfully give to: ', username_credit + Style.RESET_ALL)
+                elif operation_code == -1 or credit_code == -1 or credit_user_code == -1:
                     print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
             elif proceed.strip().upper() == "N":
                     print(Fore.RED + "Operation Cancelled." + Style.RESET_ALL)
@@ -192,6 +196,7 @@ class Utils:
             if self.controller.check_birthdate_format(end_date): break
             else: print(Fore.RED + "\nInvalid date or incorrect format." + Style.RESET_ALL)
         report_code = self.controller.insert_report_info(creation_date, start_date, end_date, username)
+
         if report_code == 0:
             print(Fore.GREEN + 'Your report is ready' + Style.RESET_ALL)
         else:
