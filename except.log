@@ -30,3 +30,27 @@
 2025-05-08 17:45:25,004 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
 2025-05-08 17:45:29,054 - ERROR - Error executing addOperation from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
 2025-05-08 17:45:29,054 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
+2025-05-09 09:02:00,701 - ERROR - Error executing addOperation from 0xb59C6D8417a51c6e78EBBc8DF05D2e0ef8ae87ed. Error: 
+ABI Not Found!
+Found 1 element(s) named `addOperation` that accept 2 argument(s).
+The provided arguments are not valid.
+Provided argument types: (date,str)
+Provided keyword argument types: {}
+
+Tried to find a matching ABI element named `addOperation`, but encountered the following problems:
+Signature: addOperation(string,string), type: function
+Argument 1 value `2025-05-09` is not compatible with type `string`.
+Argument 2 value `Credit give to: marco` is valid.
+
+2025-05-09 09:02:00,701 - ERROR - 
+ABI Not Found!
+Found 1 element(s) named `addOperation` that accept 2 argument(s).
+The provided arguments are not valid.
+Provided argument types: (date,str)
+Provided keyword argument types: {}
+
+Tried to find a matching ABI element named `addOperation`, but encountered the following problems:
+Signature: addOperation(string,string), type: function
+Argument 1 value `2025-05-09` is not compatible with type `string`.
+Argument 2 value `Credit give to: marco` is valid.
+

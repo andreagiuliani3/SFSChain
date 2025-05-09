@@ -269,11 +269,11 @@ class ActionController:
         """
         if not from_address:
             raise ValueError(Fore.RED + "A valid Ethereum address must be provided as 'from_address'." + Style.RESET_ALL)
-        treatment_plan_functions = {
+        operation_functions = {
             'add': 'addOperation',
             'update': 'updateOperation'
         }
-        function_name = treatment_plan_functions.get(action)
+        function_name = operation_functions.get(action)
         if not function_name:
             raise ValueError(Fore.RED + f"No function available for action {action}" + Style.RESET_ALL)
         return self.write_data(function_name, from_address, *args)

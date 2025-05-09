@@ -171,7 +171,7 @@ class Utils:
                 operation_code = self.controller.insert_operation_info(creation_date, username, user_role, operation) 
                 try:
                     from_address_user = self.controller.get_public_key_by_username(username)
-                    self.act_controller.manage_operation('add', creation_date, operation, from_address=from_address_user)
+                    self.act_controller.manage_operation('add', str(creation_date), operation, from_address=from_address_user)
                 except Exception as e:
                     log_error(e)           
                 if operation_code == 0 and credit_code == 0 and credit_user_code == 0:
