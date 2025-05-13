@@ -1,32 +1,29 @@
-2025-05-08 16:02:09,863 - ERROR - Contract files not found. Deploy contract first.
-2025-05-08 16:02:09,884 - ERROR - Contract files not found. Deploy contract first.
-2025-05-08 16:51:47,373 - ERROR - Error executing addTreatmentPlan from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ("The function 'addTreatmentPlan' was not found in this ", "contract's abi.")
-2025-05-08 16:51:47,373 - ERROR - ("The function 'addTreatmentPlan' was not found in this ", "contract's abi.")
-2025-05-08 16:53:44,695 - ERROR - Error executing addOperation from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 16:53:44,695 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 16:58:55,174 - ERROR - Error executing addOperation from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 16:58:55,174 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:04:46,456 - ERROR - Error executing addOperation from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:04:46,456 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:05:36,830 - ERROR - Error executing addOperation from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:05:36,831 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:09:27,265 - ERROR - Error executing addOperation from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:09:27,265 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:15:05,547 - ERROR - Error executing addOperation from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:15:05,547 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:19:37,269 - ERROR - Error executing addOperation from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:19:37,269 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:21:13,219 - ERROR - Error executing addOperation from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:21:13,219 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:27:59,419 - ERROR - Error executing addOperation from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:27:59,419 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:38:53,099 - ERROR - Error executing addOperation from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:38:53,099 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:44:33,534 - ERROR - Error executing addOperation from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:44:33,534 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:44:54,327 - ERROR - Error executing addOperation from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:44:54,327 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:45:25,004 - ERROR - Error executing addOperation from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:45:25,004 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:45:29,054 - ERROR - Error executing addOperation from 0x9812eE2c81E7AE3a5f315dB205C9E84db63aB4F5. Error: ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
-2025-05-08 17:45:29,054 - ERROR - ('execution reverted: VM Exception while processing transaction: revert', {'hash': None, 'programCounter': 103, 'result': '0x', 'reason': None, 'message': 'revert'})
+2025-05-13 17:45:49,895 - ERROR - Contract files not found. Deploy contract first.
+2025-05-13 17:45:49,920 - ERROR - Contract files not found. Deploy contract first.
+2025-05-13 17:47:04,360 - ERROR - Error executing addUser from 0x71876a95C7e01bE979987A8b6386C42f1bA0e48c. Error: ('execution reverted: VM Exception while processing transaction: revert Access denied: caller is not the owner or an authorized editor.', {'hash': None, 'programCounter': 5297, 'result': '0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003f4163636573732064656e6965643a2063616c6c6572206973206e6f7420746865206f776e6572206f7220616e20617574686f72697a656420656469746f722e00', 'reason': 'Access denied: caller is not the owner or an authorized editor.', 'message': 'revert'})
+2025-05-13 18:11:25,497 - ERROR - Error executing addOperation from 0xd3237b2285F4c062304d3135F741D00d8cE4AD1e. Error: 
+ABI Not Found!
+Found 1 element(s) named `addOperation` that accept 2 argument(s).
+The provided arguments are not valid.
+Provided argument types: (date,str)
+Provided keyword argument types: {}
+
+Tried to find a matching ABI element named `addOperation`, but encountered the following problems:
+Signature: addOperation(string,string), type: function
+Argument 1 value `2025-05-13` is not compatible with type `string`.
+Argument 2 value ` Credit give to: marcoprova` is valid.
+
+2025-05-13 18:11:25,497 - ERROR - 
+ABI Not Found!
+Found 1 element(s) named `addOperation` that accept 2 argument(s).
+The provided arguments are not valid.
+Provided argument types: (date,str)
+Provided keyword argument types: {}
+
+Tried to find a matching ABI element named `addOperation`, but encountered the following problems:
+Signature: addOperation(string,string), type: function
+Argument 1 value `2025-05-13` is not compatible with type `string`.
+Argument 2 value ` Credit give to: marcoprova` is valid.
+
+2025-05-13 18:24:37,920 - ERROR - Error executing addOperation from 0xd3237b2285F4c062304d3135F741D00d8cE4AD1e. Error: ('execution reverted: VM Exception while processing transaction: revert Access denied: caller is not the owner or an authorized editor.', {'hash': None, 'programCounter': 3252, 'result': '0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003f4163636573732064656e6965643a2063616c6c6572206973206e6f7420746865206f776e6572206f7220616e20617574686f72697a656420656469746f722e00', 'reason': 'Access denied: caller is not the owner or an authorized editor.', 'message': 'revert'})
+2025-05-13 18:24:37,920 - ERROR - ('execution reverted: VM Exception while processing transaction: revert Access denied: caller is not the owner or an authorized editor.', {'hash': None, 'programCounter': 3252, 'result': '0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003f4163636573732064656e6965643a2063616c6c6572206973206e6f7420746865206f776e6572206f7220616e20617574686f72697a656420656469746f722e00', 'reason': 'Access denied: caller is not the owner or an authorized editor.', 'message': 'revert'})

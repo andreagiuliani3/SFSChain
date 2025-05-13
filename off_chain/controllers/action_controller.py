@@ -253,30 +253,7 @@ class ActionController:
         return self.write_data(function_name, from_address, *args)
     
     def manage_operation(self, action, *args, from_address):
-        """
-        Manages treatment plans by adding or updating them.
-
-        Args:
-            action (str): The action to be performed, such as 'add' or 'update'.
-            *args: Additional arguments required by the contract function.
-            from_address (str): The Ethereum address to send the transaction from.
-
-        Returns:
-            The transaction receipt object.
-
-        Raises:
-            ValueError: If no function is available for the specified action or the from_address is invalid.
-        """
-        if not from_address:
-            raise ValueError(Fore.RED + "A valid Ethereum address must be provided as 'from_address'." + Style.RESET_ALL)
-        treatment_plan_functions = {
-            'add': 'addOperation',
-            'update': 'updateOperation'
-        }
-        function_name = treatment_plan_functions.get(action)
-        if not function_name:
-            raise ValueError(Fore.RED + f"No function available for action {action}" + Style.RESET_ALL)
-        return self.write_data(function_name, from_address, *args)
+        return self.write_data('addOperation', from_address, *args)
     
     def manage_report(self, action, *args, from_address):
         """

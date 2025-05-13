@@ -70,7 +70,8 @@ class DatabaseOperations:
                     creation_date DATE NOT NULL,
                     username TEXT NOT NULL,
                     role TEXT CHECK(role IN ('FARMER', 'CARRIER', 'PRODUCER', 'SELLER')) NOT NULL,
-                    operation TEXT NOT NULL
+                    operation TEXT NOT NULL,
+                    co2 INTEGER NOT NULL
                     );''')
         self.cur.execute('''CREATE TABLE IF NOT EXISTS Reports(
                     id_report INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,7 +79,8 @@ class DatabaseOperations:
                     operation_date DATE NOT NULL,
                     username TEXT NOT NULL,
                     role TEXT CHECK(role IN ('FARMER', 'CARRIER', 'PRODUCER', 'SELLER')) NOT NULL,
-                    operations TEXT
+                    operations TEXT NOT NULL,
+                    co2 INTEGER NOT NULL
                     );''')
         self.conn.commit()
     
@@ -257,8 +259,8 @@ class DatabaseOperations:
             print(f"Errore di integrità: {e}")
             return -1
     
-    def delete_credit(self,username):
-        user_credit = self.get_credit_by_username(username)-1
+    def delete_credit(self,username, credit):
+        user_credit = self.get_credit_by_username(username)-credit
         try:
             
             self.cur.execute("""
@@ -273,8 +275,8 @@ class DatabaseOperations:
             print("Errore durante il trasferimento crediti:", e)
             return -1
 
-    def give_credit(self, username):
-        user_credit = self.get_credit_by_username(username) + 1
+    def give_credit(self, username, credit):
+        user_credit = self.get_credit_by_username(username) + credit
         try:
 
             self.cur.execute("""
@@ -289,7 +291,7 @@ class DatabaseOperations:
             print("Errore durante il trasferimento crediti:", e)
             return -1
 
-    def insert_operation(self, creation_date, username, role, operation):
+    def insert_operation(self, creation_date, username, role, operation, co2):
         """
         Inserts a new operation record into the Operations table in the database.
 
@@ -298,9 +300,9 @@ class DatabaseOperations:
         """
         try:
             self.cur.execute("""
-                INSERT INTO Operations (creation_date, username, role, operation)
-                VALUES (?, ?, ?, ?)""",
-                (creation_date, username, role, operation)
+                INSERT INTO Operations (creation_date, username, role, operation, co2)
+                VALUES (?, ?, ?, ?, ?)""",
+                (creation_date, username, role, operation, co2)
             )
             self.conn.commit()
             return 0
@@ -312,6 +314,19 @@ class DatabaseOperations:
             self.conn.rollback()
             print("Errore generale durante insert_operation:", e)
             return -1
+
+    def get_information_for_credit(self):
+        # Esegui la query per ottenere carbon_credit, username, email
+        information_data = self.cur.execute("""
+            SELECT username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit
+            FROM Users
+        """).fetchall()  # fetchall() restituisce tutte le righe
+
+        if information_data:
+            # Restituisci una lista di Users, una per ogni riga
+            return [User(*row) for row in information_data]
+
+        return None
 
     def get_creds_by_username(self, username):
         """
@@ -367,7 +382,7 @@ class DatabaseOperations:
         """
         # Query the database for the user by username
         operation_data = self.cur.execute("""
-                                    SELECT creation_date, username, role, operation
+                                    SELECT creation_date, username, role, operation, co2
                                     FROM Operations
                                     WHERE username = ? AND creation_date = ?
                                     """, (username,creation_date)).fetchone()
@@ -391,7 +406,7 @@ class DatabaseOperations:
             list[Operation]: A list of Operation objects grouped by date, or an empty list if no operations exist.
         """
         operation_data = self.cur.execute("""
-            SELECT MIN(id_operation) AS id_operation, creation_date, username, role, 
+            SELECT MIN(id_operation) AS id_operation, creation_date, username, role, co2
                 GROUP_CONCAT(operation, ', ') AS operations
             FROM Operations
             WHERE username = ?
@@ -429,8 +444,8 @@ class DatabaseOperations:
             
             for op in operations:
                 self.cur.execute("""
-                    INSERT INTO Reports (creation_date, operation_date, username, role, operations)
-                    VALUES (?, ?, ?, ?, ?)
+                    INSERT INTO Reports (creation_date, operation_date, username, role, operations, co2)
+                    VALUES (?, ?, ?, ?, ?, ?)
                 """, (creation_date, op.creation_date, op.username, op.role, op.operations))
             
             self.conn.commit()
@@ -462,7 +477,7 @@ class DatabaseOperations:
     
     def get_report_by_date(self, username, creation_date):
         report_data = self.cur.execute("""
-                                SELECT id_report, creation_date, operation_date, username, role, operations
+                                SELECT id_report, creation_date, operation_date, username, role, operations, co2
                                 FROM Reports
                                 WHERE username = ? AND creation_date = ?
                                 """, (username, creation_date)).fetchall()  # fetchall() restituisce tutte le righe

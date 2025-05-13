@@ -35,7 +35,7 @@ class Session:
 
     def get_operation(self):
         return self._operation
-
+    
     def set_operation(self, operation):
         self._operation = operation
 

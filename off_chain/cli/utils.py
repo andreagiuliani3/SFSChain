@@ -130,34 +130,37 @@ class Utils:
         us.save()
 
     def make_operation(self, username, user_role):
-        operation_code = self.controller.check_balance(username)
-        if operation_code:
-            print(Fore.CYAN + "\nMake an Operation"  + Style.RESET_ALL)
-            while True:
-                from datetime import date
+        balance = self.controller.get_credit_by_username(username)
+        if balance<=0: print(Fore.RED + 'WARNING: YOUR BALANCE IS ZERO OR BELOW!' + Style.RESET_ALL)
+        print(Fore.CYAN + "\nMake an Operation"  + Style.RESET_ALL)
+        while True: 
                 creation_date = date.today().strftime("%Y-%m-%d")
                 if self.controller.check_birthdate_format(creation_date): break
                 else: print(Fore.RED + "\nInvalid birthdate or incorrect format." + Style.RESET_ALL)
-            operation = str(input("Insert the descripion of the Operation: "))
-            credit_core = self.controller.delete_credit(username)
-            insert_code = self.controller.insert_operation_info(creation_date, username, user_role, operation)
-            try:
-                from_address_user = self.controller.get_public_key_by_username(username)
-                self.act_controller.manage_operation('add', creation_date, operation, from_address=from_address_user)
-            except Exception as e:
-                log_error(e)  
-            if insert_code == 0 and credit_core == 0:
-                print(Fore.GREEN + 'Information saved correctly!' + Style.RESET_ALL)
-            elif insert_code == -1 or credit_core == -1:
-                print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
-        else:
-            print("\nYou haven't enough carbon credit!")
+        operation = str(input("Insert the descripion of the Operation: "))
+        co2 = int(input("Inser the Co2 emission of the operation (tons): "))
+        insert_code = self.controller.insert_operation_info(creation_date, username, user_role, operation, co2)
+        soglia = 5
+        action = "added to "
+        if soglia>co2:
+            credit_core = self.controller.give_credit(username,soglia-co2)    
+        elif soglia<co2:
+            credit_core = self.controller.delete_credit(username,co2-soglia)
+            if co2>balance:
+                controller = 1
+            action = "removed from "
+        if insert_code == 0 and credit_core == 0:
+            print(Fore.GREEN + 'Credit has been '+action+' your wallet' + Style.RESET_ALL)
+            if (controller == 1): print(Fore.RED + 'WARNING: YOUR BALANCE IS BELOW ZERO!' + Style.RESET_ALL)
+        elif insert_code == -1 or credit_core == -1:
+            print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
 
     def give_credit(self, username, user_role):
-        operation_code = self.controller.check_balance(username)
-        if operation_code:
+        credit = int(input("How many credit you want to give? "))
+        balance = self.controller.get_credit_by_username(username)
+        if balance>credit:
             while True:
-                username_credit = str(input("Insert the username of the account you want to give 1 credit:\n"))
+                username_credit = str(input("Insert the username of the account you want to give credit:\n"))
                 if username != username_credit:
                     if self.controller.check_username(username_credit) == -1: break
                     else: print(Fore.RED + 'The username is not correct/not exist.\n' + Style.RESET_ALL)
@@ -165,25 +168,20 @@ class Utils:
             proceed = input("Do you want to proceed with the operation? (Y/n): ")
             if proceed.strip().upper() == "Y":
                 creation_date = date.today()
-                operation = "Credit give to: "+username_credit
-                credit_code = self.controller.give_credit(username)
-                credit_user_code = self.controller.delete_credit(username)
-                operation_code = self.controller.insert_operation_info(creation_date, username, user_role, operation) 
-                try:
-                    from_address_user = self.controller.get_public_key_by_username(username)
-                    self.act_controller.manage_operation('add', creation_date, operation, from_address=from_address_user)
-                except Exception as e:
-                    log_error(e)           
+                operation = " Credit give to: "+username_credit
+                credit_code = self.controller.give_credit(username_credit, credit)
+                credit_user_code = self.controller.delete_credit(username, credit)
+                operation_code = self.controller.insert_operation_info(creation_date, username, user_role, operation, co2 = 0) 
                 if operation_code == 0 and credit_code == 0 and credit_user_code == 0:
                     print(Fore.GREEN + 'Your credit is succesfully give to: ', username_credit + Style.RESET_ALL)
-                elif operation_code == -1 or credit_code == -1 or credit_user_code == -1:
+                elif operation_code == 0 or credit_code == -1 or credit_user_code == -1:
                     print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
             elif proceed.strip().upper() == "N":
                     print(Fore.RED + "Operation Cancelled." + Style.RESET_ALL)
             else:
                     print(Fore.RED + 'Wrong input, please insert Y or N!' + Style.RESET_ALL)
         else:
-            print("\nYou can't give a carbon credit, your balance is 0!")
+            print("\nYou can't give you don't have enough balance!")
     
     def create_report(self, username):
         creation_date = date.today()

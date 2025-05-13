@@ -84,8 +84,8 @@ class Controller:
  
         return insertion_code
     
-    def insert_operation_info(self, creation_date: str, username: str, user_role: str, operation: str):
-        insertion_code = self.db_ops.insert_operation(creation_date, username, user_role, operation)
+    def insert_operation_info(self, creation_date: str, username: str, user_role: str, operation: str, co2: int):
+        insertion_code = self.db_ops.insert_operation(creation_date, username, user_role, operation, co2)
  
         if insertion_code == 0:
             operation = self.db_ops.get_operation_by_username(operation, creation_date)
@@ -276,14 +276,17 @@ class Controller:
     def get_credit_by_username(self, username):
         return self.db_ops.get_credit_by_username(username)
    
-    def give_credit(self, username):
-        return self.db_ops.give_credit(username)
+    def give_credit(self, username, credit):
+        return self.db_ops.give_credit(username, credit)
     
-    def delete_credit(self,username):
-        return self.db_ops.delete_credit(username)
+    def delete_credit(self,username, credit):
+        return self.db_ops.delete_credit(username, credit)
     
     def get_report_by_username(self, username):
         return self.db_ops.get_report_by_username(username)
     
     def get_report_by_date(self, username, creation_date):
         return self.db_ops.get_report_by_date(username, creation_date)
+    
+    def get_information_for_credit(self):
+        return self.db_ops.get_information_for_credit()

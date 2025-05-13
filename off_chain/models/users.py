@@ -31,6 +31,8 @@ class User:
 
     def get_user_role(self): return self.user_role
 
+    def get_carbon_credit(self): return self.carbon_credit
+
 
     def set_username(self, username): self.username = username
     
@@ -47,6 +49,8 @@ class User:
     def set_birthday(self, birthday): self.birthday = birthday
 
     def set_user_role(self, user_role): self.user_role = user_role
+
+    def set_carbon_credit(self, carbon_credit): self.carbon_credit = carbon_credit
 
     def save(self):
         """

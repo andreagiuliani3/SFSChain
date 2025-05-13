@@ -292,8 +292,9 @@ class CommandLineInterface:
         user_options = {
             1: "Profile",
             2: "Operation",
-            3: "Report",  # Triggers the sub-menu
-            4: "Log out"
+            3: "Report",
+            4: "Ask for credit",  # Triggers the sub-menu
+            5: "Log out"
         }
 
         while True:
@@ -312,12 +313,14 @@ class CommandLineInterface:
 
                     elif choice == 3:
                         self.report_submenu(username)
-
                     elif choice == 4:
+                        self.ask_for_credit()
+                    elif choice == 5:
                         confirm = input("\nDo you really want to leave? (Y/n): ").strip().upper()
                         if confirm == 'Y':
                             print(Fore.CYAN + "\nThank you for using the service!\n" + Style.RESET_ALL)
                             self.session.reset_session()
+                            
                             return
                         else:
                             print(Fore.RED + "Invalid choice! Please try again." + Style.RESET_ALL)
@@ -394,7 +397,6 @@ class CommandLineInterface:
             except ValueError:
                 print(Fore.RED + "Invalid Input! Please enter a valid number." + Style.RESET_ALL)
 
-
     def report_submenu(self, username):
         """
         This method presents a sub-menu for report-related actions.
@@ -425,8 +427,6 @@ class CommandLineInterface:
                     print(Fore.RED + "Invalid choice! Please try again." + Style.RESET_ALL)
             except ValueError:
                 print(Fore.RED + "Invalid Input! Please enter a valid number." + Style.RESET_ALL)
-
-
 
     def view_userview(self, username):
         """
@@ -498,3 +498,10 @@ class CommandLineInterface:
 
         input("\nPress Enter to return to the menu...\n")
 
+    def ask_for_credit(self):
+        informationview = self.controller.get_information_for_credit()
+        if informationview:
+            for users in informationview:
+                print("Credit: ", users.get_carbon_credit())
+                print("Username: ", users.get_username())
+                print("Email: ", users.get_email())
