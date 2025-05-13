@@ -320,7 +320,7 @@ class CommandLineInterface:
                         if confirm == 'Y':
                             print(Fore.CYAN + "\nThank you for using the service!\n" + Style.RESET_ALL)
                             self.session.reset_session()
-                            
+
                             return
                         else:
                             print(Fore.RED + "Invalid choice! Please try again." + Style.RESET_ALL)
@@ -500,8 +500,9 @@ class CommandLineInterface:
 
     def ask_for_credit(self):
         informationview = self.controller.get_information_for_credit()
+        print("You can see a list of user with the amount of credit and their email. Try to contact them and ask for credit")
         if informationview:
             for users in informationview:
-                print("Credit: ", users.get_carbon_credit())
+                print("\nCredit: ", users.get_carbon_credit())
                 print("Username: ", users.get_username())
                 print("Email: ", users.get_email())
