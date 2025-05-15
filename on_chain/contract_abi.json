@@ -1,1 +1,86 @@
-[{"inputs": [], "stateMutability": "nonpayable", "type": "constructor"}, {"anonymous": false, "inputs": [{"indexed": true, "internalType": "uint256", "name": "actionId", "type": "uint256"}, {"indexed": false, "internalType": "string", "name": "actionType", "type": "string"}, {"indexed": true, "internalType": "address", "name": "initiator", "type": "address"}, {"indexed": true, "internalType": "uint256", "name": "timestamp", "type": "uint256"}, {"indexed": false, "internalType": "string", "name": "details", "type": "string"}], "name": "ActionLogged", "type": "event"}, {"anonymous": false, "inputs": [{"indexed": false, "internalType": "string", "name": "entityType", "type": "string"}, {"indexed": true, "internalType": "address", "name": "entityAddress", "type": "address"}], "name": "EntityRegistered", "type": "event"}, {"anonymous": false, "inputs": [{"indexed": false, "internalType": "string", "name": "entityType", "type": "string"}, {"indexed": true, "internalType": "address", "name": "entityAddress", "type": "address"}], "name": "EntityUpdated", "type": "event"}, {"inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "name": "actionLogs", "outputs": [{"internalType": "uint256", "name": "actionId", "type": "uint256"}, {"internalType": "string", "name": "actionType", "type": "string"}, {"internalType": "address", "name": "initiatedBy", "type": "address"}, {"internalType": "uint256", "name": "timestamp", "type": "uint256"}, {"internalType": "string", "name": "details", "type": "string"}], "stateMutability": "view", "type": "function"}, {"inputs": [{"internalType": "string", "name": "creation_date", "type": "string"}, {"internalType": "string", "name": "operation_description", "type": "string"}], "name": "addOperation", "outputs": [], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [{"internalType": "string", "name": "operation_date", "type": "string"}, {"internalType": "string", "name": "operation_description", "type": "string"}], "name": "addReport", "outputs": [], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [{"internalType": "string", "name": "name", "type": "string"}, {"internalType": "string", "name": "lastname", "type": "string"}, {"internalType": "string", "name": "role", "type": "string"}], "name": "addUser", "outputs": [], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [{"internalType": "address", "name": "_editor", "type": "address"}], "name": "authorizeEditor", "outputs": [], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [{"internalType": "address", "name": "", "type": "address"}], "name": "authorizedEditors", "outputs": [{"internalType": "bool", "name": "", "type": "bool"}], "stateMutability": "view", "type": "function"}, {"inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "name": "operation", "outputs": [{"internalType": "uint256", "name": "planId", "type": "uint256"}, {"internalType": "address", "name": "userAddress", "type": "address"}, {"internalType": "string", "name": "creation_date", "type": "string"}, {"internalType": "string", "name": "operation", "type": "string"}], "stateMutability": "view", "type": "function"}, {"inputs": [], "name": "operationCounter", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "stateMutability": "view", "type": "function"}, {"inputs": [], "name": "owner", "outputs": [{"internalType": "address", "name": "", "type": "address"}], "stateMutability": "view", "type": "function"}, {"inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "name": "report", "outputs": [{"internalType": "uint256", "name": "reportId", "type": "uint256"}, {"internalType": "address", "name": "userAddress", "type": "address"}, {"internalType": "string", "name": "operation_date", "type": "string"}, {"internalType": "string", "name": "operation", "type": "string"}], "stateMutability": "view", "type": "function"}, {"inputs": [{"internalType": "uint256", "name": "operationId", "type": "uint256"}, {"internalType": "string", "name": "creation_date", "type": "string"}, {"internalType": "string", "name": "operation_description", "type": "string"}], "name": "updateOperation", "outputs": [], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [{"internalType": "uint256", "name": "reportId", "type": "uint256"}, {"internalType": "string", "name": "operationDate", "type": "string"}, {"internalType": "string", "name": "operationDescription", "type": "string"}], "name": "updateReport", "outputs": [], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [{"internalType": "string", "name": "name", "type": "string"}, {"internalType": "string", "name": "lastname", "type": "string"}, {"internalType": "string", "name": "role", "type": "string"}], "name": "updateUser", "outputs": [], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [{"internalType": "address", "name": "", "type": "address"}], "name": "users", "outputs": [{"internalType": "string", "name": "name", "type": "string"}, {"internalType": "string", "name": "lastName", "type": "string"}, {"internalType": "string", "name": "role", "type": "string"}, {"internalType": "bool", "name": "isRegistered", "type": "bool"}], "stateMutability": "view", "type": "function"}]
+[
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "lastName", "type": "string" },
+      { "internalType": "string", "name": "role", "type": "string" },
+      { "internalType": "string", "name": "email", "type": "string" }
+    ],
+    "name": "registerUser",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "lastName", "type": "string" },
+      { "internalType": "string", "name": "role", "type": "string" },
+      { "internalType": "string", "name": "email", "type": "string" }
+    ],
+    "name": "updateUser",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "userAddress", "type": "address" }
+    ],
+    "name": "getUser",
+    "outputs": [
+      { "internalType": "string", "name": "", "type": "string" },
+      { "internalType": "string", "name": "", "type": "string" },
+      { "internalType": "string", "name": "", "type": "string" },
+      { "internalType": "string", "name": "", "type": "string" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "userAddress", "type": "address" }
+    ],
+    "name": "getTokenBalance",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "to", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "transferTokens",
+    "outputs": [
+      { "internalType": "bool", "name": "", "type": "bool" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "burnTokens",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "rewardAmount", "type": "uint256" }
+    ],
+    "name": "rewardUser",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

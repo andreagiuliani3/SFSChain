@@ -27,3 +27,102 @@ Argument 2 value ` Credit give to: marcoprova` is valid.
 
 2025-05-13 18:24:37,920 - ERROR - Error executing addOperation from 0xd3237b2285F4c062304d3135F741D00d8cE4AD1e. Error: ('execution reverted: VM Exception while processing transaction: revert Access denied: caller is not the owner or an authorized editor.', {'hash': None, 'programCounter': 3252, 'result': '0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003f4163636573732064656e6965643a2063616c6c6572206973206e6f7420746865206f776e6572206f7220616e20617574686f72697a656420656469746f722e00', 'reason': 'Access denied: caller is not the owner or an authorized editor.', 'message': 'revert'})
 2025-05-13 18:24:37,920 - ERROR - ('execution reverted: VM Exception while processing transaction: revert Access denied: caller is not the owner or an authorized editor.', {'hash': None, 'programCounter': 3252, 'result': '0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003f4163636573732064656e6965643a2063616c6c6572206973206e6f7420746865206f776e6572206f7220616e20617574686f72697a656420656469746f722e00', 'reason': 'Access denied: caller is not the owner or an authorized editor.', 'message': 'revert'})
+2025-05-15 12:54:16,363 - ERROR - ParserError: Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version
+ --> on_chain/CarbonCreditRecords.sol:2:1:
+  |
+2 | pragma solidity ^0.8.20;
+  | ^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+> command: `C:\Users\marco\.solcx\solc-v0.8.0\solc.exe --standard-json`
+> return code: `0`
+> stdout:
+{"errors":[{"component":"general","errorCode":"5333","formattedMessage":"ParserError: Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version\n --> on_chain/CarbonCreditRecords.sol:2:1:\n  |\n2 | pragma solidity ^0.8.20;\n  | ^^^^^^^^^^^^^^^^^^^^^^^^\n\n","message":"Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version","severity":"error","sourceLocation":{"end":56,"file":"on_chain/CarbonCreditRecords.sol","start":32},"type":"ParserError"}],"sources":{}}
+
+> stderr:
+2025-05-15 13:15:24,436 - ERROR - ParserError: Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version
+ --> on_chain/CarbonCreditRecords.sol:2:1:
+  |
+2 | pragma solidity ^0.8.20;
+  | ^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+> command: `C:\Users\marco\.solcx\solc-v0.8.0\solc.exe --standard-json`
+> return code: `0`
+> stdout:
+{"errors":[{"component":"general","errorCode":"5333","formattedMessage":"ParserError: Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version\n --> on_chain/CarbonCreditRecords.sol:2:1:\n  |\n2 | pragma solidity ^0.8.20;\n  | ^^^^^^^^^^^^^^^^^^^^^^^^\n\n","message":"Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version","severity":"error","sourceLocation":{"end":56,"file":"on_chain/CarbonCreditRecords.sol","start":32},"type":"ParserError"}],"sources":{}}
+
+> stderr:
+2025-05-15 13:16:10,190 - ERROR - ParserError: Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version
+ --> on_chain/CarbonCreditRecords.sol:2:1:
+  |
+2 | pragma solidity ^0.8.20;
+  | ^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+> command: `C:\Users\marco\.solcx\solc-v0.8.0\solc.exe --standard-json`
+> return code: `0`
+> stdout:
+{"errors":[{"component":"general","errorCode":"5333","formattedMessage":"ParserError: Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version\n --> on_chain/CarbonCreditRecords.sol:2:1:\n  |\n2 | pragma solidity ^0.8.20;\n  | ^^^^^^^^^^^^^^^^^^^^^^^^\n\n","message":"Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version","severity":"error","sourceLocation":{"end":56,"file":"on_chain/CarbonCreditRecords.sol","start":32},"type":"ParserError"}],"sources":{}}
+
+> stderr:
+2025-05-15 13:16:42,492 - ERROR - Contract files not found. Deploy contract first.
+2025-05-15 13:16:42,499 - ERROR - Contract files not found. Deploy contract first.
+2025-05-15 13:16:45,862 - ERROR - ParserError: Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version
+ --> on_chain/CarbonCreditRecords.sol:2:1:
+  |
+2 | pragma solidity ^0.8.20;
+  | ^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+> command: `C:\Users\marco\.solcx\solc-v0.8.0\solc.exe --standard-json`
+> return code: `0`
+> stdout:
+{"errors":[{"component":"general","errorCode":"5333","formattedMessage":"ParserError: Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version\n --> on_chain/CarbonCreditRecords.sol:2:1:\n  |\n2 | pragma solidity ^0.8.20;\n  | ^^^^^^^^^^^^^^^^^^^^^^^^\n\n","message":"Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version","severity":"error","sourceLocation":{"end":56,"file":"on_chain/CarbonCreditRecords.sol","start":32},"type":"ParserError"}],"sources":{}}
+
+> stderr:
+2025-05-15 13:18:55,983 - ERROR - Contract files not found. Deploy contract first.
+2025-05-15 13:18:56,019 - ERROR - Contract files not found. Deploy contract first.
+2025-05-15 13:18:58,180 - ERROR - ParserError: Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version
+ --> on_chain/CarbonCreditRecords.sol:2:1:
+  |
+2 | pragma solidity ^0.8.20;
+  | ^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+> command: `C:\Users\marco\.solcx\solc-v0.8.0\solc.exe --standard-json`
+> return code: `0`
+> stdout:
+{"errors":[{"component":"general","errorCode":"5333","formattedMessage":"ParserError: Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version\n --> on_chain/CarbonCreditRecords.sol:2:1:\n  |\n2 | pragma solidity ^0.8.20;\n  | ^^^^^^^^^^^^^^^^^^^^^^^^\n\n","message":"Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version","severity":"error","sourceLocation":{"end":56,"file":"on_chain/CarbonCreditRecords.sol","start":32},"type":"ParserError"}],"sources":{}}
+
+> stderr:
+2025-05-15 13:23:12,053 - ERROR - Contract files not found. Deploy contract first.
+2025-05-15 13:23:12,060 - ERROR - Contract files not found. Deploy contract first.
+2025-05-15 13:23:15,650 - ERROR - ParserError: Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version
+ --> on_chain/CarbonCreditRecords.sol:2:1:
+  |
+2 | pragma solidity ^0.8.20;
+  | ^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+> command: `C:\Users\marco\.solcx\solc-v0.8.0\solc.exe --standard-json`
+> return code: `0`
+> stdout:
+{"errors":[{"component":"general","errorCode":"5333","formattedMessage":"ParserError: Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version\n --> on_chain/CarbonCreditRecords.sol:2:1:\n  |\n2 | pragma solidity ^0.8.20;\n  | ^^^^^^^^^^^^^^^^^^^^^^^^\n\n","message":"Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version","severity":"error","sourceLocation":{"end":56,"file":"on_chain/CarbonCreditRecords.sol","start":32},"type":"ParserError"}],"sources":{}}
+
+> stderr:
+2025-05-15 13:25:51,743 - ERROR - Contract files not found. Deploy contract first.
+2025-05-15 13:25:51,773 - ERROR - Contract files not found. Deploy contract first.
+2025-05-15 13:25:54,152 - ERROR - ParserError: Source "@openzeppelin/contracts/token/ERC20/ERC20.sol" not found: File outside of allowed directories.
+ --> on_chain/CarbonCreditRecords.sol:4:1:
+  |
+4 | import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+> command: `C:\Users\marco\.solcx\solc-v0.8.0\solc.exe --standard-json`
+> return code: `0`
+> stdout:
+{"errors":[{"component":"general","errorCode":"6275","formattedMessage":"ParserError: Source \"@openzeppelin/contracts/token/ERC20/ERC20.sol\" not found: File outside of allowed directories.\n --> on_chain/CarbonCreditRecords.sol:4:1:\n  |\n4 | import \"@openzeppelin/contracts/token/ERC20/ERC20.sol\";\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\n","message":"Source \"@openzeppelin/contracts/token/ERC20/ERC20.sol\" not found: File outside of allowed directories.","severity":"error","sourceLocation":{"end":112,"file":"on_chain/CarbonCreditRecords.sol","start":57},"type":"ParserError"}],"sources":{}}
+
+> stderr:

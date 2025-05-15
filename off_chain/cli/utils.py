@@ -141,11 +141,14 @@ class Utils:
         co2 = int(input("Inser the Co2 emission of the operation (tons): "))
         insert_code = self.controller.insert_operation_info(creation_date, username, user_role, operation, co2)
         soglia = 5
+        address = self.controller.get_public_key_by_username(username)
         action = "added to "
         if soglia>co2:
-            credit_core = self.controller.give_credit(username,soglia-co2)    
+            credit_core = self.controller.give_credit(username,soglia-co2)
+            self.act_controller.reward_tokens(address, soglia-co2)
         elif soglia<co2:
             credit_core = self.controller.delete_credit(username,co2-soglia)
+            self.act_controller.burn_tokens(address, co2-soglia)
             if co2>balance:
                 controller = 1
             action = "removed from "
@@ -171,7 +174,10 @@ class Utils:
                 operation = " Credit give to: "+username_credit
                 credit_code = self.controller.give_credit(username_credit, credit)
                 credit_user_code = self.controller.delete_credit(username, credit)
-                operation_code = self.controller.insert_operation_info(creation_date, username, user_role, operation, co2 = 0) 
+                operation_code = self.controller.insert_operation_info(creation_date, username, user_role, operation, co2 = 0)
+                addres_user = self.controller.get_public_key_by_username(username)
+                addres_credit = self.controller.get_public_key_by_username(username_credit)
+                self.act_controller.mint_tokens(addres_user,credit,addres_credit) 
                 if operation_code == 0 and credit_code == 0 and credit_user_code == 0:
                     print(Fore.GREEN + 'Your credit is succesfully give to: ', username_credit + Style.RESET_ALL)
                 elif operation_code == 0 or credit_code == -1 or credit_user_code == -1:

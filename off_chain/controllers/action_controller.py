@@ -5,6 +5,7 @@ from colorama import Fore, Style, init
 from controllers.deploy_controller import DeployController
 from session.logging import log_msg, log_error
 from web3 import Web3
+import traceback
 
 class ActionController:
     """
@@ -67,6 +68,7 @@ class ActionController:
             log_msg(f"Contract deployed at {self.contract.address} and initialized.")
         except Exception as e:
             log_error(str(e))
+            traceback.print_exc()
             print(Fore.RED + "An error occurred during deployment." + Style.RESET_ALL)
         
     def read_data(self, function_name, *args):
@@ -181,103 +183,84 @@ class ActionController:
         """
         log_msg(f"New Action Logged: {event['args']}")
 
-    def register_entity(self, entity_type, *args, from_address):
+    from colorama import Fore, Style
+
+    # Già esistente - aggiornato con nuovi parametri
+    def register_entity(self, name, last_name, role, email, from_address):
         """
         Registers a new user in the contract.
 
         Args:
-            entity_type (str): Type of the user (can be used internally but maps to a single function).
-            *args: Additional arguments required by the contract function.
-            from_address (str): The Ethereum address to send the transaction from.
+            name (str): User's first name.
+            last_name (str): User's last name.
+            role (str): User role.
+            email (str): Email address.
+            from_address (str): The Ethereum address initiating the transaction.
 
         Returns:
             The transaction receipt object.
-        
-        Raises:
-            ValueError: If from_address is not provided.
         """
         if not from_address:
             raise ValueError(Fore.RED + "A valid Ethereum address must be provided as 'from_address'." + Style.RESET_ALL)
-        function_name = 'addUser'  # Assume the smart contract now has a unified function
-        return self.write_data(function_name, from_address, entity_type, *args)
+        return self.write_data("registerUser", from_address, name, last_name, role, email)
 
-
-    def update_entity(self, entity_type, *args, from_address):
+    # 🔹 Lettura del saldo token
+    def get_token_balance(self, address):
         """
-        Updates an existing entity of a specified type in the contract.
+        Returns the token balance of a given address.
 
         Args:
-            entity_type (str): Type of the entity to update, e.g., 'medic', 'patient', 'caregiver'.
-            *args: Additional arguments required by the contract function.
-            from_address (str): The Ethereum address to send the transaction from.
+            address (str): The Ethereum address to check.
 
         Returns:
-            The transaction receipt object.
-
-        Raises:
-            ValueError: If no function is available for the specified entity type or the from_address is invalid.
+            int: The token balance.
         """
-        if not from_address:
-            raise ValueError(Fore.RED + "A valid Ethereum address must be provided as 'from_address'." + Style.RESET_ALL)
-        update_functions = {
-            'user': 'updateUser',
-        }
-        function_name = update_functions.get(entity_type)
-        if not function_name:
-            raise ValueError(Fore.RED + f"No function available for entity type {entity_type}" + Style.RESET_ALL)
-        return self.write_data(function_name, from_address, *args)
+        return self.read_data("balanceOf", address)
 
-    def manage_report(self, action, *args, from_address):
+    # 🔹 Trasferimento token
+    def transfer_tokens(self, to_address, amount, from_address):
         """
-        Manages reports by adding new reports.
+        Transfers tokens from one address to another.
 
         Args:
-            action (str): The action to be performed, currently only 'add' is supported.
-            *args: Additional arguments required by the contract function.
-            from_address (str): The Ethereum address to send the transaction from.
+            to_address (str): Recipient's Ethereum address.
+            amount (int): Amount of tokens to transfer.
+            from_address (str): Sender's Ethereum address.
 
         Returns:
             The transaction receipt object.
+        """
+        if not from_address or not to_address:
+            raise ValueError(Fore.RED + "Both 'from_address' and 'to_address' must be provided." + Style.RESET_ALL)
+        return self.write_data("transfer", from_address, to_address, amount)
 
-        Raises:
-            ValueError: If no function is available for the specified action or the from_address is invalid.
+    # 🔹 Burn token
+    def burn_tokens(self, from_address, amount):
         """
-        if not from_address:
-            raise ValueError(Fore.RED + "A valid Ethereum address must be provided as 'from_address'." + Style.RESET_ALL)
-        report_functions = {
-            'add': 'addReport',
-        }
-        function_name = report_functions.get(action)
-        if not function_name:
-            raise ValueError(Fore.RED + f"No function available for action {action}" + Style.RESET_ALL)
-        return self.write_data(function_name, from_address, *args)
-    
-    def manage_operation(self, action, *args, from_address):
-        return self.write_data('addOperation', from_address, *args)
-    
-    def manage_report(self, action, *args, from_address):
-        """
-        Manages reports by adding new reports.
+        Burns tokens from the specified address.
 
         Args:
-            action (str): The action to be performed, currently only 'add' is supported.
-            *args: Additional arguments required by the contract function.
-            from_address (str): The Ethereum address to send the transaction from.
+            from_address (str): Address from which tokens will be burned.
+            amount (int): Amount to burn.
 
         Returns:
             The transaction receipt object.
-
-        Raises:
-            ValueError: If no function is available for the specified action or the from_address is invalid.
         """
         if not from_address:
             raise ValueError(Fore.RED + "A valid Ethereum address must be provided as 'from_address'." + Style.RESET_ALL)
-        report_functions = {
-            'add': 'addReport',
-        }
-        function_name = report_functions.get(action)
-        if not function_name:
-            raise ValueError(Fore.RED + f"No function available for action {action}" + Style.RESET_ALL)
-        return self.write_data(function_name, from_address, *args)
+        return self.write_data("burn", from_address, from_address, amount)  # potrebbe richiedere `burn(from, amount)`
 
-    
+    def reward_tokens(self, user_address, amount):
+        """
+        Rewards tokens to the specified user address.
+
+        Args:
+            user_address (str): Address of the user to reward tokens.
+            amount (int): Amount of tokens to reward.
+
+        Returns:
+            The transaction receipt object.
+        """
+        if not user_address:
+            raise ValueError("A valid Ethereum address must be provided as 'user_address'.")
+        return self.write_data("rewardUser", user_address, amount)
