@@ -1,70 +1,112 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
-contract CarbonCreditRecords is ERC20 {
+/// @title MyToken with User Registry and Fungible Tokens + Permit
+/// @notice Gestisce registrazione utenti e token ERC20 fungibili con supporto Permit e trasferimenti tra account
+contract CarbonCredit is ERC20, ERC20Burnable, ERC20Permit {
     struct User {
         string name;
         string lastName;
-        string role;
-        string email;
-        bool exists;
+        bool isRegistered;
     }
 
-    mapping(address => User) private users;
+    address public owner;
+    mapping(address => User) public users;
+    mapping(address => bool) public authorizedEditors;
 
-    event UserRegistered(address indexed userAddress, string name, string lastName, string role, string email);
-    event UserUpdated(address indexed userAddress, string name, string lastName, string role, string email);
-    event OperationExecuted(address indexed userAddress, string operationType, uint256 tokenAmount);
+    uint256 public constant INITIAL_TOKENS_ON_REGISTRATION = 10 * 10**18;
 
-    constructor() ERC20("CarbonCreditToken", "CCT") {
-        // Nessun owner, nessun admin
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event UserRegistered(address indexed user, string name, string lastName);
+    event UserUpdated(address indexed user, string name, string lastName);
+    event TokensTransferred(address indexed from, address indexed to, uint256 amount);
+    event TokensAdded(address indexed to, uint256 amount);
+    event TokensRemoved(address indexed from, uint256 amount);
+
+    /// @notice Imposta il deployer come owner e lo autorizza come editor
+    constructor() ERC20("CarbonCredit", "CCT") ERC20Permit("CarbonCredit") {
+        require(msg.sender != address(0), "Owner cannot be zero address");
+        owner = msg.sender;
+        authorizedEditors[msg.sender] = true;
+        emit OwnershipTransferred(address(0), msg.sender);
     }
 
-    // Registrazione utente (register_entity)
-    function registerUser(string memory name, string memory lastName, string memory role, string memory email) public {
-        require(!users[msg.sender].exists, "User already registered");
-        users[msg.sender] = User(name, lastName, role, email, true);
-        emit UserRegistered(msg.sender, name, lastName, role, email);
+    // Modifiers
+
+    /// @dev Limita l'accesso al solo proprietario
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Caller is not the owner");
+        _;
     }
 
-    // Aggiornamento dati utente
-    function updateUser(string memory name, string memory lastName, string memory role, string memory email) public {
-        require(users[msg.sender].exists, "User not registered");
-        users[msg.sender] = User(name, lastName, role, email, true);
-        emit UserUpdated(msg.sender, name, lastName, role, email);
+    /// @dev Limita l'accesso al proprietario o editor autorizzato
+    modifier onlyAuthorized() {
+        require(msg.sender == owner || authorizedEditors[msg.sender], "Access denied: caller is not the owner or an authorized editor.");
+        _;
     }
 
-    // Lettura dati utente
-    function getUser(address userAddress) public view returns (string memory, string memory, string memory, string memory) {
-        require(users[userAddress].exists, "User not found");
-        User memory u = users[userAddress];
-        return (u.name, u.lastName, u.role, u.email);
+    // Owner management
+
+    /// @notice Trasferisce la proprietà a un nuovo indirizzo
+    function transferOwnership(address newOwner) external onlyOwner {
+        require(newOwner != address(0), "New owner cannot be zero address");
+        emit OwnershipTransferred(owner, newOwner);
+        owner = newOwner;
     }
 
-    // Lettura saldo token (get_token_balance)
-    // Questa funzione è già ereditata da ERC20 come "balanceOf(address)"
-    // ma la riscrivo per chiarezza
-    function getTokenBalance(address userAddress) public view returns (uint256) {
-        return balanceOf(userAddress);
+    /// @notice Autorizza un nuovo editor
+    function authorizeEditor(address editor) external onlyOwner {
+        authorizedEditors[editor] = true;
     }
 
-    // Trasferimento token (transfer_tokens)
-    // Funzione "transfer" già esiste in ERC20, puoi chiamarla direttamente
-    // Se vuoi, puoi fare un wrapper per chiarezza:
-    function transferTokens(address to, uint256 amount) public returns (bool) {
-        return transfer(to, amount);
+    /// @notice Rimuove l'autorizzazione a un editor
+    function revokeEditor(address editor) external onlyOwner {
+        authorizedEditors[editor] = false;
     }
 
-    // Burn token (burn_tokens)
-    function burnTokens(uint256 amount) public {
-        _burn(msg.sender, amount);
+    // Functional methods
+
+    /// @notice Registra un nuovo utente e assegna token iniziali
+    function addUser(string calldata name, string calldata lastName) external {
+        require(!users[msg.sender].isRegistered, "User already registered");
+        users[msg.sender] = User(name, lastName, true);
+        _mint(msg.sender, INITIAL_TOKENS_ON_REGISTRATION);
+        emit UserRegistered(msg.sender, name, lastName);
+        emit TokensAdded(msg.sender, INITIAL_TOKENS_ON_REGISTRATION);
     }
 
-    // Reward tokens (reward_tokens)
-    function rewardUser(uint256 rewardAmount) public {
-        require(users[msg.sender].exists, "User not registered");
-        _mint(msg.sender, rewardAmount);
+    /// @notice Aggiorna i dati di un utente registrato
+    function updateUser(string calldata name, string calldata lastName) external {
+        require(users[msg.sender].isRegistered, "User not registered");
+        users[msg.sender].name = name;
+        users[msg.sender].lastName = lastName;
+        emit UserUpdated(msg.sender, name, lastName);
+    }
+
+    /// @notice Aggiunge token (crediti) a un account registrato (solo owner o editor autorizzato)
+    function addTokens(address to, uint256 amount) external onlyAuthorized {
+        require(users[to].isRegistered, "Recipient not registered");
+        _mint(to, amount);
+        emit TokensAdded(to, amount);
+    }
+
+    /// @notice Rimuove token (crediti) da un account registrato (solo owner o editor autorizzato)
+    function removeTokens(address from, uint256 amount) external onlyAuthorized {
+        require(users[from].isRegistered, "Account not registered");
+        _burn(from, amount);
+        emit TokensRemoved(from, amount);
+    }
+
+    /// @notice Trasferisce token tra account registrati
+    function transferTokens(address to, uint256 amount) external returns (bool) {
+        require(users[msg.sender].isRegistered, "Sender not registered");
+        require(users[to].isRegistered, "Recipient not registered");
+        bool success = super.transfer(to, amount);
+        emit TokensTransferred(msg.sender, to, amount);
+        return success;
     }
 }

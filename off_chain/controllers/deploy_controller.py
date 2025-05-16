@@ -1,94 +1,114 @@
 import os
-import random
 from colorama import Fore, Style, init
 from web3 import Web3
 from solcx import compile_standard, get_installed_solc_versions, install_solc
 
+init(convert=True)
+
 class DeployController:
     """
-    DeployController handles initialization, compilation and deployment for Solidity contract, establishing 
-    a connection with Ganache through Web3.
+    Gestisce compilazione e deploy del contratto Solidity tramite Web3.
     """
 
-    init(convert=True)
-
-    def __init__(self, http_provider='http://ganache:7545', solc_version='0.8.0'):
-        """
-        Initializes the deployment controller with Ethereum HTTP provider and Solidity 
-        compiler version.
-        
-        Args:
-            http_provider (str): The HTTP URL to connect to an Ethereum node.
-            solc_version (str): The version of the Solidity compiler to use for compiling contracts.
-        """
-        #http://ganache:7545
-        #http://127.0.0.1:7545
+    def __init__(self, http_provider='http://127.0.0.1:7545', solc_version='0.8.20'):
+        print("[DeployController] Inizializzo connessione a nodo Ethereum...")
         self.http_provider = http_provider
         self.solc_version = solc_version
         self.w3 = Web3(Web3.HTTPProvider(self.http_provider))
-        assert self.w3.is_connected(), Fore.RED + "Failed to connect to Ethereum node." + Style.RESET_ALL
+        if self.w3.is_connected():
+            print(Fore.GREEN + "[DeployController] Connesso correttamente al nodo Ethereum." + Style.RESET_ALL)
+        else:
+            print(Fore.RED + "[DeployController] Errore: connessione al nodo Ethereum fallita." + Style.RESET_ALL)
+            raise ConnectionError("Failed to connect to Ethereum node.")
         self.contract = None
+        self.abi = None
+        self.bytecode = None
+        self.contract_id = None
+        self.contract_interface = None
 
     def compile_and_deploy(self, contract_source_path, account=None):
-        """
-        Compiles and deploys a smart contract to an Ethereum network.
-        
-        Args:
-            contract_source_path (str): Path to the Solidity contract source file.
-            account (str): The Ethereum account to deploy from (randomly chosen if not provided).
-        """
-        # Resolve the full path of the contract source file
+        print(f"[DeployController] Avvio compile e deploy del contratto da: {contract_source_path}")
+
         dir_path = os.path.dirname(os.path.realpath(__file__))
         shared_dir_path = os.path.dirname(os.path.dirname(dir_path))
         contract_full_path = os.path.normpath(os.path.join(shared_dir_path, contract_source_path))
+        print(f"[DeployController] Percorso assoluto contratto: {contract_full_path}")
 
-        # Read the Solidity source code from file
         with open(contract_full_path, 'r') as file:
             contract_source_code = file.read()
+        print(f"[DeployController] Codice Solidity letto, lunghezza: {len(contract_source_code)} caratteri")
 
-        # Compile the contract and then deploy it
         self.compile_contract(contract_source_code)
-        account = random.choice(self.w3.eth.accounts)
+
+        if account is None:
+            accounts = self.w3.eth.accounts
+            print(f"[DeployController] Account non specificato, uso il primo disponibile: {accounts[0]}")
+            account = accounts[0]
+        else:
+            print(f"[DeployController] Account specificato: {account}")
+
+        balance = self.w3.eth.get_balance(account)
+        print(f"[DeployController] Saldo account: {balance} wei")
+
         self.deploy_contract(account)
 
     def compile_contract(self, solidity_source):
-        """
-        Compiles a Solidity contract using the specified version of solc.
-        
-        Args:
-            solidity_source (str): The source code of the Solidity contract.
-        """
-        # Install solc version if not already installed
+        print(f"[DeployController] Controllo installazione solc versione {self.solc_version}...")
         if self.solc_version not in get_installed_solc_versions():
+            print(f"[DeployController] Versione solc non trovata, installo {self.solc_version}...")
             install_solc(self.solc_version)
+        else:
+            print(f"[DeployController] Versione solc già installata.")
 
-        # Compile the Solidity source code
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+        node_modules_path = os.path.join(base_dir, 'node_modules')
+        remappings = [f"@openzeppelin={node_modules_path}/@openzeppelin"]
+        print(f"[DeployController] Uso remappings: {remappings}")
+
+        print("[DeployController] Compilo il contratto Solidity...")
         compiled_sol = compile_standard({
             "language": "Solidity",
-            "sources": {"on_chain/CarbonCreditRecords.sol": {"content": solidity_source}},
-            "settings": {"outputSelection": {"*": {"*": ["abi", "evm.bytecode"]}}}
+            "sources": {
+                "CarbonCredit.sol": {
+                    "content": solidity_source
+                }
+            },
+            "settings": {
+                "remappings": remappings,
+                "outputSelection": {
+                    "*": {
+                        "*": ["abi", "evm.bytecode"]
+                    }
+                }
+            }
         }, solc_version=self.solc_version)
 
-        # Extract the ABI and bytecode
-        self.contract_id, self.contract_interface = next(iter(compiled_sol['contracts']['on_chain/CarbonCreditRecords.sol'].items()))
+        self.contract_id, self.contract_interface = next(iter(compiled_sol['contracts']['CarbonCredit.sol'].items()))
         self.abi = self.contract_interface['abi']
         self.bytecode = self.contract_interface['evm']['bytecode']['object']
 
-    def deploy_contract(self, account):
-        """
-        Deploys the compiled contract using the provided account.
-        
-        Args:
-            account (str): The account to deploy the contract from.
-        """
-        try:
-            # Create the contract in Web3
-            contract = self.w3.eth.contract(abi=self.abi, bytecode=self.bytecode)
+        print(f"[DeployController] Compilazione completata per contratto: {self.contract_id}")
+        print(f"[DeployController] ABI ottenuta con {len(self.abi)} elementi")
+        print(f"[DeployController] Bytecode lunghezza: {len(self.bytecode)}")
 
-             # Send transaction to deploy the contract
+    def deploy_contract(self, account):
+        print(f"[DeployController] Inizio deploy contratto dall'account: {account}")
+
+        contract = self.w3.eth.contract(abi=self.abi, bytecode=self.bytecode)
+
+        try:
+            print("[DeployController] Invio transazione di deploy...")
             tx_hash = contract.constructor().transact({'from': account})
+            print(f"[DeployController] Transazione inviata, hash: {tx_hash.hex()}")
+
+            print("[DeployController] Attendo il receipt della transazione...")
             tx_receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            print(f"[DeployController] Transazione confermata nella block {tx_receipt.blockNumber}")
+
             self.contract = self.w3.eth.contract(address=tx_receipt.contractAddress, abi=self.abi)
-            print(f'Contract deployed at {tx_receipt.contractAddress} from {account}')
+            print(Fore.GREEN + f"[DeployController] Contratto deployato all'indirizzo: {tx_receipt.contractAddress}" + Style.RESET_ALL)
+
         except Exception as e:
-            print(Fore.RED + f"An error occurred while deploying the contract from account {account}: {e}" + Style.RESET_ALL)
+            print(Fore.RED + "[DeployController] Errore durante il deploy del contratto:" + Style.RESET_ALL)
+            print(e)
+            raise

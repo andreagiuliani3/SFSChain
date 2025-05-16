@@ -126,3 +126,20 @@ Argument 2 value ` Credit give to: marcoprova` is valid.
 {"errors":[{"component":"general","errorCode":"6275","formattedMessage":"ParserError: Source \"@openzeppelin/contracts/token/ERC20/ERC20.sol\" not found: File outside of allowed directories.\n --> on_chain/CarbonCreditRecords.sol:4:1:\n  |\n4 | import \"@openzeppelin/contracts/token/ERC20/ERC20.sol\";\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\n","message":"Source \"@openzeppelin/contracts/token/ERC20/ERC20.sol\" not found: File outside of allowed directories.","severity":"error","sourceLocation":{"end":112,"file":"on_chain/CarbonCreditRecords.sol","start":57},"type":"ParserError"}],"sources":{}}
 
 > stderr:
+2025-05-16 16:15:37,521 - ERROR - Contract files not found. Deploy contract first.
+2025-05-16 16:15:37,549 - ERROR - Contract files not found. Deploy contract first.
+2025-05-16 16:15:42,860 - ERROR - ParserError: Source "node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol" not found: File outside of allowed directories.
+ --> on_chain/CarbonCreditRecords.sol:4:1:
+  |
+4 | import "node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+> command: `C:\Users\marco\.solcx\solc-v0.8.0\solc.exe --standard-json`
+> return code: `0`
+> stdout:
+{"errors":[{"component":"general","errorCode":"6275","formattedMessage":"ParserError: Source \"node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol\" not found: File outside of allowed directories.\n --> on_chain/CarbonCreditRecords.sol:4:1:\n  |\n4 | import \"node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol\";\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\n","message":"Source \"node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol\" not found: File outside of allowed directories.","severity":"error","sourceLocation":{"end":125,"file":"on_chain/CarbonCreditRecords.sol","start":57},"type":"ParserError"}],"sources":{}}
+
+> stderr:
+2025-05-16 16:17:29,529 - ERROR - Contract files not found. Deploy contract first.
+2025-05-16 16:17:29,545 - ERROR - Contract files not found. Deploy contract first.
