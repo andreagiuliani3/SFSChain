@@ -2,6 +2,7 @@ import os
 from colorama import Fore, Style, init
 from web3 import Web3
 from solcx import compile_standard, get_installed_solc_versions, install_solc
+import random
 
 init(convert=True)
 
@@ -10,11 +11,19 @@ class DeployController:
     Gestisce compilazione e deploy del contratto Solidity tramite Web3.
     """
 
-    def __init__(self, http_provider='http://127.0.0.1:7545', solc_version='0.8.20'):
+    def __init__(self, http_provider='http://127.0.0.1:7545', solc_version='0.8.19'):
         print("[DeployController] Inizializzo connessione a nodo Ethereum...")
         self.http_provider = http_provider
         self.solc_version = solc_version
         self.w3 = Web3(Web3.HTTPProvider(self.http_provider))
+
+        install_dir = os.getcwd()
+        install_solc('0.8.19')
+        print(f"[DeployController] Controllo installazione solc versione {self.solc_version}...")
+        if self.solc_version not in get_installed_solc_versions():
+            print(f"[DeployController] Versione solc non trovata, installo {self.solc_version}...")
+        else: print("ok")
+
         if self.w3.is_connected():
             print(Fore.GREEN + "[DeployController] Connesso correttamente al nodo Ethereum." + Style.RESET_ALL)
         else:
@@ -39,14 +48,7 @@ class DeployController:
         print(f"[DeployController] Codice Solidity letto, lunghezza: {len(contract_source_code)} caratteri")
 
         self.compile_contract(contract_source_code)
-
-        if account is None:
-            accounts = self.w3.eth.accounts
-            print(f"[DeployController] Account non specificato, uso il primo disponibile: {accounts[0]}")
-            account = accounts[0]
-        else:
-            print(f"[DeployController] Account specificato: {account}")
-
+        account = random.choice(self.w3.eth.accounts)
         balance = self.w3.eth.get_balance(account)
         print(f"[DeployController] Saldo account: {balance} wei")
 
@@ -56,7 +58,7 @@ class DeployController:
         print(f"[DeployController] Controllo installazione solc versione {self.solc_version}...")
         if self.solc_version not in get_installed_solc_versions():
             print(f"[DeployController] Versione solc non trovata, installo {self.solc_version}...")
-            install_solc(self.solc_version)
+            install_solc('0.8.19')
         else:
             print(f"[DeployController] Versione solc già installata.")
 
@@ -69,7 +71,7 @@ class DeployController:
         compiled_sol = compile_standard({
             "language": "Solidity",
             "sources": {
-                "CarbonCredit.sol": {
+                "CarbonCreditRecords.sol": {
                     "content": solidity_source
                 }
             },
@@ -83,7 +85,7 @@ class DeployController:
             }
         }, solc_version=self.solc_version)
 
-        self.contract_id, self.contract_interface = next(iter(compiled_sol['contracts']['CarbonCredit.sol'].items()))
+        self.contract_id, self.contract_interface = next(iter(compiled_sol['contracts']['CarbonCreditRecords.sol'].items()))
         self.abi = self.contract_interface['abi']
         self.bytecode = self.contract_interface['evm']['bytecode']['object']
 
@@ -106,7 +108,7 @@ class DeployController:
             print(f"[DeployController] Transazione confermata nella block {tx_receipt.blockNumber}")
 
             self.contract = self.w3.eth.contract(address=tx_receipt.contractAddress, abi=self.abi)
-            print(Fore.GREEN + f"[DeployController] Contratto deployato all'indirizzo: {tx_receipt.contractAddress}" + Style.RESET_ALL)
+            print(f'Contract deployed at {tx_receipt.contractAddress} from {account}')
 
         except Exception as e:
             print(Fore.RED + "[DeployController] Errore durante il deploy del contratto:" + Style.RESET_ALL)

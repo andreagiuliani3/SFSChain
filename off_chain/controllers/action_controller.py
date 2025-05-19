@@ -42,7 +42,7 @@ class ActionController:
             print(Fore.RED + f"[ActionController] Errore caricamento contratto: {e}" + Style.RESET_ALL)
             self.contract = None
 
-    def deploy_and_initialize(self, source_path='../../on_chain/CarbonCredit.sol', account=None):
+    def deploy_and_initialize(self, source_path='../../on_chain/CarbonCreditRecords.sol', account=None):
         print("[ActionController] Inizio deploy e inizializzazione contratto...")
         controller = DeployController(self.w3.provider.endpoint_uri)
 

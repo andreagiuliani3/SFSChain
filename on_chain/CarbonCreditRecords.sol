@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.19;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
@@ -7,7 +7,7 @@ import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20P
 
 /// @title MyToken with User Registry and Fungible Tokens + Permit
 /// @notice Gestisce registrazione utenti e token ERC20 fungibili con supporto Permit e trasferimenti tra account
-contract CarbonCredit is ERC20, ERC20Burnable, ERC20Permit {
+contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
     struct User {
         string name;
         string lastName;
@@ -28,11 +28,20 @@ contract CarbonCredit is ERC20, ERC20Burnable, ERC20Permit {
     event TokensRemoved(address indexed from, uint256 amount);
 
     /// @notice Imposta il deployer come owner e lo autorizza come editor
-    constructor() ERC20("CarbonCredit", "CCT") ERC20Permit("CarbonCredit") {
-        require(msg.sender != address(0), "Owner cannot be zero address");
+    event Debug(string tag);
+
+    constructor()
+        ERC20("CarbonCredit", "CCT")
+        ERC20Permit("CarbonCredit")
+    {
+        emit Debug("ERC20 fatto");
+        emit Debug("ERC20Permit fatto");
+
         owner = msg.sender;
+        emit Debug("owner settato");
+
         authorizedEditors[msg.sender] = true;
-        emit OwnershipTransferred(address(0), msg.sender);
+        emit Debug("editor autorizzato");
     }
 
     // Modifiers

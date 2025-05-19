@@ -143,3 +143,16 @@ Argument 2 value ` Credit give to: marcoprova` is valid.
 > stderr:
 2025-05-16 16:17:29,529 - ERROR - Contract files not found. Deploy contract first.
 2025-05-16 16:17:29,545 - ERROR - Contract files not found. Deploy contract first.
+2025-05-16 16:58:28,666 - ERROR - ParserError: Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version
+ --> on_chain/CarbonCreditRecords.sol:2:1:
+  |
+2 | pragma solidity ^0.8.20;
+  | ^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+> command: `C:\Users\marco\.solcx\solc-v0.8.0\solc.exe --standard-json`
+> return code: `0`
+> stdout:
+{"errors":[{"component":"general","errorCode":"5333","formattedMessage":"ParserError: Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version\n --> on_chain/CarbonCreditRecords.sol:2:1:\n  |\n2 | pragma solidity ^0.8.20;\n  | ^^^^^^^^^^^^^^^^^^^^^^^^\n\n","message":"Source file requires different compiler version (current compiler is 0.8.0+commit.c7dfd78e.Windows.msvc) - note that nightly builds are considered to be strictly less than the released version","severity":"error","sourceLocation":{"end":56,"file":"on_chain/CarbonCreditRecords.sol","start":32},"type":"ParserError"}],"sources":{}}
+
+> stderr:
