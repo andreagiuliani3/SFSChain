@@ -11,37 +11,31 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
     struct User {
         string name;
         string lastName;
+        string userRole;
         bool isRegistered;
     }
 
     address public owner;
     mapping(address => User) public users;
     mapping(address => bool) public authorizedEditors;
+    mapping(address => uint256) public balance;
+
 
     uint256 public constant INITIAL_TOKENS_ON_REGISTRATION = 10 * 10**18;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-    event UserRegistered(address indexed user, string name, string lastName);
-    event UserUpdated(address indexed user, string name, string lastName);
+    event UserRegistered(address indexed user, string name, string lastName, string userRole);
+    event UserUpdated(address indexed user, string name, string lastName, string userRole);
     event TokensTransferred(address indexed from, address indexed to, uint256 amount);
     event TokensAdded(address indexed to, uint256 amount);
     event TokensRemoved(address indexed from, uint256 amount);
-
+    
     /// @notice Imposta il deployer come owner e lo autorizza come editor
     event Debug(string tag);
 
-    constructor()
-        ERC20("CarbonCredit", "CCT")
-        ERC20Permit("CarbonCredit")
-    {
-        emit Debug("ERC20 fatto");
-        emit Debug("ERC20Permit fatto");
-
+    constructor() ERC20("CarbonCredit", "CCT") ERC20Permit("CarbonCredit") {
         owner = msg.sender;
-        emit Debug("owner settato");
-
         authorizedEditors[msg.sender] = true;
-        emit Debug("editor autorizzato");
     }
 
     // Modifiers
@@ -80,42 +74,51 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
     // Functional methods
 
     /// @notice Registra un nuovo utente e assegna token iniziali
-    function addUser(string calldata name, string calldata lastName) external {
+    function addUser(string calldata name, string calldata lastName, string calldata userRole ) external {
         require(!users[msg.sender].isRegistered, "User already registered");
-        users[msg.sender] = User(name, lastName, true);
+        users[msg.sender] = User(name, lastName, userRole, true);
         _mint(msg.sender, INITIAL_TOKENS_ON_REGISTRATION);
-        emit UserRegistered(msg.sender, name, lastName);
+        emit UserRegistered(msg.sender, name, lastName, userRole);
         emit TokensAdded(msg.sender, INITIAL_TOKENS_ON_REGISTRATION);
     }
 
     /// @notice Aggiorna i dati di un utente registrato
-    function updateUser(string calldata name, string calldata lastName) external {
+    function updateUser(string calldata name, string calldata lastName, string calldata userRole) external {
         require(users[msg.sender].isRegistered, "User not registered");
         users[msg.sender].name = name;
         users[msg.sender].lastName = lastName;
-        emit UserUpdated(msg.sender, name, lastName);
+        users[msg.sender].userRole = userRole;
+        emit UserUpdated(msg.sender, name, lastName, userRole);
     }
 
     /// @notice Aggiunge token (crediti) a un account registrato (solo owner o editor autorizzato)
-    function addTokens(address to, uint256 amount) external onlyAuthorized {
-        require(users[to].isRegistered, "Recipient not registered");
-        _mint(to, amount);
-        emit TokensAdded(to, amount);
+    function addToken(address user, uint256 amount) external onlyAuthorized {
+        require(users[user].isRegistered, "Recipient not registered");
+        _mint(user, amount);
+        emit TokensAdded(user, amount);
     }
 
     /// @notice Rimuove token (crediti) da un account registrato (solo owner o editor autorizzato)
-    function removeTokens(address from, uint256 amount) external onlyAuthorized {
+    function removeToken(address from, uint256 amount) external onlyAuthorized {
         require(users[from].isRegistered, "Account not registered");
         _burn(from, amount);
         emit TokensRemoved(from, amount);
     }
 
     /// @notice Trasferisce token tra account registrati
-    function transferTokens(address to, uint256 amount) external returns (bool) {
+    function transferToken(address to, uint256 amount) external returns (bool) {
         require(users[msg.sender].isRegistered, "Sender not registered");
         require(users[to].isRegistered, "Recipient not registered");
         bool success = super.transfer(to, amount);
         emit TokensTransferred(msg.sender, to, amount);
         return success;
+    }
+
+    function checkBalance(address user) public view returns (uint) {
+         return balanceOf(user);
+    }
+
+    function isRegistered(address user) public view returns (bool) {
+        return users[user].isRegistered;
     }
 }

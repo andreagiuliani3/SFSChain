@@ -237,7 +237,7 @@ class CommandLineInterface:
         carbon_credit = 5
         from_address_users = self.controller.get_public_key_by_username(username)
         print(from_address_users)
-        self.act_controller.register_entity(name, lastname, user_role, email, from_address_users)
+        self.act_controller.add_user(name, lastname, user_role, from_address_users)
         insert_code = self.controller.insert_user_info(username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit)
         if insert_code == 0:
             print(Fore.GREEN + 'Information saved correctly!' + Style.RESET_ALL)
@@ -449,7 +449,7 @@ class CommandLineInterface:
     def view_balance(self, username):
         balance = self.controller.get_credit_by_username(username)
         address = self.controller.get_public_key_by_username(username)
-        balance2 = self.act_controller.get_token_balance(address)
+        balance2 = self.act_controller.check_balance(address)
         print(Fore.CYAN + "\nBalance:\n" + Style.RESET_ALL)
         print("Your balance is: ", balance)
         print("Your balance is: ", balance2)

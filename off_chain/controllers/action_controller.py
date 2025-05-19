@@ -69,81 +69,58 @@ class ActionController:
         except Exception as e:
             print(f"[ActionController] Deploy fallito: {e}")
 
+    def read_data(self, function_name, *args):
+        """
+        Reads data from a contract's function.
 
-    def read_data(self, fn_name, *args):
-        print(f"[ActionController] Lettura dati: funzione {fn_name} con argomenti {args}")
+        Args:
+            function_name (str): The function name to call.
+            *args: Arguments required by the function.
+
+        Returns:
+            The return value of the function call.
+        """
         try:
-            result = getattr(self.contract.functions, fn_name)(*args).call()
-            log_msg(f"{fn_name} -> {result}")
-            print(f"[ActionController] Risultato: {result}")
-            return result
+            function = getattr(self.contract.functions, function_name)(*args)
+            return function.call()
         except Exception as e:
-            log_error(f"Errore read_data {fn_name}: {e}")
-            print(Fore.RED + f"[ActionController] Errore in read_data {fn_name}: {e}" + Style.RESET_ALL)
+            log_error(f"Error calling {function_name} with args {args}: {str(e)}")
             raise
 
-    def write_data(self, fn_name, from_address, private_key, *args, gas=2000000):
-        print(f"[ActionController] Scrittura dati: funzione {fn_name} da {from_address} con argomenti {args}")
-        if not from_address or not private_key:
-            raise ValueError(Fore.RED + "Specificare indirizzo e private key validi." + Style.RESET_ALL)
+    def write_data(self, function_name, from_address, *args, gas=2000000, gas_price=None, nonce=None):
+        """
+        Writes data to a contract's function.
+
+        Args:
+            function_name (str): The function name to call on the contract.
+            from_address (str): The Ethereum address to send the transaction from.
+            *args: Arguments required by the function.
+            gas (int): The gas limit for the transaction.
+            gas_price (int): The gas price for the transaction.
+            nonce (int): The nonce for the transaction.
+
+        Returns:
+            The transaction receipt object.
+        """
+        if not from_address:
+            raise ValueError("Invalid 'from_address' provided. It must be a non-empty string representing an Ethereum address.")
+        tx_parameters = {
+            'from': from_address,
+            'gas': gas,
+            'gasPrice': gas_price or self.w3.eth.gas_price,
+            'nonce': nonce or self.w3.eth.get_transaction_count(from_address)
+        }
         try:
-            nonce = self.w3.eth.get_transaction_count(from_address)
-            print(f"[ActionController] Nonce corrente: {nonce}")
-
-            tx = getattr(self.contract.functions, fn_name)(*args).build_transaction({
-                'from': from_address,
-                'nonce': nonce,
-                'gas': gas,
-                'gasPrice': self.w3.eth.gas_price
-            })
-            print(f"[ActionController] Transazione costruita: {tx}")
-
-            signed = self.w3.eth.account.sign_transaction(tx, private_key)
-            print(f"[ActionController] Transazione firmata.")
-
-            tx_hash = self.w3.eth.send_raw_transaction(signed.rawTransaction)
-            print(f"[ActionController] Transazione inviata, hash: {tx_hash.hex()}")
-
+            function = getattr(self.contract.functions, function_name)(*args)
+            tx_hash = function.transact(tx_parameters)
             receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
-            print(f"[ActionController] Receipt ricevuto, status: {receipt.status}, block: {receipt.blockNumber}")
 
-            if receipt.status == 0:
-                log_error(f"Transaction {fn_name} failed: {tx_hash.hex()}")
-                print(Fore.RED + f"[ActionController] Transazione fallita: {tx_hash.hex()}" + Style.RESET_ALL)
-                raise Exception("Transaction failed")
-
-            log_msg(f"Transaction {fn_name} success: {tx_hash.hex()}")
-            print(Fore.GREEN + f"[ActionController] Transazione {fn_name} completata con successo." + Style.RESET_ALL)
+            log_msg(f"Transaction {function_name} executed. From: {from_address}, Tx Hash: {tx_hash.hex()}, Gas: {gas}, Gas Price: {tx_parameters['gasPrice']}")
             return receipt
+
         except Exception as e:
-            log_error(f"Errore in write_data {fn_name}: {e}")
-            print(Fore.RED + f"[ActionController] Eccezione in write_data {fn_name}: {e}" + Style.RESET_ALL)
-            raise
-
-    # Metodi equivalenti alle funzioni del contratto
-    def register_entity(self, name, last_name, from_address, private_key):
-        print(f"[ActionController] Chiamata register_entity con {name}, {last_name}")
-        return self.write_data('addUser', from_address, private_key, name, last_name)
-
-    def update_entity(self, name, last_name, from_address, private_key):
-        print(f"[ActionController] Chiamata update_entity con {name}, {last_name}")
-        return self.write_data('updateUser', from_address, private_key, name, last_name)
-
-    def add_tokens(self, to_address, amount, from_address, private_key):
-        print(f"[ActionController] Chiamata add_tokens a {to_address} quantità {amount}")
-        return self.write_data('addTokens', from_address, private_key, to_address, amount)
-
-    def remove_tokens(self, from_token_addr, amount, from_address, private_key):
-        print(f"[ActionController] Chiamata remove_tokens da {from_token_addr} quantità {amount}")
-        return self.write_data('removeTokens', from_address, private_key, from_token_addr, amount)
-
-    def transfer_tokens(self, to_address, amount, from_address, private_key):
-        print(f"[ActionController] Chiamata transfer_tokens a {to_address} quantità {amount}")
-        return self.write_data('transferTokens', from_address, private_key, to_address, amount)
-
-    def transfer_from(self, token_from, to_address, amount, from_address, private_key):
-        print(f"[ActionController] Chiamata transfer_from da {token_from} a {to_address} quantità {amount}")
-        return self.write_data('transferFrom', from_address, private_key, token_from, to_address, amount)
+            log_error(f"Error executing {function_name} from {from_address}. Error: {str(e)}")
+            raise e
 
     def listen_to_event(self, event_name, handler, poll_interval=10):
         print(f"[ActionController] Inizio ascolto evento {event_name} con polling ogni {poll_interval}s")
@@ -157,3 +134,52 @@ class ActionController:
     def handle_action_logged(self, event):
         print(f"[ActionController] Nuovo Action Logged evento: {event['args']}")
         log_msg(f"New Action Logged: {event['args']}")
+
+    def add_user(self, name: str, last_name: str, user_role: str, from_address: str):
+        """
+        Calls addUser(name, lastName)
+        """
+        return self.write_data('addUser', from_address, name, last_name, user_role)
+
+    def update_user(self, name: str, last_name: str, user_role: str, from_address: str):
+        """
+        Calls updateUser(name, lastName)
+        """
+        return self.write_data('updateUser', from_address, name, last_name, user_role)
+
+    def add_token(self, amount: int, to_address: str):
+        """
+        Calls addToken(to, amount)
+        """
+        from_address=to_address
+        return self.write_data('addToken', from_address, to_address, amount)
+
+    def remove_token(self, amount: int, from_address: str, target_address: str):
+        """
+        Calls removeToken(from, amount)
+        """
+        return self.write_data('removeToken', from_address, target_address, amount)
+
+    def transfer_token(self, from_address: str, to_address: str, amount: int):
+        """
+        Calls transferToken(to, amount)
+        """
+        return self.write_data('transferToken', from_address, to_address, amount)
+    
+    def check_balance(self, address: str):
+        if not Web3.is_address(address):
+            raise ValueError(f"Invalid address: {address}")
+
+        address = Web3.to_checksum_address(address)
+
+        if not self.is_registered(address):
+            log_error(f"L'indirizzo {address} non è registrato, impossibile leggere il bilancio.")
+            return 0
+
+        return self.read_data('checkBalance', address)
+
+    
+    def is_registered(self, address: str):
+        if not Web3.is_address(address):
+            raise ValueError(f"Invalid address: {address}")
+        return self.read_data('isRegistered', Web3.to_checksum_address(address))

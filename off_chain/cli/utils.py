@@ -125,7 +125,7 @@ class Utils:
         name = us.get_name()
         lastname = us.get_lastname()
         public_key = self.controller.get_public_key_by_username(username)
-        self.act_controller.update_entity(user_role, name, lastname, from_address=public_key)
+        self.act_controller.update_user(name, lastname, user_role, from_address=public_key)
 
         us.save()
 
@@ -145,10 +145,10 @@ class Utils:
         action = "added to "
         if soglia>co2:
             credit_core = self.controller.give_credit(username,soglia-co2)
-            self.act_controller.reward_tokens(address, soglia-co2)
+            self.act_controller.add_token(soglia-co2, address)
         elif soglia<co2:
             credit_core = self.controller.delete_credit(username,co2-soglia)
-            self.act_controller.burn_tokens(address, co2-soglia)
+            self.act_controller.remove_token(co2-soglia, address)
             if co2>balance:
                 controller = 1
             action = "removed from "
@@ -177,7 +177,7 @@ class Utils:
                 operation_code = self.controller.insert_operation_info(creation_date, username, user_role, operation, co2 = 0)
                 addres_user = self.controller.get_public_key_by_username(username)
                 addres_credit = self.controller.get_public_key_by_username(username_credit)
-                self.act_controller.mint_tokens(addres_user,credit,addres_credit) 
+                self.act_controller.transfer_token(addres_user, addres_credit, credit) 
                 if operation_code == 0 and credit_code == 0 and credit_user_code == 0:
                     print(Fore.GREEN + 'Your credit is succesfully give to: ', username_credit + Style.RESET_ALL)
                 elif operation_code == 0 or credit_code == -1 or credit_user_code == -1:
