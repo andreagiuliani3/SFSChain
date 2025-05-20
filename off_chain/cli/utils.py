@@ -143,6 +143,7 @@ class Utils:
         soglia = 5
         address = self.controller.get_public_key_by_username(username)
         action = "added to "
+        controller = 0
         if soglia>co2:
             credit_core = self.controller.give_credit(username,soglia-co2)
             self.act_controller.add_token(soglia-co2, address)
@@ -177,6 +178,8 @@ class Utils:
                 operation_code = self.controller.insert_operation_info(creation_date, username, user_role, operation, co2 = 0)
                 addres_user = self.controller.get_public_key_by_username(username)
                 addres_credit = self.controller.get_public_key_by_username(username_credit)
+                print("1: "+addres_user)
+                print("2: "+addres_credit)
                 self.act_controller.transfer_token(addres_user, addres_credit, credit) 
                 if operation_code == 0 and credit_code == 0 and credit_user_code == 0:
                     print(Fore.GREEN + 'Your credit is succesfully give to: ', username_credit + Style.RESET_ALL)

@@ -153,12 +153,13 @@ class ActionController:
         """
         from_address=to_address
         return self.write_data('addToken', from_address, to_address, amount)
-
-    def remove_token(self, amount: int, from_address: str, target_address: str):
+    
+    def remove_token(self, amount: int, to_address: str):
         """
-        Calls removeToken(from, amount)
+        Calls addToken(to, amount)
         """
-        return self.write_data('removeToken', from_address, target_address, amount)
+        from_address=to_address
+        return self.write_data('removeToken', from_address, to_address, amount)
 
     def transfer_token(self, from_address: str, to_address: str, amount: int):
         """
@@ -177,7 +178,6 @@ class ActionController:
             return 0
 
         return self.read_data('checkBalance', address)
-
     
     def is_registered(self, address: str):
         if not Web3.is_address(address):
