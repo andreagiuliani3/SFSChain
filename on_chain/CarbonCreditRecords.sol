@@ -74,16 +74,17 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
     // Functional methods
 
     /// @notice Registra un nuovo utente e assegna token iniziali
-    function addUser(string memory name, string memory lastName, string memory userRole ) public onlyAuthorized() {
-        require(!users[msg.sender].isRegistered, "User already registered");
-        users[msg.sender] = User(name, lastName, userRole, true);
-        _mint(msg.sender, INITIAL_TOKENS_ON_REGISTRATION);
-        emit UserRegistered(msg.sender, name, lastName, userRole);
-        emit TokensAdded(msg.sender, INITIAL_TOKENS_ON_REGISTRATION);
+    function addUser(address userAddress, string memory name, string memory lastName, string memory userRole ) public onlyOwner() {
+        require(!users[userAddress].isRegistered, "User already registered");
+        users[userAddress] = User(name, lastName, userRole, true);
+        authorizedEditors[userAddress] = true;
+        _mint(userAddress, INITIAL_TOKENS_ON_REGISTRATION);
+        emit UserRegistered(userAddress, name, lastName, userRole);
+        emit TokensAdded(userAddress, INITIAL_TOKENS_ON_REGISTRATION);
     }
 
     /// @notice Aggiorna i dati di un utente registrato
-    function updateUser(string memory name, string memory lastName, string memory userRole) public onlyAuthorized() {
+    function updateUser(string memory name, string memory lastName, string memory userRole) public onlyAuthorized {
         require(users[msg.sender].isRegistered, "User not registered");
         users[msg.sender].name = name;
         users[msg.sender].lastName = lastName;
@@ -92,15 +93,17 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
     }
 
     /// @notice Aggiunge token (crediti) a un account registrato (solo owner o editor autorizzato)
-    function addToken(address user, uint256 amount) public {
+    function addToken(address user, uint256 amount) public onlyAuthorized {
         require(users[user].isRegistered, "Recipient not registered");
+        require(user != msg.sender, "Cannot mint tokens to yourself"); /// Evita che un utente possa chiamare la funzione per aggiungere token a se stesso
         _mint(user, amount);
         emit TokensAdded(user, amount);
     }
 
     /// @notice Rimuove token (crediti) da un account registrato (solo owner o editor autorizzato)
-    function removeToken(address from, uint256 amount) public {
+    function removeToken(address from, uint256 amount) public onlyAuthorized {
         require(users[from].isRegistered, "Account not registered");
+        require(from != msg.sender, "Cannot burn your own tokens");
         _burn(from, amount);
         emit TokensRemoved(from, amount);
     }
@@ -108,17 +111,18 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
     /// @notice Trasferisce token tra account registrati
     function transferToken(address to, uint256 amount) public onlyAuthorized returns (bool) {
         require(users[msg.sender].isRegistered, "Sender not registered");
-        require(users[to].isRegistered, "Sender not registered");
+        require(users[to].isRegistered, "Receiver not registered");
         bool success = super.transfer(to, amount);
         emit TokensTransferred(msg.sender, to, amount);
         return success;
     }
 
-    function checkBalance(address user) public view returns (uint) {
-         return balanceOf(user);
+    
+    function checkBalance() public onlyAuthorized view returns (uint) {
+         return balanceOf(msg.sender);
     }
 
-    function isRegistered(address user) public view returns (bool) {
-        return users[user].isRegistered;
+    function isRegistered() public onlyAuthorized() view returns (bool) {
+        return users[msg.sender].isRegistered;
     }
 }

@@ -117,6 +117,33 @@ class DatabaseOperations:
                 return -1  # Username already exists
         except sqlite3.IntegrityError:
             return -1
+    
+    def update_user_profile(self, username, name, lastname, birthday, phone):
+        """
+        Updates an existing user's profile information in the Users table.
+
+        Args:
+         username (str): Username of the user.
+            name (str): First name of the user.
+            lastname (str): Last name of the user.
+            birthday (str): Birthday of the user.
+         phone (str): Phone number of the user.
+
+        Returns:
+         int: 0 if update is successful, -1 on error.
+        """
+        try:
+            self.cur.execute("""
+                UPDATE Users
+                SET name = ?, lastname = ?, birthday = ?, phone = ?
+                WHERE username = ?
+            """, (name, lastname, birthday, phone, username))
+            
+            self.conn.commit()
+            return 0
+        except Exception as e:
+            print(Fore.RED + f'Internal error while updating profile: {str(e)}' + Style.RESET_ALL)
+            return -1
 
     def check_username(self, username):
         """

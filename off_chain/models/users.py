@@ -69,8 +69,8 @@ class User:
                             ))
             else:
                 # Update existing Users details
-                self.cur.execute('''UPDATE Users SET name=?, lastname=?, birthday=?, company_name=?, carbon_credit=?, role=?, mail=?, phone=? WHERE username=?''',
-                                (self.username, self.name, self.lastname, self.birthday, self.company_name, self.carbon_credit, self.role, self.mail, self.phone))
+                self.cur.execute("""UPDATE Users SET name=?, lastname=?, birthday=?, phone=? WHERE username=?""",
+                                (self.name, self.lastname, self.birthday, self.phone, self.username))
             self.conn.commit()
             self.username = self.cur.lastrowid
             print(Fore.GREEN + 'Information saved correctly!\n' + Style.RESET_ALL)

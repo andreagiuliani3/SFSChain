@@ -6,11 +6,16 @@ from eth_utils import *
 from eth_keys import *
 from controllers.controller import Controller
 from controllers.action_controller import ActionController
+from controllers.deploy_controller import DeployController
 from session.session import Session
 from database.database_operation import DatabaseOperations
 from cli.utils import Utils
 from colorama import Fore, Style, init
 from datetime import date
+import os
+import json
+from web3 import Web3
+
 
 class CommandLineInterface:
 
@@ -19,8 +24,13 @@ class CommandLineInterface:
         self.session = session
         self.controller = Controller(session)
         self.act_controller = ActionController()
+        self.deploy_controller = DeployController()
         self.ops = DatabaseOperations()
         self.util = Utils(session)
+        # Esegui il deploy del contratto se non è stato effettuato precedentemente
+        if not self.act_controller.load_contract():
+            self.act_controller.deploy_and_initialize('../../on_chain/CarbonCreditRecords.sol')
+        
 
         self.menu = {
             1: 'Register New Account',
@@ -48,30 +58,33 @@ class CommandLineInterface:
               
         
             """ + Style.RESET_ALL)
-
+        
+        
         for key in self.menu.keys():
             print(key, '--' ,self.menu[key])
 
-        try:
-            choice = int(input('Enter your choice: '))
+        """try:"""
+        choice = int(input('Enter your choice: '))
 
-            if choice == 1:
+        if choice == 1:
                 print('Proceed with the registration...')
                 self.registration_menu()
-            elif choice == 2:
+        elif choice == 2:
                 print('Proceed with the log in...')
                 res_code = self.login_menu()
-                if res_code == 0:
+        if res_code == 0:
                     self.print_menu()
-            elif choice == 3:
+        elif choice == 3:
                 print('Bye Bye!')
                 exit()
-            else:
+        else:
                 print(Fore.RED + 'Wrong option. Please enter one of the options listed in the menu!' + Style.RESET_ALL)
 
-        except ValueError:
+        """except ValueError:
             print(Fore.RED + 'Wrong input. Please enter a number!\n'+ Style.RESET_ALL)
-            return
+            return"""
+    
+    
     
     def registration_menu(self):
         """
@@ -81,18 +94,6 @@ class CommandLineInterface:
         The method validates user inputs and interacts with the Controller to perform 
         registration actions.
         """
-
-        while True:
-            proceed = input("In order to register, you need to deploy. Do you want to proceed with deployment and initialization of the contract? (Y/n): ")
-            if proceed.strip().upper() == "Y":
-                self.act_controller.deploy_and_initialize('../../on_chain/CarbonCreditRecords.sol')
-                break  # Exit the loop after deployment
-            elif proceed.strip().upper() == "N":
-                print(Fore.RED + "Deployment cancelled. Please deploy the contract when you are ready to register." + Style.RESET_ALL)
-                return  # Return from the function to cancel
-            else:
-                print(Fore.RED + 'Wrong input, please insert Y or N!' + Style.RESET_ALL)
-
 
         print('Please, enter your wallet credentials.')
         attempts = 0
@@ -187,7 +188,7 @@ class CommandLineInterface:
 
             reg_code = self.controller.registration(username, password, user_role, public_key, private_key)
             if reg_code == 0:
-                self.insert_user_info(username, user_role)
+                self.insert_user_info(username, user_role, private_key)
             elif reg_code == -1:
                 print(Fore.RED + 'Your username has been taken.\n' + Style.RESET_ALL)
         
@@ -196,7 +197,7 @@ class CommandLineInterface:
             return
         
     
-    def insert_user_info(self, username, user_role):
+    def insert_user_info(self, username, user_role, private_key):
         """
         This method guides users through the process of providing personal information.
         It validates user inputs and ensures data integrity before inserting the
@@ -236,7 +237,6 @@ class CommandLineInterface:
             else: print(Fore.RED + "Invalid phone number format.\n" + Style.RESET_ALL)
         carbon_credit = 5
         from_address_users = self.controller.get_public_key_by_username(username)
-        print(from_address_users)
         self.act_controller.add_user(name, lastname, user_role, from_address_users)
         insert_code = self.controller.insert_user_info(username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit)
         if insert_code == 0:

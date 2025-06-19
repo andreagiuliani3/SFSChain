@@ -290,3 +290,6 @@ class Controller:
     
     def get_information_for_credit(self):
         return self.db_ops.get_information_for_credit()
+    
+    def update_user_profile(self, username, name, lastname, birthday, phone):
+        return self.db_ops.update_user_profile(username, name, lastname, birthday, phone)

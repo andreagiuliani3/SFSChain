@@ -7,6 +7,7 @@ from colorama import Fore, Style, init
 from rich.console import Console
 from rich.table import Table
 from datetime import date
+from controllers.action_controller import *
 
 from controllers.controller import Controller
 from controllers.action_controller import ActionController
@@ -50,8 +51,9 @@ class Utils:
         self.session = session
         self.controller = Controller(session)
         self.database_operation = DatabaseOperations()
-        self.act_controller = ActionController()
+        self.act_controller = ActionController() 
         self.today_date = str(datetime.date.today())
+        self.contract = self.act_controller.load_contract()
 
     def change_passwd(self, username):
         """
@@ -94,8 +96,8 @@ class Utils:
                 print("Okay\n")
             break
             
-    def update_profile(self, username, user_role):
-        """
+    """def update_profile(self, username, user_role):
+        
         Updates the profile information of a user.
 
         Parameters:
@@ -104,7 +106,7 @@ class Utils:
 
         Returns:
             None
-        """
+        
      
         print(Fore.CYAN + "\nUpdate profile function"  + Style.RESET_ALL)
         us = self.controller.get_user_by_username(username)
@@ -127,7 +129,40 @@ class Utils:
         public_key = self.controller.get_public_key_by_username(username)
         self.act_controller.update_user(name, lastname, user_role, from_address=public_key)
 
-        us.save()
+        us.save()"""
+    
+    def update_profile(self, username, user_role):
+    
+        print(Fore.CYAN + "\nUpdate profile function" + Style.RESET_ALL)
+
+        current = self.controller.get_user_by_username(username)
+
+        name = click.prompt('Name ', default=current.get_name())
+        lastname = click.prompt('Lastname ', default=current.get_lastname())
+
+        while True:
+            birthday = click.prompt('Date of birth (YYYY-MM-DD) ', default=current.get_birthday())
+            if self.controller.check_birthdate_format(birthday): 
+                break
+            print(Fore.RED + "Invalid birthdate or incorrect format." + Style.RESET_ALL)
+
+        while True:
+            phone = click.prompt('Phone ', default=current.get_phone())
+            if self.controller.check_phone_number_format(phone): 
+                break
+            print(Fore.RED + "Invalid phone number format." + Style.RESET_ALL)
+
+        # Blockchain update (se necessario)
+        public_key = self.controller.get_public_key_by_username(username)
+        self.act_controller.update_user(name, lastname, user_role, from_address=public_key)
+
+        # DB update
+        result = self.controller.update_user_profile(username, name, lastname, birthday, phone)
+
+        if result == 0:
+            print(Fore.GREEN + "Profile updated successfully!" + Style.RESET_ALL)
+        else:
+            print(Fore.RED + "Failed to update profile!" + Style.RESET_ALL)
 
     def make_operation(self, username, user_role):
         balance = self.controller.get_credit_by_username(username)
