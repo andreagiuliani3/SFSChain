@@ -63,26 +63,26 @@ class CommandLineInterface:
         for key in self.menu.keys():
             print(key, '--' ,self.menu[key])
 
-        """try:"""
-        choice = int(input('Enter your choice: '))
+        try:
+            choice = int(input('Enter your choice: '))
 
-        if choice == 1:
-                print('Proceed with the registration...')
-                self.registration_menu()
-        elif choice == 2:
-                print('Proceed with the log in...')
-                res_code = self.login_menu()
-        if res_code == 0:
-                    self.print_menu()
-        elif choice == 3:
-                print('Bye Bye!')
-                exit()
-        else:
-                print(Fore.RED + 'Wrong option. Please enter one of the options listed in the menu!' + Style.RESET_ALL)
+            if choice == 1:
+                    print('Proceed with the registration...')
+                    self.registration_menu()
+            elif choice == 2:
+                    print('Proceed with the log in...')
+                    res_code = self.login_menu()
+                    if res_code == 0:
+                        self.print_menu()
+            elif choice == 3:
+                    print('Bye Bye!')
+                    exit()
+            else:
+                    print(Fore.RED + 'Wrong option. Please enter one of the options listed in the menu!' + Style.RESET_ALL)
 
-        """except ValueError:
+        except ValueError:
             print(Fore.RED + 'Wrong input. Please enter a number!\n'+ Style.RESET_ALL)
-            return"""
+            return
     
     
     
@@ -320,7 +320,7 @@ class CommandLineInterface:
                         if confirm == 'Y':
                             print(Fore.CYAN + "\nThank you for using the service!\n" + Style.RESET_ALL)
                             self.session.reset_session()
-
+                            self.print_menu()
                             return
                         else:
                             print(Fore.RED + "Invalid choice! Please try again." + Style.RESET_ALL)
