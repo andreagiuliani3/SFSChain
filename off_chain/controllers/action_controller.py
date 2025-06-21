@@ -221,7 +221,8 @@ class ActionController:
         Calls addToken(to, amount)
         """
         to_address = Web3.to_checksum_address(to_address)
-        from_address=to_address
+        from_address = os.getenv('ADMIN_ADDRESS')
+        from_address= Web3.to_checksum_address(from_address)
         return self.write_data('addToken', from_address, to_address, amount)
     
     def remove_token(self, amount: int, to_address: str):
@@ -229,7 +230,8 @@ class ActionController:
         Calls addToken(to, amount)
         """
         to_address = Web3.to_checksum_address(to_address)
-        from_address=to_address
+        from_address = os.getenv('ADMIN_ADDRESS')
+        from_address= Web3.to_checksum_address(from_address)
         return self.write_data('removeToken', from_address, to_address, amount)
 
     def transfer_token(self, from_address: str, to_address: str, amount: int):
@@ -241,14 +243,16 @@ class ActionController:
         return self.write_data('transferToken', from_address, to_address, amount)
     
     def check_balance(self, address: str):
+        """
+        Calls checkBalance(address)
+        """
         address = Web3.to_checksum_address(address)
         function = getattr(self.contract.functions, 'checkBalance')()
         return function.call({'from': address})
-
-        """return self.read_data('checkBalance', address)"""
     
     def is_registered(self, address: str):
-        """if not Web3.is_address(address):
-            raise ValueError(f"Invalid address: {address}")"""
+        """
+        Calls isRegistered(address)
+        """
         address = Web3.to_checksum_address(address)
         return self.read_data('isRegistered', address)

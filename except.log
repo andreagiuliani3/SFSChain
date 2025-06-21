@@ -309,3 +309,5 @@ Expected 0 argument(s) but received 1 argument(s).
 2025-06-19 11:17:29,284 - ERROR - Error executing transferToken from 0xd3237b2285F4c062304d3135F741D00d8cE4AD1e. Error: dict() argument after ** must be a mapping, not set
 2025-06-19 11:18:49,376 - ERROR - Error executing transferToken from 0xd3237b2285F4c062304d3135F741D00d8cE4AD1e. Error: {'code': -32004, 'message': 'Upfront cost exceeds account balance'}
 2025-06-19 11:20:36,063 - ERROR - Error executing transferToken from 0xd3237b2285F4c062304d3135F741D00d8cE4AD1e. Error: {'code': -32004, 'message': 'Upfront cost exceeds account balance'}
+2025-06-20 23:19:12,366 - ERROR - Error executing addToken from 0xd3237b2285F4c062304d3135F741D00d8cE4AD1e. Error: {'code': -32000, 'message': 'Execution reverted (Cannot mint tokens to yourself)', 'data': '0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001e43616e6e6f74206d696e7420746f6b656e7320746f20796f757273656c660000'}
+2025-06-20 23:27:54,189 - ERROR - Error executing addToken from 0xd3237b2285F4c062304d3135F741D00d8cE4AD1e. Error: name 'gas_estimate' is not defined
