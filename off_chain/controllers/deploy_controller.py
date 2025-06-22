@@ -108,13 +108,14 @@ class DeployController:
 
         contract = self.w3.eth.contract(abi=self.abi, bytecode=self.bytecode)
         gas_estimate = contract.constructor().estimate_gas({'from': account_address})
+        print(gas_estimate)
         try:
             print("[DeployController] Invio transazione di deploy...")
             nonce = self.w3.eth.get_transaction_count(account_address)
             transaction = contract.constructor().build_transaction({
                 'from': account_address,
                 'nonce': nonce,
-                'gas': int(gas_estimate),               
+                'gas': gas_estimate,               
                 'gasPrice': self.w3.to_wei('5', 'gwei')
             })
             signed_txn = self.w3.eth.account.sign_transaction(transaction, private_key="02f55087030340d96a19dd0c0c16e798cb028da49df8747883b1c2afeb1ea8a2")

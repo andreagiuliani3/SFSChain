@@ -164,35 +164,435 @@ class Utils:
         else:
             print(Fore.RED + "Failed to update profile!" + Style.RESET_ALL)
 
-    def make_operation(self, username, user_role):
+    def make_operation_farmer(self, username, user_role):
+        if user_role != "FARMER":
+            print(Fore.RED + "Operation not available for your role." + Style.RESET_ALL)
+            return
+
         balance = self.controller.get_credit_by_username(username)
-        if balance<=0: print(Fore.RED + 'WARNING: YOUR BALANCE IS ZERO OR BELOW!' + Style.RESET_ALL)
-        print(Fore.CYAN + "\nMake an Operation"  + Style.RESET_ALL)
-        while True: 
-                creation_date = date.today().strftime("%Y-%m-%d")
-                if self.controller.check_birthdate_format(creation_date): break
-                else: print(Fore.RED + "\nInvalid birthdate or incorrect format." + Style.RESET_ALL)
-        operation = str(input("Insert the descripion of the Operation: "))
-        co2 = int(input("Inser the Co2 emission of the operation (tons): "))
-        insert_code = self.controller.insert_operation_info(creation_date, username, user_role, operation, co2)
-        soglia = 5
+        if balance <= 0:
+            print(Fore.RED + 'WARNING: YOUR BALANCE IS ZERO OR BELOW!' + Style.RESET_ALL)
+
+        print(Fore.CYAN + "\nAvailable FARMER Operations:" + Style.RESET_ALL)
+
+        operation_factors = {
+            1: ("Soil Preparation", 12),
+            2: ("Sowing", 3),
+            3: ("Fertilization", 7),
+            4: ("Irrigation", 5),
+            5: ("Harvesting", 8)
+        }
+
+        for key, (desc, factor) in operation_factors.items():
+            print(f"{key}. {desc} (reference: {factor} tons CO2 per hectare)")
+
+        # Scelta dell’operazione
+        while True:
+            try:
+                op_choice = int(input("\nSelect the operation (1-5): "))
+                if op_choice in operation_factors:
+                    break
+                else:
+                    print(Fore.RED + "Invalid option. Try again." + Style.RESET_ALL)
+            except ValueError:
+                print(Fore.RED + "Please enter a number." + Style.RESET_ALL)
+
+        operation_desc, co2_per_unit = operation_factors[op_choice]
+
+        # Richiesta numero di unità
+        while True:
+            try:
+                units = int(input(f"Enter number of hectares (or units) for '{operation_desc}': "))
+                if units > 0:
+                    break
+                else:
+                    print(Fore.RED + "Units must be greater than 0." + Style.RESET_ALL)
+            except ValueError:
+                print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
+
+        # Calcolo soglia dinamica
+        threshold = co2_per_unit * units
+
+        # Data operazione
+        creation_date = date.today().strftime("%Y-%m-%d")
+
+        # Emissioni effettive inserite
+        while True:
+            try:
+                co2 = int(input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): "))
+                break
+            except ValueError:
+                print(Fore.RED + "Please enter a valid integer." + Style.RESET_ALL)
+
+        description = f"{operation_desc} ({units} hectares)"
+        # Inserimento nel sistema
+        insert_code = self.controller.insert_operation_info(
+            creation_date, username, user_role, description, co2
+        )
+
+        
+
         address = self.controller.get_public_key_by_username(username)
-        action = "added to "
+        self.act_controller.register_operation(address, operation_desc, description, co2)
+        credit_core = 0
         controller = 0
-        if soglia>co2:
-            credit_core = self.controller.give_credit(username,soglia-co2)
-            self.act_controller.add_token(soglia-co2, address)
-        elif soglia<co2:
-            credit_core = self.controller.delete_credit(username,co2-soglia)
-            self.act_controller.remove_token(co2-soglia, address)
-            if co2>balance:
+
+        if co2 < threshold:
+            delta = threshold - co2
+            credit_core = self.controller.give_credit(username, delta)
+            self.act_controller.add_token(delta, address)
+            action = "added to"
+        elif co2 > threshold:
+            delta = co2 - threshold
+            credit_core = self.controller.delete_credit(username, delta)
+            self.act_controller.remove_token(delta, address)
+            if delta > balance:
                 controller = 1
-            action = "removed from "
-        if insert_code == 0 and credit_core == 0:
-            print(Fore.GREEN + 'Credit has been '+action+' your wallet' + Style.RESET_ALL)
-            if (controller == 1): print(Fore.RED + 'WARNING: YOUR BALANCE IS BELOW ZERO!' + Style.RESET_ALL)
+            action = "removed from"
+        else:
+            print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
+            action = None
+
+        # Output finale
+        if insert_code == 0 and (credit_core == 0 or action is None):
+            if action:
+                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            if controller == 1:
+                print(Fore.RED + 'WARNING: YOUR BALANCE IS BELOW ZERO!' + Style.RESET_ALL)
         elif insert_code == -1 or credit_core == -1:
             print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+    
+    def make_operation_producer(self, username, user_role):
+        if user_role != "PRODUCER":
+            print(Fore.RED + "Operation not available for your role." + Style.RESET_ALL)
+            return
+
+        balance = self.controller.get_credit_by_username(username)
+        if balance <= 0:
+            print(Fore.RED + 'WARNING: YOUR BALANCE IS ZERO OR BELOW!' + Style.RESET_ALL)
+
+        print(Fore.CYAN + "\nAvailable PRODUCER Operations:" + Style.RESET_ALL)
+
+        operation_factors = {
+            1: ("Raw Material Processing", 15),
+            2: ("Product Packaging", 6),
+            3: ("Warehouse Storage", 4),
+            4: ("Quality Control", 2)
+        }
+
+        for key, (desc, factor) in operation_factors.items():
+            print(f"{key}. {desc} (reference: {factor} tons CO2 per unit)")
+
+        # Scelta dell’operazione
+        while True:
+            try:
+                op_choice = int(input("\nSelect the operation (1-4): "))
+                if op_choice in operation_factors:
+                    break
+                else:
+                    print(Fore.RED + "Invalid option. Try again." + Style.RESET_ALL)
+            except ValueError:
+                print(Fore.RED + "Please enter a number." + Style.RESET_ALL)
+
+        operation_desc, co2_per_unit = operation_factors[op_choice]
+
+        # Richiesta numero di unità
+        while True:
+            try:
+                units = int(input(f"Enter number of units (e.g., lots or batches) for '{operation_desc}': "))
+                if units > 0:
+                    break
+                else:
+                    print(Fore.RED + "Units must be greater than 0." + Style.RESET_ALL)
+            except ValueError:
+                print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
+
+        # Calcolo soglia dinamica
+        threshold = co2_per_unit * units
+
+        # Data operazione
+        creation_date = date.today().strftime("%Y-%m-%d")
+
+        # Emissioni effettive inserite
+        while True:
+            try:
+                co2 = int(input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): "))
+                break
+            except ValueError:
+                print(Fore.RED + "Please enter a valid integer." + Style.RESET_ALL)
+        
+        description = f"{operation_desc} ({units} hectares)"
+        # Inserimento nel sistema
+        insert_code = self.controller.insert_operation_info(
+            creation_date, username, user_role, description, co2
+        )
+        
+
+        address = self.controller.get_public_key_by_username(username)
+        self.act_controller.register_operation(address, operation_desc, description, co2)
+        credit_core = 0
+        controller = 0
+
+        if co2 < threshold:
+            delta = threshold - co2
+            credit_core = self.controller.give_credit(username, delta)
+            self.act_controller.add_token(delta, address)
+            action = "added to"
+        elif co2 > threshold:
+            delta = co2 - threshold
+            credit_core = self.controller.delete_credit(username, delta)
+            self.act_controller.remove_token(delta, address)
+            if delta > balance:
+                controller = 1
+            action = "removed from"
+        else:
+            print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
+            action = None
+
+        # Output finale
+        if insert_code == 0 and (credit_core == 0 or action is None):
+            if action:
+                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            if controller == 1:
+                print(Fore.RED + 'WARNING: YOUR BALANCE IS BELOW ZERO!' + Style.RESET_ALL)
+        elif insert_code == -1 or credit_core == -1:
+            print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+    
+    def make_operation_carrier(self, username, user_role):
+        if user_role != "CARRIER":
+            print(Fore.RED + "Operation not available for your role." + Style.RESET_ALL)
+            return
+
+        balance = self.controller.get_credit_by_username(username)
+        if balance <= 0:
+            print(Fore.RED + 'WARNING: YOUR BALANCE IS ZERO OR BELOW!' + Style.RESET_ALL)
+
+        print(Fore.CYAN + "\nAvailable CARRIER Operations:" + Style.RESET_ALL)
+
+        operation_factors = {
+            1: ("Product Loading", 2),
+            2: ("Transport", 10),
+            3: ("Product Unloading", 2)
+        }
+
+        for key, (desc, factor) in operation_factors.items():
+            print(f"{key}. {desc} (reference: {factor} tons CO2 per shipment unit)")
+
+        # Scelta dell’operazione
+        while True:
+            try:
+                op_choice = int(input("\nSelect the operation (1-3): "))
+                if op_choice in operation_factors:
+                    break
+                else:
+                    print(Fore.RED + "Invalid option. Try again." + Style.RESET_ALL)
+            except ValueError:
+                print(Fore.RED + "Please enter a number." + Style.RESET_ALL)
+
+        operation_desc, co2_per_unit = operation_factors[op_choice]
+
+        # Richiesta numero di unità
+        while True:
+            try:
+                units = int(input(f"Enter number of units (e.g., shipments or pallets) for '{operation_desc}': "))
+                if units > 0:
+                    break
+                else:
+                    print(Fore.RED + "Units must be greater than 0." + Style.RESET_ALL)
+            except ValueError:
+                print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
+
+        # Calcolo soglia dinamica
+        threshold = co2_per_unit * units
+
+        # Data operazione
+        creation_date = date.today().strftime("%Y-%m-%d")
+
+        # Emissioni effettive inserite
+        while True:
+            try:
+                co2 = int(input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): "))
+                break
+            except ValueError:
+                print(Fore.RED + "Please enter a valid integer." + Style.RESET_ALL)
+
+        description = f"{operation_desc} ({units} hectares)"
+        # Inserimento nel sistema
+        insert_code = self.controller.insert_operation_info(
+            creation_date, username, user_role, description, co2
+        )
+        
+
+        address = self.controller.get_public_key_by_username(username)
+        self.act_controller.register_operation(address, operation_desc, description, co2)
+        credit_core = 0
+        controller = 0
+
+        if co2 < threshold:
+            delta = threshold - co2
+            credit_core = self.controller.give_credit(username, delta)
+            self.act_controller.add_token(delta, address)
+            action = "added to"
+        elif co2 > threshold:
+            delta = co2 - threshold
+            credit_core = self.controller.delete_credit(username, delta)
+            self.act_controller.remove_token(delta, address)
+            if delta > balance:
+                controller = 1
+            action = "removed from"
+        else:
+            print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
+            action = None
+
+        # Output finale
+        if insert_code == 0 and (credit_core == 0 or action is None):
+            if action:
+                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            if controller == 1:
+                print(Fore.RED + 'WARNING: YOUR BALANCE IS BELOW ZERO!' + Style.RESET_ALL)
+        elif insert_code == -1 or credit_core == -1:
+            print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+
+
+    def make_operation_seller(self, username, user_role):
+        if user_role != "SELLER":
+            print(Fore.RED + "Operation not available for your role." + Style.RESET_ALL)
+            return
+
+        balance = self.controller.get_credit_by_username(username)
+        if balance <= 0:
+            print(Fore.RED + 'WARNING: YOUR BALANCE IS ZERO OR BELOW!' + Style.RESET_ALL)
+
+        print(Fore.CYAN + "\nAvailable SELLER Operations:" + Style.RESET_ALL)
+
+        operation_factors = {
+            1: ("Storage (e.g. fridge/freezer)", 5),
+            2: ("Sales (energy, POS, etc.)", 0.5),
+            3: ("Packaging Disposal", 2)
+        }
+
+        for key, (desc, factor) in operation_factors.items():
+            print(f"{key}. {desc} (reference: {factor} tons CO2 per unit)")
+
+        # Scelta dell’operazione
+        while True:
+            try:
+                op_choice = int(input("\nSelect the operation (1-3): "))
+                if op_choice in operation_factors:
+                    break
+                else:
+                    print(Fore.RED + "Invalid option. Try again." + Style.RESET_ALL)
+            except ValueError:
+                print(Fore.RED + "Please enter a number." + Style.RESET_ALL)
+
+        operation_desc, co2_per_unit = operation_factors[op_choice]
+
+        # Richiesta numero di unità
+        while True:
+            try:
+                units = float(input(f"Enter number of units for '{operation_desc}': "))
+                if units > 0:
+                    break
+                else:
+                    print(Fore.RED + "Units must be greater than 0." + Style.RESET_ALL)
+            except ValueError:
+                print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
+
+        # Calcolo soglia dinamica
+        threshold = co2_per_unit * units
+
+        # Data operazione
+        creation_date = date.today().strftime("%Y-%m-%d")
+
+        # Emissioni effettive inserite
+        while True:
+            try:
+                co2 = float(input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): "))
+                break
+            except ValueError:
+                print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
+
+        description = f"{operation_desc} ({units} hectares)"
+        # Inserimento nel sistema
+        insert_code = self.controller.insert_operation_info(
+            creation_date, username, user_role, description, co2
+        )
+        
+
+        address = self.controller.get_public_key_by_username(username)
+        self.act_controller.register_operation(address, operation_desc, description, co2)
+        credit_core = 0
+        controller = 0
+
+        if co2 < threshold:
+            delta = threshold - co2
+            credit_core = self.controller.give_credit(username, delta)
+            self.act_controller.add_token(delta, address)
+            action = "added to"
+        elif co2 > threshold:
+            delta = co2 - threshold
+            credit_core = self.controller.delete_credit(username, delta)
+            self.act_controller.remove_token(delta, address)
+            balance = self.controller.get_credit_by_username(username)
+            if delta > balance:
+                controller = 1
+            action = "removed from"
+        else:
+            print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
+            action = None
+
+        # Output finale
+        if insert_code == 0 and (credit_core == 0 or action is None):
+            if action:
+                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            if controller == 1:
+                print(Fore.RED + 'WARNING: YOUR BALANCE IS BELOW ZERO!' + Style.RESET_ALL)
+        elif insert_code == -1 or credit_core == -1:
+            print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+
+    def make_green_action(self, username, user_role):
+        print(Fore.CYAN + "\nMake a Green Action" + Style.RESET_ALL)
+
+        # Descrizione azione green
+        green_action = input("Enter the description of the green action you performed: ").strip()
+        if not green_action:
+            print(Fore.RED + "Green action description cannot be empty." + Style.RESET_ALL)
+            return
+
+        # CO2 risparmiata (tonnellate)
+        while True:
+            try:
+                co2_saved = float(input("Enter the amount of CO2 saved (in tons): "))
+                if co2_saved > 0:
+                    break
+                else:
+                    print(Fore.RED + "CO2 saved must be a positive number." + Style.RESET_ALL)
+            except ValueError:
+                print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
+
+        # Data azione
+        creation_date = date.today().strftime("%Y-%m-%d")
+        
+        description = f"Green Action: {green_action}"
+
+        # Inserimento azione green come operazione con emissioni negative (risparmio)
+        insert_code = self.controller.insert_operation_info(
+            creation_date, username, user_role, description, -co2_saved
+        )
+        self.act_controller.register_green_action(description, co2_saved)
+
+        address = self.controller.get_public_key_by_username(username)
+
+        # Aggiunta crediti corrispondenti al risparmio
+        credit_core = self.controller.give_credit(username, co2_saved)
+        self.act_controller.add_token(co2_saved, address)
+
+        if insert_code == 0 and credit_core == 0:
+            print(Fore.GREEN + f"Green action registered. {co2_saved} tons of CO2 saved credited to your wallet." + Style.RESET_ALL)
+        else:
+            print(Fore.RED + "Failed to register the green action." + Style.RESET_ALL)
+
+
 
     def give_credit(self, username, user_role):
         credit = int(input("How many credit you want to give? "))

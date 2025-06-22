@@ -187,6 +187,48 @@ class ActionController:
         except Exception as e:
             log_error(f"Error executing {function_name} from {from_address}. Error: {str(e)}")
             raise e
+        
+    def write_data_admin(self, function_name, from_address, *args, gas_price=None, nonce=None):
+        """
+        Writes data to a contract's function.
+
+        Args:
+            function_name (str): The function name to call on the contract.
+            from_address (str): The Ethereum address to send the transaction from.
+            *args: Arguments required by the function.
+            gas (int): The gas limit for the transaction.
+            gas_price (int): The gas price for the transaction.
+            nonce (int): The nonce for the transaction.
+
+        Returns:
+            The transaction receipt object.
+        """
+        """if not from_address:
+            raise ValueError("Invalid 'from_address' provided. It must be a non-empty string representing an Ethereum address.")"""
+        
+        try:
+            private_key = os.getenv('ADMIN_PRIVATE_KEY')
+            function = getattr(self.contract.functions, function_name)(*args)
+            gas_estimate = function.estimate_gas({'from': from_address})
+           
+            transaction = function.build_transaction({
+            'from': from_address,
+            'nonce': self.w3.eth.get_transaction_count(from_address),
+            'gas': int(gas_estimate),
+            'gasPrice': self.w3.to_wei('0', 'gwei')
+            })
+            
+            signed_txn = self.w3.eth.account.sign_transaction(transaction, private_key=private_key)
+            tx_hash = self.w3.eth.send_raw_transaction(signed_txn.raw_transaction)
+            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            print(f"Transaction {function_name} executed. Tx Hash: {tx_hash.hex()}, Gas: {gas_estimate}, Gas Price: {gas_price or self.w3.eth.gas_price}")
+            log_msg(f"Transaction {function_name} executed. Tx Hash: {tx_hash.hex()}, Gas: {gas_estimate}, Gas Price: {gas_price or self.w3.eth.gas_price}")
+
+            return receipt
+
+        except Exception as e:
+            log_error(f"Error executing {function_name} from {from_address}. Error: {str(e)}")
+            raise e
 
     def listen_to_event(self, event_name, handler, poll_interval=10):
         print(f"[ActionController] Inizio ascolto evento {event_name} con polling ogni {poll_interval}s")
@@ -223,7 +265,7 @@ class ActionController:
         to_address = Web3.to_checksum_address(to_address)
         from_address = os.getenv('ADMIN_ADDRESS')
         from_address= Web3.to_checksum_address(from_address)
-        return self.write_data('addToken', from_address, to_address, amount)
+        return self.write_data_admin('addToken', from_address, to_address, amount)
     
     def remove_token(self, amount: int, to_address: str):
         """
@@ -232,7 +274,7 @@ class ActionController:
         to_address = Web3.to_checksum_address(to_address)
         from_address = os.getenv('ADMIN_ADDRESS')
         from_address= Web3.to_checksum_address(from_address)
-        return self.write_data('removeToken', from_address, to_address, amount)
+        return self.write_data_admin('removeToken', from_address, to_address, amount)
 
     def transfer_token(self, from_address: str, to_address: str, amount: int):
         """
@@ -241,6 +283,20 @@ class ActionController:
         from_address = Web3.to_checksum_address(from_address)
         to_address = Web3.to_checksum_address(to_address)
         return self.write_data('transferToken', from_address, to_address, amount)
+    
+    def register_operation(self, address: str, operationType: str, operationDescription: str, co2emissions: float):
+        """
+        Calls registerOperation(address, operationType, operationDescription, co2)
+        """
+        address = Web3.to_checksum_address(address)
+        return self.write_data('registerOperation', address, operationType, operationDescription, co2emissions)
+    
+    def register_green_action(self, address: str, operationDescription: str, co2saved: float):
+        """
+        Calls registerOperation(address, operationType, operationDescription, co2)
+        """
+        address = Web3.to_checksum_address(address)
+        return self.write_data('registerOperation', address, operationDescription, co2saved)
     
     def check_balance(self, address: str):
         """

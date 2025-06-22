@@ -371,7 +371,8 @@ class CommandLineInterface:
         report_options = {
             1: "Check Balance",
             2: "Give Credit",
-            3: "Make Operation"
+            3: "Make Operation",
+            4: "Make Green Action"
         }
 
         while True:
@@ -391,7 +392,16 @@ class CommandLineInterface:
                     elif choice == 2:
                         self.util.give_credit(username, user_role)
                     elif choice == 3:
-                        self.util.make_operation(username, user_role)
+                        if user_role == 'FARMER':
+                            self.util.make_operation_farmer(username, user_role)   
+                        elif user_role == 'PRODUCER':
+                            self.util.make_operation_producer(username, user_role)
+                        elif user_role == 'CARRIER':
+                            self.util.make_operation_carrier(username, user_role)
+                        elif user_role == 'SELLER':
+                            self.util.make_operation_seller(username, user_role)
+                    elif choice == 4:
+                        self.util.make_green_action(username, user_role)
                 else:
                     print(Fore.RED + "Invalid choice! Please try again." + Style.RESET_ALL)
             except ValueError:
