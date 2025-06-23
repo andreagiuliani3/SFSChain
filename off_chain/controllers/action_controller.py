@@ -284,19 +284,19 @@ class ActionController:
         to_address = Web3.to_checksum_address(to_address)
         return self.write_data('transferToken', from_address, to_address, amount)
     
-    def register_operation(self, address: str, operationType: str, operationDescription: str, co2emissions: float):
+    def register_operation(self, address: str, operationType: str, operationDescription: str, co2emissions: int):
         """
         Calls registerOperation(address, operationType, operationDescription, co2)
         """
         address = Web3.to_checksum_address(address)
         return self.write_data('registerOperation', address, operationType, operationDescription, co2emissions)
     
-    def register_green_action(self, address: str, operationDescription: str, co2saved: float):
+    def register_green_action(self, address: str, operationDescription: str, co2saved: int):
         """
         Calls registerOperation(address, operationType, operationDescription, co2)
         """
         address = Web3.to_checksum_address(address)
-        return self.write_data('registerOperation', address, operationDescription, co2saved)
+        return self.write_data('registerGreenAction', address, operationDescription, co2saved)
     
     def check_balance(self, address: str):
         """

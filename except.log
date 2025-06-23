@@ -314,3 +314,25 @@ Expected 0 argument(s) but received 1 argument(s).
 2025-06-22 17:08:33,522 - ERROR - Error executing addUser from 0xd3237b2285F4c062304d3135F741D00d8cE4AD1e. Error: Could not transact with/call contract function, is contract deployed correctly and chain synced?
 2025-06-22 17:32:20,072 - ERROR - Error executing removeToken from 0x2579257Ceb6F9B7041023a111E076606f72Db7Ce. Error: from field must match key's 0x8630Aef947346b2EeC708ce80987E7f98044b755, but it was 0x2579257Ceb6F9B7041023a111E076606f72Db7Ce
 2025-06-22 17:38:51,418 - ERROR - Error executing addToken from 0x2579257Ceb6F9B7041023a111E076606f72Db7Ce. Error: from field must match key's 0x8630Aef947346b2EeC708ce80987E7f98044b755, but it was 0x2579257Ceb6F9B7041023a111E076606f72Db7Ce
+2025-06-23 10:46:10,912 - ERROR - Error executing registerOperation from 0xd3237b2285F4c062304d3135F741D00d8cE4AD1e. Error: 
+ABI Not Found!
+No element named `registerOperation` with 2 argument(s).
+Provided argument types: (str,float)
+Provided keyword argument types: {}
+
+Tried to find a matching ABI element named `registerOperation`, but encountered the following problems:
+Signature: registerOperation(string,string,uint256), type: function
+Expected 3 argument(s) but received 2 argument(s).
+
+2025-06-23 10:48:05,432 - ERROR - Error executing registerGreenAction from 0xd3237b2285F4c062304d3135F741D00d8cE4AD1e. Error: 
+ABI Not Found!
+Found 1 element(s) named `registerGreenAction` that accept 2 argument(s).
+The provided arguments are not valid.
+Provided argument types: (str,float)
+Provided keyword argument types: {}
+
+Tried to find a matching ABI element named `registerGreenAction`, but encountered the following problems:
+Signature: registerGreenAction(string,uint256), type: function
+Argument 1 value `Green Action: Piantati 50 alberi` is valid.
+Argument 2 value `5.0` is not compatible with type `uint256`.
+

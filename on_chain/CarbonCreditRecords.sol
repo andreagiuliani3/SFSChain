@@ -26,18 +26,18 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
  }
     
     /// @notice Struttura per memorizzare le azioni verdi
-    /* struct GreenAction{
+    struct GreenAction{
         string description;
         uint256 timestamp; 
         uint256 co2Saved;
-    } */
+    } 
 
     address public owner;
     mapping(address => User) public users;
     mapping(address => bool) public authorizedEditors;
     mapping(address => uint256) public balance;
     mapping(address => Operation[]) public operations;
-    /// mapping(address => GreenAction[]) public greenActions;
+    mapping(address => GreenAction[]) public greenActions;
 
 
     uint256 public constant INITIAL_TOKENS_ON_REGISTRATION = 10;
@@ -49,7 +49,7 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
     event TokensAdded(address indexed to, uint256 amount);
     event TokensRemoved(address indexed from, uint256 amount);
     event OperationRegistered(address indexed user, string actionType, string description, uint256 timestamp, uint256 co2emissions);
-    /// event GreenActionRegistered(address indexed user, string description, uint256 timestamp, uint256 co2Saved);
+    event GreenActionRegistered(address indexed user, string description, uint256 timestamp, uint256 co2Saved);
     
     /// @notice Imposta il deployer come owner e lo autorizza come editor
     event Debug(string tag);
@@ -125,7 +125,7 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         emit OperationRegistered(msg.sender, newOperation.actionType, newOperation.description, newOperation.timestamp, newOperation.co2emissions);
     }
 
-    /* function registerGreenAction(string memory description, uint256 co2Saved) public onlyAuthorized {
+    function registerGreenAction(string memory description, uint256 co2Saved) public onlyAuthorized {
         require(users[msg.sender].isRegistered, "User not registered");
         GreenAction memory newGreenAction = GreenAction({
             description: description,
@@ -134,7 +134,7 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         });
         greenActions[msg.sender].push(newGreenAction);
         emit GreenActionRegistered(msg.sender, newGreenAction.description, newGreenAction.timestamp, newGreenAction.co2Saved);
-    } */
+    } 
 
     /// @notice Aggiunge token (crediti) a un account registrato (solo owner o editor autorizzato)
     function addToken(address user, uint256 amount) public onlyAuthorized {

@@ -490,7 +490,7 @@ class Utils:
         # Richiesta numero di unità
         while True:
             try:
-                units = float(input(f"Enter number of units for '{operation_desc}': "))
+                units = int(input(f"Enter number of units for '{operation_desc}': "))
                 if units > 0:
                     break
                 else:
@@ -507,7 +507,7 @@ class Utils:
         # Emissioni effettive inserite
         while True:
             try:
-                co2 = float(input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): "))
+                co2 = int(input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): "))
                 break
             except ValueError:
                 print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
@@ -562,7 +562,7 @@ class Utils:
         # CO2 risparmiata (tonnellate)
         while True:
             try:
-                co2_saved = float(input("Enter the amount of CO2 saved (in tons): "))
+                co2_saved = int(input("Enter the amount of CO2 saved (in tons): "))
                 if co2_saved > 0:
                     break
                 else:
@@ -579,9 +579,10 @@ class Utils:
         insert_code = self.controller.insert_operation_info(
             creation_date, username, user_role, description, -co2_saved
         )
-        self.act_controller.register_green_action(description, co2_saved)
+        
 
         address = self.controller.get_public_key_by_username(username)
+        self.act_controller.register_green_action(address, description, co2_saved)
 
         # Aggiunta crediti corrispondenti al risparmio
         credit_core = self.controller.give_credit(username, co2_saved)
