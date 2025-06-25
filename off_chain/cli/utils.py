@@ -10,7 +10,8 @@ from datetime import date
 from controllers.action_controller import *
 
 from controllers.controller import Controller
-from controllers.action_controller import ActionController
+"""from controllers.action_controller import ActionController"""
+from singleton.action_controller_instance import action_controller_instance as act_controller
 from database.database_operation import DatabaseOperations
 from session.session import Session
 from session.logging import log_error
@@ -51,9 +52,9 @@ class Utils:
         self.session = session
         self.controller = Controller(session)
         self.database_operation = DatabaseOperations()
-        self.act_controller = ActionController() 
-        self.today_date = str(datetime.date.today())
-        self.contract = self.act_controller.load_contract()
+        """self.act_controller = ActionController() """
+        self.today_date = str(date.today())
+        """self.contract = self.act_controller.load_contract()"""
 
     def change_passwd(self, username):
         """
@@ -154,7 +155,7 @@ class Utils:
 
         # Blockchain update (se necessario)
         public_key = self.controller.get_public_key_by_username(username)
-        self.act_controller.update_user(name, lastname, user_role, from_address=public_key)
+        act_controller.update_user(name, lastname, user_role, from_address=public_key)
 
         # DB update
         result = self.controller.update_user_profile(username, name, lastname, birthday, phone)
@@ -233,19 +234,19 @@ class Utils:
         
 
         address = self.controller.get_public_key_by_username(username)
-        self.act_controller.register_operation(address, operation_desc, description, co2)
+        act_controller.register_operation(address, operation_desc, description, co2)
         credit_core = 0
         controller = 0
 
         if co2 < threshold:
             delta = threshold - co2
             credit_core = self.controller.give_credit(username, delta)
-            self.act_controller.add_token(delta, address)
+            act_controller.add_token(delta, address)
             action = "added to"
         elif co2 > threshold:
             delta = co2 - threshold
             credit_core = self.controller.delete_credit(username, delta)
-            self.act_controller.remove_token(delta, address)
+            act_controller.remove_token(delta, address)
             if delta > balance:
                 controller = 1
             action = "removed from"
@@ -329,19 +330,19 @@ class Utils:
         
 
         address = self.controller.get_public_key_by_username(username)
-        self.act_controller.register_operation(address, operation_desc, description, co2)
+        act_controller.register_operation(address, operation_desc, description, co2)
         credit_core = 0
         controller = 0
 
         if co2 < threshold:
             delta = threshold - co2
             credit_core = self.controller.give_credit(username, delta)
-            self.act_controller.add_token(delta, address)
+            act_controller.add_token(delta, address)
             action = "added to"
         elif co2 > threshold:
             delta = co2 - threshold
             credit_core = self.controller.delete_credit(username, delta)
-            self.act_controller.remove_token(delta, address)
+            act_controller.remove_token(delta, address)
             if delta > balance:
                 controller = 1
             action = "removed from"
@@ -424,19 +425,19 @@ class Utils:
         
 
         address = self.controller.get_public_key_by_username(username)
-        self.act_controller.register_operation(address, operation_desc, description, co2)
+        act_controller.register_operation(address, operation_desc, description, co2)
         credit_core = 0
         controller = 0
 
         if co2 < threshold:
             delta = threshold - co2
             credit_core = self.controller.give_credit(username, delta)
-            self.act_controller.add_token(delta, address)
+            act_controller.add_token(delta, address)
             action = "added to"
         elif co2 > threshold:
             delta = co2 - threshold
             credit_core = self.controller.delete_credit(username, delta)
-            self.act_controller.remove_token(delta, address)
+            act_controller.remove_token(delta, address)
             if delta > balance:
                 controller = 1
             action = "removed from"
@@ -520,19 +521,19 @@ class Utils:
         
 
         address = self.controller.get_public_key_by_username(username)
-        self.act_controller.register_operation(address, operation_desc, description, co2)
+        act_controller.register_operation(address, operation_desc, description, co2)
         credit_core = 0
         controller = 0
 
         if co2 < threshold:
             delta = threshold - co2
             credit_core = self.controller.give_credit(username, delta)
-            self.act_controller.add_token(delta, address)
+            act_controller.add_token(delta, address)
             action = "added to"
         elif co2 > threshold:
             delta = co2 - threshold
             credit_core = self.controller.delete_credit(username, delta)
-            self.act_controller.remove_token(delta, address)
+            act_controller.remove_token(delta, address)
             balance = self.controller.get_credit_by_username(username)
             if delta > balance:
                 controller = 1
@@ -582,11 +583,11 @@ class Utils:
         
 
         address = self.controller.get_public_key_by_username(username)
-        self.act_controller.register_green_action(address, description, co2_saved)
+        act_controller.register_green_action(address, description, co2_saved)
 
         # Aggiunta crediti corrispondenti al risparmio
         credit_core = self.controller.give_credit(username, co2_saved)
-        self.act_controller.add_token(co2_saved, address)
+        act_controller.add_token(co2_saved, address)
 
         if insert_code == 0 and credit_core == 0:
             print(Fore.GREEN + f"Green action registered. {co2_saved} tons of CO2 saved credited to your wallet." + Style.RESET_ALL)
@@ -616,7 +617,7 @@ class Utils:
                 addres_credit = self.controller.get_public_key_by_username(username_credit)
                 print("1: "+addres_user)
                 print("2: "+addres_credit)
-                self.act_controller.transfer_token(addres_user, addres_credit, credit) 
+                act_controller.transfer_token(addres_user, addres_credit, credit) 
                 if operation_code == 0 and credit_code == 0 and credit_user_code == 0:
                     print(Fore.GREEN + 'Your credit is succesfully give to: ', username_credit + Style.RESET_ALL)
                 elif operation_code == 0 or credit_code == -1 or credit_user_code == -1:

@@ -1,21 +1,7 @@
 import os
 from colorama import Fore, Style, init
-from web3 import Web3
 from solcx import compile_standard, get_installed_solc_versions, install_solc
-import random
-from web3.middleware import ExtraDataToPOAMiddleware
-from eth_abi.codec import ABICodec
-from eth_utils import decode_hex
-from eth_abi.exceptions import DecodingError
-from eth_abi.registry import registry
-from dotenv import load_dotenv
-import json
 from config.web3_provider import get_web3
-
-
-
-
-
 
 init(convert=True)
 

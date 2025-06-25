@@ -599,3 +599,29 @@
 2025-06-23 10:53:54,568 - INFO - Contract loaded at 0xF1Fc96ee12972a80e7Ea9e37FF821B3B2EB16385
 2025-06-23 10:54:28,581 - INFO - Transaction registerGreenAction executed. Tx Hash: 235e3f5c7763789681c210904aacc8f762fdb53dc8a3ae433dcc1f5998d930bb, Gas: 144540, Gas Price: 0
 2025-06-23 10:54:30,471 - INFO - Transaction addToken executed. Tx Hash: eea9554f7bf8e229bc8344ffc851e4b4998590d90b74926c4a49d350deb24a47, Gas: 40728, Gas Price: 0
+2025-06-24 12:32:55,628 - INFO - Contract loaded at 0xF1Fc96ee12972a80e7Ea9e37FF821B3B2EB16385
+2025-06-24 12:32:55,643 - INFO - Contract loaded at 0xF1Fc96ee12972a80e7Ea9e37FF821B3B2EB16385
+2025-06-24 12:33:28,789 - INFO - Transaction registerGreenAction executed. Tx Hash: 8d82caef1b24991c2d2d38e547c7e6fe41ac9ea38655a67ad7c269553acbd959, Gas: 105173, Gas Price: 0
+2025-06-24 12:33:30,857 - INFO - Transaction addToken executed. Tx Hash: abfab4dcf82c6ae3e767549daf76df5fc06c646e0e69095a615e3543003c4381, Gas: 40728, Gas Price: 0
+2025-06-24 12:33:48,793 - INFO - Transaction registerOperation executed. Tx Hash: 3b1ae8fea6540ac5310708632bd286ffc16b0062a4c372a254747b6fd0807b45, Gas: 147452, Gas Price: 0
+2025-06-24 12:33:50,863 - INFO - Transaction addToken executed. Tx Hash: 7ef9deb415fa620bc135e9d3b10895347710994875bc8cf01f3683ed0a1d73ee, Gas: 40728, Gas Price: 0
+2025-06-24 16:31:53,467 - INFO - Contract loaded at 0x29458FFcd4e45213052882651fC660eafaf5C65E
+2025-06-24 16:31:53,485 - INFO - Contract loaded at 0x29458FFcd4e45213052882651fC660eafaf5C65E
+2025-06-24 16:32:21,052 - INFO - Contract loaded at 0x29458FFcd4e45213052882651fC660eafaf5C65E
+2025-06-24 16:36:05,417 - INFO - Transaction addUser executed. Tx Hash: bf70d90852514b71fffdbe8379c99fa0f519df4dad02e0922b30e9664838d794, Gas: 193821, Gas Price: 5000000000
+2025-06-24 16:36:41,117 - INFO - Transaction registerOperation executed. Tx Hash: 3834df90f2c617f600682ed460c3dd33febec02e9805d0aa40276aec988433b8, Gas: 147548, Gas Price: 5000000000
+2025-06-24 16:36:42,482 - INFO - Transaction removeToken executed. Tx Hash: dd635fab00baa4fb9237b395ded6c6444e779929e179813df6bdb8e4f8b10d54, Gas: 40663, Gas Price: 5000000000
+2025-06-24 17:19:21,351 - INFO - Contract loaded at 0x3F9AAA80C45C907cBe4584f34DB3F535E22f0BB2
+2025-06-24 17:21:21,987 - INFO - Contract loaded at 0x3F9AAA80C45C907cBe4584f34DB3F535E22f0BB2
+2025-06-24 17:22:29,070 - INFO - Contract loaded at 0x3F9AAA80C45C907cBe4584f34DB3F535E22f0BB2
+2025-06-24 18:16:01,204 - INFO - Contract loaded at 0x2d87a847fd19174c5ed4A279a723B15601df8eA5
+2025-06-24 18:16:58,704 - INFO - Contract loaded at 0x2d87a847fd19174c5ed4A279a723B15601df8eA5
+2025-06-24 18:17:45,079 - INFO - Transaction addUser executed. Tx Hash: 456fca34b96c4e79a31fe3f53f5176b80a1a6e97983b23d6b4e5ac31e5dbc0a7, Gas: 193821, Gas Price: 5000000000
+2025-06-24 18:18:00,998 - INFO - Transaction registerOperation executed. Tx Hash: 48ace988c75444463ec8e1b912dda2ecace6b4010021b652bc977fea70013051, Gas: 147692, Gas Price: 5000000000
+2025-06-24 18:19:31,757 - INFO - Contract loaded at 0x2d87a847fd19174c5ed4A279a723B15601df8eA5
+2025-06-24 18:20:43,935 - INFO - Contract loaded at 0x2d87a847fd19174c5ed4A279a723B15601df8eA5
+2025-06-24 18:22:02,328 - INFO - Transaction registerOperation executed. Tx Hash: eb7cc8574c8d3cd52c5cf897c47d2f6c0df329240d8057fed7ccb52ab0fb5bc0, Gas: 130448, Gas Price: 0
+2025-06-24 18:22:04,176 - INFO - Transaction removeToken executed. Tx Hash: c695ca58b933318fd457fc0d6db677ebe7722a307240c894a73e4228baa17ea5, Gas: 40663, Gas Price: 0
+2025-06-24 22:46:36,985 - INFO - Contract loaded at 0x2d87a847fd19174c5ed4A279a723B15601df8eA5
+2025-06-24 23:01:44,925 - INFO - Contract loaded at 0x2d87a847fd19174c5ed4A279a723B15601df8eA5
+2025-06-24 23:09:19,308 - INFO - Contract loaded at 0x2d87a847fd19174c5ed4A279a723B15601df8eA5

@@ -1,20 +1,15 @@
 import getpass
-from ipaddress import ip_address
 import re
- 
 from eth_utils import *
 from eth_keys import *
 from controllers.controller import Controller
-from controllers.action_controller import ActionController
+from singleton.action_controller_instance import action_controller_instance as act_controller
 from controllers.deploy_controller import DeployController
 from session.session import Session
 from database.database_operation import DatabaseOperations
 from cli.utils import Utils
-from colorama import Fore, Style, init
-from datetime import date
-import os
-import json
-from web3 import Web3
+from colorama import Fore, Style
+
 
 
 class CommandLineInterface:
@@ -23,15 +18,11 @@ class CommandLineInterface:
 
         self.session = session
         self.controller = Controller(session)
-        self.act_controller = ActionController()
         self.deploy_controller = DeployController()
         self.ops = DatabaseOperations()
         self.util = Utils(session)
-        # Esegui il deploy del contratto se non è stato effettuato precedentemente
-        if not self.act_controller.load_contract():
-            self.act_controller.deploy_and_initialize('../../on_chain/CarbonCreditRecords.sol')
-        
 
+        
         self.menu = {
             1: 'Register New Account',
             2: 'Log In',
@@ -108,7 +99,7 @@ class CommandLineInterface:
                     attempts += 1
                     if attempts >= 3:
                         print(Fore.RED + "Maximum retry attempts reached. Redeploying..." + Style.RESET_ALL)
-                        self.act_controller.deploy_and_initialize('../../on_chain/CarbonCredit.sol')
+                        act_controller.deploy_and_initialize('../../on_chain/CarbonCredit.sol')
                         attempts = 0  # Reset attempts after deployment
                 else:
                     try:
@@ -237,7 +228,7 @@ class CommandLineInterface:
             else: print(Fore.RED + "Invalid phone number format.\n" + Style.RESET_ALL)
         carbon_credit = 5
         from_address_users = self.controller.get_public_key_by_username(username)
-        self.act_controller.add_user(name, lastname, user_role, from_address_users)
+        act_controller.add_user(name, lastname, user_role, from_address_users)
         insert_code = self.controller.insert_user_info(username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit)
         if insert_code == 0:
             print(Fore.GREEN + 'Information saved correctly!' + Style.RESET_ALL)
@@ -346,7 +337,7 @@ class CommandLineInterface:
 
             choice = input("Choose an option: ").strip()
             if choice == "":
-                break  # Uscita dal submenu
+                break  
 
             try:
                 choice = int(choice)
@@ -459,7 +450,7 @@ class CommandLineInterface:
     def view_balance(self, username):
         balance = self.controller.get_credit_by_username(username)
         address = self.controller.get_public_key_by_username(username)
-        balance2 = self.act_controller.check_balance(address)
+        balance2 = act_controller.check_balance(address)
         print(Fore.CYAN + "\nBalance:\n" + Style.RESET_ALL)
         print("Your balance is: ", balance)
         print("Your balance is: ", balance2)
@@ -474,12 +465,12 @@ class CommandLineInterface:
         reportview = self.controller.get_report_by_username(username)
         if not reportview:
             print("No reports found for this user.")
-            return  # Uscita immediata se non ci sono report
+            return  
 
-        available_dates = list({report.get_creation_date() for report in reportview})  # set per eliminare i duplicati, list per ordinabilità
-        available_dates.sort()  # opzionale: ordina le date
+        available_dates = list({report.get_creation_date() for report in reportview})  
+        available_dates.sort()  
 
-        print("\nAvailable report:")
+        print("\nAvailable reports:")
         for date in available_dates:
             print("- " + date)
 
@@ -502,9 +493,12 @@ class CommandLineInterface:
 
         reportdateview = self.controller.get_report_by_date(username, user_input_date)
         if reportdateview:
+            if len(reportdateview) > 1:
+                print("There are more than one report for this date:")
             for report in reportdateview:
                 print("Date: ", report.get_operation_date())
-                print("Operation: ", report.get_operations())
+                print("Operations: ", report.get_operations())
+                print("Total Emissions (co2): ", report.get_co2())
         else:
             print("Report not found.")
 

@@ -125,6 +125,10 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         emit OperationRegistered(msg.sender, newOperation.actionType, newOperation.description, newOperation.timestamp, newOperation.co2emissions);
     }
 
+    function getOperations(address user) external view returns (Operation[] memory) {
+        return operations[user];
+    }
+
     function registerGreenAction(string memory description, uint256 co2Saved) public onlyAuthorized {
         require(users[msg.sender].isRegistered, "User not registered");
         GreenAction memory newGreenAction = GreenAction({

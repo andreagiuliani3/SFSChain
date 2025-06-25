@@ -8,7 +8,6 @@ import sqlite3
 import os
 import hashlib
 import base64
-
 from cryptography.fernet import Fernet
 from colorama import Fore, Style, init
 from config import config
@@ -16,6 +15,14 @@ from models.users import User
 from models.operation import Operation
 from models.credentials import Credentials
 from models.report import Report
+from collections import defaultdict
+import datetime
+from singleton.action_controller_instance import action_controller_instance as act_controller 
+from types import SimpleNamespace
+
+
+
+
 
 
 class DatabaseOperations:
@@ -32,6 +39,8 @@ class DatabaseOperations:
         self.conn = sqlite3.connect(config.config["db_path"])
         self.cur = self.conn.cursor()
         self._create_new_table()
+    
+
 
         self.n_param = 2
         self.r_param = 8
@@ -420,61 +429,58 @@ class DatabaseOperations:
         
         return None  # Return None if the user does not exist
     
+    
+
     def get_operation_by_username_grouped_by_date(self, username, start_date, end_date):
-        """
-        Retrieves all operations performed by a user, grouped by date, within a given date range.
+     
+        user_address = self.get_public_key_by_username(username)
 
-        Args:
-            username (str): The username of the user whose operations are being requested.
-            start_date (str): The start date of the range (inclusive), in 'YYYY-MM-DD' format.
-            end_date (str): The end date of the range (inclusive), in 'YYYY-MM-DD' format.
+        raw_ops = act_controller.contract.functions.getOperations(user_address).call()
 
-        Returns:
-            list[Operation]: A list of Operation objects grouped by date, or an empty list if no operations exist.
-        """
-        operation_data = self.cur.execute("""
-            SELECT MIN(id_operation) AS id_operation, creation_date, username, role, co2
-                GROUP_CONCAT(operation, ', ') AS operations
-            FROM Operations
-            WHERE username = ?
-            AND creation_date BETWEEN ? AND ?
-            GROUP BY creation_date, username, role
-            ORDER BY creation_date
-        """, (username, start_date, end_date)).fetchall()
+        grouped = defaultdict(list)
 
-        if operation_data:
-            return [Operation(*row) for row in operation_data]
-        
-        return []
+        for op in raw_ops:
+            action_type, description, timestamp, co2 = op
+            ts = datetime.datetime.fromtimestamp(timestamp)
+            date_str = ts.strftime("%Y-%m-%d")
+
+            if start_date <= date_str <= end_date:
+                grouped[date_str].append({
+                    "description": f"[{action_type}] {description}",
+                    "co2": co2
+                })
+
+        results = []
+        for date_str, ops in grouped.items():
+            combined_desc = " | ".join(op["description"] for op in ops)
+            total_co2 = sum(op["co2"] for op in ops)
+
+            results.append(SimpleNamespace(
+                creation_date=date_str,
+                username=username,
+                role="FARMER",  
+                operations=combined_desc,
+                co2=total_co2
+            ))
+
+        return results
+
 
     
     def insert_report(self, creation_date, username, start_date, end_date):
-        """
-        Inserisce nel database un report per ogni giorno in cui l'utente ha effettuato operazioni
-        tra start_date ed end_date. Ogni report contiene le operazioni concatenate di quel giorno.
-
-        Args:
-            creation_date (str): Data di creazione del report.
-            username (str): Nome utente.
-            start_date (str): Data di inizio intervallo.
-            end_date (str): Data di fine intervallo.
-
-        Returns:
-            int: 0 se l'inserimento ha avuto successo, -1 in caso di errore.
-        """
         try:
             operations = self.get_operation_by_username_grouped_by_date(username, start_date, end_date)
-            
+
             if not operations:
                 print(f"Nessuna operazione trovata per l'utente {username} tra {start_date} e {end_date}.")
                 return 0
-            
+
             for op in operations:
                 self.cur.execute("""
                     INSERT INTO Reports (creation_date, operation_date, username, role, operations, co2)
                     VALUES (?, ?, ?, ?, ?, ?)
-                """, (creation_date, op.creation_date, op.username, op.role, op.operations))
-            
+                """, (creation_date, op.creation_date, op.username, op.role, op.operations, op.co2))
+
             self.conn.commit()
             return 0
 
@@ -491,7 +497,7 @@ class DatabaseOperations:
         
     def get_report_by_username(self, username):
         report_data = self.cur.execute("""
-                                SELECT id_report, creation_date, operation_date, username, role, operations
+                                SELECT id_report, creation_date, operation_date, username, role, operations, co2
                                 FROM Reports
                                 WHERE username = ?
                                 """, (username,)).fetchall()  # fetchall() restituisce tutte le righe

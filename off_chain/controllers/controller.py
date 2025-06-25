@@ -96,7 +96,7 @@ class Controller:
     
     def insert_report_info(self, creation_date: str, start_date: str, end_date: str, username: str):
         report_code = self.db_ops.insert_report(creation_date, username, start_date, end_date)
-
+       
         if report_code == 0:
             report = self.db_ops.get_report_by_username(username)
             self.session.set_report(report)

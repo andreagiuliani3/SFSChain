@@ -1,13 +1,14 @@
 import os
 import time
 import json
-from pathlib import Path
 from colorama import Fore, Style, init
 from controllers.deploy_controller import DeployController
 from session.logging import log_msg, log_error
 from web3 import Web3
 from config.web3_provider import get_web3
 import getpass
+from collections import defaultdict
+from datetime import datetime
 
 
 init(convert=True)
@@ -229,6 +230,43 @@ class ActionController:
         except Exception as e:
             log_error(f"Error executing {function_name} from {from_address}. Error: {str(e)}")
             raise e
+        
+
+
+    def get_operation_by_username_grouped_by_date(self, username, start_date, end_date):
+        # Recupera tutte le operazioni raw (es. dallo smart contract o DB)
+        all_ops = self.get_all_operations_for_user(username)  # definisci questa funzione tu
+        
+        # Converti date in timestamp per il confronto
+        start_ts = int(datetime.strptime(start_date, '%Y-%m-%d').timestamp())
+        end_ts = int(datetime.strptime(end_date, '%Y-%m-%d').timestamp()) + 86399  # fine giornata
+        
+        # Filtra per data
+        filtered_ops = [op for op in all_ops if start_ts <= op['timestamp'] <= end_ts]
+        
+        # Raggruppa per giorno (stringa YYYY-MM-DD)
+        grouped_ops = defaultdict(list)
+        for op in filtered_ops:
+            day = datetime.utcfromtimestamp(op['timestamp']).strftime('%Y-%m-%d')
+            grouped_ops[day].append(op)
+        
+        # Prepara la lista dei risultati raggruppati
+        result = []
+        for day, ops_list in grouped_ops.items():
+            operations_str = "; ".join(f"{o['actionType']} - {o['description']} (CO2: {o['co2emissions']})" for o in ops_list)
+            total_co2 = sum(o['co2emissions'] for o in ops_list)
+            # Ricava ruolo utente se disponibile, o None
+            role = self.get_user_role(username)  # definisci questa funzione
+            
+            result.append({
+                'creation_date': day,
+                'username': username,
+                'role': role,
+                'operations': operations_str,
+                'co2': total_co2
+            })
+        return result
+
 
     def listen_to_event(self, event_name, handler, poll_interval=10):
         print(f"[ActionController] Inizio ascolto evento {event_name} con polling ogni {poll_interval}s")
