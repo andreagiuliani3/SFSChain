@@ -1,21 +1,13 @@
-import datetime
-import math
 import re
 import click
 import getpass
 from colorama import Fore, Style, init
-from rich.console import Console
-from rich.table import Table
 from datetime import date
 from controllers.action_controller import *
-
 from controllers.controller import Controller
-"""from controllers.action_controller import ActionController"""
 from singleton.action_controller_instance import action_controller_instance as act_controller
 from database.database_operation import DatabaseOperations
 from session.session import Session
-from session.logging import log_error
-
 
 
 class Utils:
@@ -52,9 +44,8 @@ class Utils:
         self.session = session
         self.controller = Controller(session)
         self.database_operation = DatabaseOperations()
-        """self.act_controller = ActionController() """
         self.today_date = str(date.today())
-        """self.contract = self.act_controller.load_contract()"""
+        
 
     def change_passwd(self, username):
         """
@@ -97,41 +88,7 @@ class Utils:
                 print("Okay\n")
             break
             
-    """def update_profile(self, username, user_role):
         
-        Updates the profile information of a user.
-
-        Parameters:
-            username (str): The username of the user whose profile is being updated.
-            role (str): The role of the user (e.g., "Patient", "Caregiver", "Medic").
-
-        Returns:
-            None
-        
-     
-        print(Fore.CYAN + "\nUpdate profile function"  + Style.RESET_ALL)
-        us = self.controller.get_user_by_username(username)
-        us.set_name(click.prompt('Name ', default=us.get_name()))
-        us.set_lastname(click.prompt('Lastname ', default=us.get_lastname()))
-        while True:
-                birthday = click.prompt('Date of birth (YYYY-MM-DD) ', default=us.get_birthday())
-                if self.controller.check_birthdate_format(birthday): 
-                    us.set_birthday(birthday)
-                    break
-                else: print(Fore.RED + "Invalid birthdate or incorrect format." + Style.RESET_ALL)
-        while True:
-                phone = click.prompt('Phone ', default=us.get_phone())
-                if self.controller.check_phone_number_format(phone): 
-                    us.set_phone(phone)
-                    break
-                else: print(Fore.RED + "Invalid phone number format."  + Style.RESET_ALL)
-        name = us.get_name()
-        lastname = us.get_lastname()
-        public_key = self.controller.get_public_key_by_username(username)
-        self.act_controller.update_user(name, lastname, user_role, from_address=public_key)
-
-        us.save()"""
-    
     def update_profile(self, username, user_role):
     
         print(Fore.CYAN + "\nUpdate profile function" + Style.RESET_ALL)
@@ -169,8 +126,9 @@ class Utils:
         if user_role != "FARMER":
             print(Fore.RED + "Operation not available for your role." + Style.RESET_ALL)
             return
-
-        balance = self.controller.get_credit_by_username(username)
+        address = self.controller.get_public_key_by_username(username)
+        balance = act_controller.check_balance(address)
+        print(f"Your balance is {balance}")
         if balance <= 0:
             print(Fore.RED + 'WARNING: YOUR BALANCE IS ZERO OR BELOW!' + Style.RESET_ALL)
 
@@ -214,9 +172,6 @@ class Utils:
         # Calcolo soglia dinamica
         threshold = co2_per_unit * units
 
-        # Data operazione
-        creation_date = date.today().strftime("%Y-%m-%d")
-
         # Emissioni effettive inserite
         while True:
             try:
@@ -226,42 +181,26 @@ class Utils:
                 print(Fore.RED + "Please enter a valid integer." + Style.RESET_ALL)
 
         description = f"{operation_desc} ({units} hectares)"
-        # Inserimento nel sistema
-        insert_code = self.controller.insert_operation_info(
-            creation_date, username, user_role, description, co2
-        )
-
-        
-
         address = self.controller.get_public_key_by_username(username)
-        act_controller.register_operation(address, operation_desc, description, co2)
-        credit_core = 0
-        controller = 0
-
-        if co2 < threshold:
-            delta = threshold - co2
-            credit_core = self.controller.give_credit(username, delta)
-            act_controller.add_token(delta, address)
-            action = "added to"
-        elif co2 > threshold:
-            delta = co2 - threshold
-            credit_core = self.controller.delete_credit(username, delta)
-            act_controller.remove_token(delta, address)
-            if delta > balance:
-                controller = 1
-            action = "removed from"
+        
+        delta = threshold - co2
+        if balance - abs(delta) >= 0:
+            act_controller.register_operation(address, operation_desc, description, co2)
+            if delta > 0:
+                act_controller.add_token(delta, address)
+                action = "added to"
+                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            elif delta < 0: 
+                act_controller.remove_token(-delta, address)
+                action = "removed from"
+                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            else:
+                print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
+                action = None
         else:
-            print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
+            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {balance - abs(delta)} MORE CREDITS" + Style.RESET_ALL)
             action = None
 
-        # Output finale
-        if insert_code == 0 and (credit_core == 0 or action is None):
-            if action:
-                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
-            if controller == 1:
-                print(Fore.RED + 'WARNING: YOUR BALANCE IS BELOW ZERO!' + Style.RESET_ALL)
-        elif insert_code == -1 or credit_core == -1:
-            print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
     
     def make_operation_producer(self, username, user_role):
         if user_role != "PRODUCER":
@@ -311,9 +250,6 @@ class Utils:
         # Calcolo soglia dinamica
         threshold = co2_per_unit * units
 
-        # Data operazione
-        creation_date = date.today().strftime("%Y-%m-%d")
-
         # Emissioni effettive inserite
         while True:
             try:
@@ -323,41 +259,28 @@ class Utils:
                 print(Fore.RED + "Please enter a valid integer." + Style.RESET_ALL)
         
         description = f"{operation_desc} ({units} hectares)"
-        # Inserimento nel sistema
-        insert_code = self.controller.insert_operation_info(
-            creation_date, username, user_role, description, co2
-        )
+        
         
 
         address = self.controller.get_public_key_by_username(username)
-        act_controller.register_operation(address, operation_desc, description, co2)
-        credit_core = 0
-        controller = 0
-
-        if co2 < threshold:
-            delta = threshold - co2
-            credit_core = self.controller.give_credit(username, delta)
-            act_controller.add_token(delta, address)
-            action = "added to"
-        elif co2 > threshold:
-            delta = co2 - threshold
-            credit_core = self.controller.delete_credit(username, delta)
-            act_controller.remove_token(delta, address)
-            if delta > balance:
-                controller = 1
-            action = "removed from"
+        delta = threshold - co2
+        if balance - abs(delta) >= 0:
+            act_controller.register_operation(address, operation_desc, description, co2)
+            if delta > 0:
+                act_controller.add_token(delta, address)
+                action = "added to"
+                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            elif delta < 0: 
+                act_controller.remove_token(-delta, address)
+                action = "removed from"
+                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            else:
+                print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
+                action = None
         else:
-            print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
+            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {balance - abs(delta)} MORE CREDITS" + Style.RESET_ALL)
             action = None
 
-        # Output finale
-        if insert_code == 0 and (credit_core == 0 or action is None):
-            if action:
-                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
-            if controller == 1:
-                print(Fore.RED + 'WARNING: YOUR BALANCE IS BELOW ZERO!' + Style.RESET_ALL)
-        elif insert_code == -1 or credit_core == -1:
-            print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
     
     def make_operation_carrier(self, username, user_role):
         if user_role != "CARRIER":
@@ -403,13 +326,7 @@ class Utils:
             except ValueError:
                 print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
 
-        # Calcolo soglia dinamica
         threshold = co2_per_unit * units
-
-        # Data operazione
-        creation_date = date.today().strftime("%Y-%m-%d")
-
-        # Emissioni effettive inserite
         while True:
             try:
                 co2 = int(input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): "))
@@ -418,41 +335,28 @@ class Utils:
                 print(Fore.RED + "Please enter a valid integer." + Style.RESET_ALL)
 
         description = f"{operation_desc} ({units} hectares)"
-        # Inserimento nel sistema
-        insert_code = self.controller.insert_operation_info(
-            creation_date, username, user_role, description, co2
-        )
+       
         
 
         address = self.controller.get_public_key_by_username(username)
-        act_controller.register_operation(address, operation_desc, description, co2)
-        credit_core = 0
-        controller = 0
-
-        if co2 < threshold:
-            delta = threshold - co2
-            credit_core = self.controller.give_credit(username, delta)
-            act_controller.add_token(delta, address)
-            action = "added to"
-        elif co2 > threshold:
-            delta = co2 - threshold
-            credit_core = self.controller.delete_credit(username, delta)
-            act_controller.remove_token(delta, address)
-            if delta > balance:
-                controller = 1
-            action = "removed from"
+        delta = threshold - co2
+        if balance - abs(delta) >= 0:
+            act_controller.register_operation(address, operation_desc, description, co2)
+            if delta > 0:
+                act_controller.add_token(delta, address)
+                action = "added to"
+                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            elif delta < 0: 
+                act_controller.remove_token(-delta, address)
+                action = "removed from"
+                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            else:
+                print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
+                action = None
         else:
-            print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
+            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {balance - abs(delta)} MORE CREDITS" + Style.RESET_ALL)
             action = None
 
-        # Output finale
-        if insert_code == 0 and (credit_core == 0 or action is None):
-            if action:
-                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
-            if controller == 1:
-                print(Fore.RED + 'WARNING: YOUR BALANCE IS BELOW ZERO!' + Style.RESET_ALL)
-        elif insert_code == -1 or credit_core == -1:
-            print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
 
 
     def make_operation_seller(self, username, user_role):
@@ -475,7 +379,6 @@ class Utils:
         for key, (desc, factor) in operation_factors.items():
             print(f"{key}. {desc} (reference: {factor} tons CO2 per unit)")
 
-        # Scelta dell’operazione
         while True:
             try:
                 op_choice = int(input("\nSelect the operation (1-3): "))
@@ -488,7 +391,6 @@ class Utils:
 
         operation_desc, co2_per_unit = operation_factors[op_choice]
 
-        # Richiesta numero di unità
         while True:
             try:
                 units = int(input(f"Enter number of units for '{operation_desc}': "))
@@ -499,13 +401,9 @@ class Utils:
             except ValueError:
                 print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
 
-        # Calcolo soglia dinamica
+        
         threshold = co2_per_unit * units
-
-        # Data operazione
-        creation_date = date.today().strftime("%Y-%m-%d")
-
-        # Emissioni effettive inserite
+ 
         while True:
             try:
                 co2 = int(input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): "))
@@ -514,42 +412,26 @@ class Utils:
                 print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
 
         description = f"{operation_desc} ({units} hectares)"
-        # Inserimento nel sistema
-        insert_code = self.controller.insert_operation_info(
-            creation_date, username, user_role, description, co2
-        )
         
-
         address = self.controller.get_public_key_by_username(username)
-        act_controller.register_operation(address, operation_desc, description, co2)
-        credit_core = 0
-        controller = 0
-
-        if co2 < threshold:
-            delta = threshold - co2
-            credit_core = self.controller.give_credit(username, delta)
-            act_controller.add_token(delta, address)
-            action = "added to"
-        elif co2 > threshold:
-            delta = co2 - threshold
-            credit_core = self.controller.delete_credit(username, delta)
-            act_controller.remove_token(delta, address)
-            balance = self.controller.get_credit_by_username(username)
-            if delta > balance:
-                controller = 1
-            action = "removed from"
+        delta = threshold - co2
+        if balance - abs(delta) >= 0:
+            act_controller.register_operation(address, operation_desc, description, co2)
+            if delta > 0:
+                act_controller.add_token(delta, address)
+                action = "added to"
+                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            elif delta < 0: 
+                act_controller.remove_token(-delta, address)
+                action = "removed from"
+                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            else:
+                print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
+                action = None
         else:
-            print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
+            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {balance - abs(delta)} MORE CREDITS" + Style.RESET_ALL)
             action = None
 
-        # Output finale
-        if insert_code == 0 and (credit_core == 0 or action is None):
-            if action:
-                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
-            if controller == 1:
-                print(Fore.RED + 'WARNING: YOUR BALANCE IS BELOW ZERO!' + Style.RESET_ALL)
-        elif insert_code == -1 or credit_core == -1:
-            print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
 
     def make_green_action(self, username, user_role):
         print(Fore.CYAN + "\nMake a Green Action" + Style.RESET_ALL)
@@ -630,7 +512,9 @@ class Utils:
             print("\nYou can't give you don't have enough balance!")
     
     def create_report(self, username):
-        creation_date = date.today()
+        creation_date = datetime.today()
+        creation_date = creation_date.strftime('%Y-%m-%d %H:%M:%S')
+
         while True:
             start_date = input("Insert the first day of the operation you want to insert in the report (YYYY-MM-DD): ")
             if self.controller.check_birthdate_format(start_date): break

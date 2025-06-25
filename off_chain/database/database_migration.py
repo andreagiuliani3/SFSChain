@@ -37,16 +37,16 @@ cur.execute('''CREATE TABLE Operations(
             id_operation INTEGER PRIMARY KEY AUTOINCREMENT,
             creation_date DATE NOT NULL,
             username TEXT NOT NULL,
-            role TEXT CHECK(role IN ('FARMER', 'CARRIER', 'PRODUCER', 'SELLER')) NOT NULL
-            operation TEXT NOT NULL
+            role TEXT CHECK(role IN ('FARMER', 'CARRIER', 'PRODUCER', 'SELLER')) NOT NULL,
+            operation TEXT NOT NULL,
             co2 INTEGER NOT NULL
             );''')
 cur.execute('''CREATE TABLE Reports(
             id_report INTEGER PRIMARY KEY AUTOINCREMENT,
-            creation_date DATE NOT NULL
-            operation_date DATE NOT NULL
+            creation_date TEXT NOT NULL,
+            operation_date DATE NOT NULL,
             username TEXT NOT NULL,
-            role TEXT CHECK(role IN ('FARMER', 'CARRIER', 'PRODUCER', 'SELLER')) NOT NULL
+            role TEXT CHECK(role IN ('FARMER', 'CARRIER', 'PRODUCER', 'SELLER')) NOT NULL,
             operations TEXT NOT NULL,
             co2 INTEGER NOT NULL
             );''')

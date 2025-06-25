@@ -84,7 +84,7 @@ class DatabaseOperations:
                     );''')
         self.cur.execute('''CREATE TABLE IF NOT EXISTS Reports(
                     id_report INTEGER PRIMARY KEY AUTOINCREMENT,
-                    creation_date DATE NOT NULL,
+                    creation_date TEXT NOT NULL,
                     operation_date DATE NOT NULL,
                     username TEXT NOT NULL,
                     role TEXT CHECK(role IN ('FARMER', 'CARRIER', 'PRODUCER', 'SELLER')) NOT NULL,
@@ -431,11 +431,12 @@ class DatabaseOperations:
     
     
 
-    def get_operation_by_username_grouped_by_date(self, username, start_date, end_date):
-     
+    def get_all_actions_grouped_by_date(self, username, start_date, end_date):
         user_address = self.get_public_key_by_username(username)
 
         raw_ops = act_controller.contract.functions.getOperations(user_address).call()
+        
+        raw_green = act_controller.contract.functions.getGreenActions(user_address).call()
 
         grouped = defaultdict(list)
 
@@ -447,7 +448,18 @@ class DatabaseOperations:
             if start_date <= date_str <= end_date:
                 grouped[date_str].append({
                     "description": f"[{action_type}] {description}",
-                    "co2": co2
+                    "co2": co2  
+                })
+
+        for gop in raw_green:
+            description, timestamp, co2 = gop
+            ts = datetime.datetime.fromtimestamp(timestamp)
+            date_str = ts.strftime("%Y-%m-%d")
+
+            if start_date <= date_str <= end_date:
+                grouped[date_str].append({
+                    "description": f"[GREEN] {description}",
+                    "co2": -co2  
                 })
 
         results = []
@@ -458,18 +470,17 @@ class DatabaseOperations:
             results.append(SimpleNamespace(
                 creation_date=date_str,
                 username=username,
-                role="FARMER",  
+                role=self.get_role_by_username(username),  
                 operations=combined_desc,
                 co2=total_co2
             ))
 
         return results
-
-
     
+        
     def insert_report(self, creation_date, username, start_date, end_date):
         try:
-            operations = self.get_operation_by_username_grouped_by_date(username, start_date, end_date)
+            operations = self.get_all_actions_grouped_by_date(username, start_date, end_date)
 
             if not operations:
                 print(f"Nessuna operazione trovata per l'utente {username} tra {start_date} e {end_date}.")
@@ -480,7 +491,7 @@ class DatabaseOperations:
                     INSERT INTO Reports (creation_date, operation_date, username, role, operations, co2)
                     VALUES (?, ?, ?, ?, ?, ?)
                 """, (creation_date, op.creation_date, op.username, op.role, op.operations, op.co2))
-
+            
             self.conn.commit()
             return 0
 

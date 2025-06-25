@@ -129,6 +129,8 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         return operations[user];
     }
 
+    
+
     function registerGreenAction(string memory description, uint256 co2Saved) public onlyAuthorized {
         require(users[msg.sender].isRegistered, "User not registered");
         GreenAction memory newGreenAction = GreenAction({
@@ -139,6 +141,10 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         greenActions[msg.sender].push(newGreenAction);
         emit GreenActionRegistered(msg.sender, newGreenAction.description, newGreenAction.timestamp, newGreenAction.co2Saved);
     } 
+
+    function getGreenActions(address user) external view returns (GreenAction[] memory) {
+        return greenActions[user];
+    }
 
     /// @notice Aggiunge token (crediti) a un account registrato (solo owner o editor autorizzato)
     function addToken(address user, uint256 amount) public onlyAuthorized {

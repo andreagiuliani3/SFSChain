@@ -457,7 +457,7 @@ class CommandLineInterface:
         
     def view_user_report(self, username):
         """
-        Visualize the user report and allow the user to select a specific report based on the date.
+        Visualize the user report and allow the user to select a specific report by number.
 
         Args:
             username (str): The username of the logged-in user.
@@ -465,36 +465,36 @@ class CommandLineInterface:
         reportview = self.controller.get_report_by_username(username)
         if not reportview:
             print("No reports found for this user.")
-            return  
+            return
 
-        available_dates = list({report.get_creation_date() for report in reportview})  
-        available_dates.sort()  
+        available_dates = sorted({report.get_creation_date() for report in reportview})
 
         print("\nAvailable reports:")
-        for date in available_dates:
-            print("- " + date)
+        for idx, date in enumerate(available_dates, start=1):
+            print(f"{idx}. {date}")
 
         while True:
-            user_input_date = input("Insert the date of the report you want to see (YYYY-MM-DD): ").strip()
-            if user_input_date == "":
+            user_input = input("Enter the number of the report you want to see (or press Enter to go back): ").strip()
+            if user_input == "":
                 print("Returning to previous menu.")
                 return
 
-            if not self.controller.check_birthdate_format(user_input_date):
-                print(Fore.RED + "\nInvalid date or incorrect format." + Style.RESET_ALL)
+            if not user_input.isdigit():
+                print(Fore.RED + "\nPlease enter a valid number." + Style.RESET_ALL)
                 continue
 
-            if user_input_date not in available_dates:
-                print(Fore.RED + "\nNo report found for the date entered." + Style.RESET_ALL)
-                continue
+            selection = int(user_input)
+            if 1 <= selection <= len(available_dates):
+                selected_date = available_dates[selection - 1]
+                print(f"\nDisplaying the report for {selected_date}...\n")
+                break
+            else:
+                print(Fore.RED + "\nInvalid selection. Please choose a number from the list." + Style.RESET_ALL)
 
-            print(f"Displaying the report for {user_input_date}...")
-            break
-
-        reportdateview = self.controller.get_report_by_date(username, user_input_date)
+        reportdateview = self.controller.get_report_by_date(username, selected_date)
         if reportdateview:
             if len(reportdateview) > 1:
-                print("There are more than one report for this date:")
+                print("There is more than one report for this date:\n")
             for report in reportdateview:
                 print("Date: ", report.get_operation_date())
                 print("Operations: ", report.get_operations())

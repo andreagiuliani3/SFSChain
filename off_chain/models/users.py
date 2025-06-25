@@ -1,5 +1,4 @@
-from colorama import Fore, Style, init
-from models.model_base import Model
+from colorama import Fore, Style
 
 class User:
     def __init__(self, username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit):
