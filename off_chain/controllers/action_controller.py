@@ -9,6 +9,7 @@ from config.web3_provider import get_web3
 import getpass
 from collections import defaultdict
 from datetime import datetime
+from dotenv import load_dotenv
 
 
 init(convert=True)
@@ -20,63 +21,49 @@ class ActionController:
     """
 
     def __init__(self):
+        
         self.w3 = get_web3()
+        load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../../', '.env'))   
         self.contract = None
 
 
     def load_contract(self):
         if os.path.exists("on_chain/contract_address.txt"):
          try:
-            print("[ActionController] Caricamento indirizzo contratto da file...")
             address = open('on_chain/contract_address.txt').read().strip()
-            print(f"[ActionController] Indirizzo contratto: {address}")
-
-            # Verifica che esista un contratto a quell'indirizzo
             code = self.w3.eth.get_code(address)
             if not code or code == b'\x00' or code.hex() == '0x':
-                print(Fore.RED + "[ActionController] Nessun contratto trovato a questo indirizzo." + Style.RESET_ALL)
-                return False  # Fa partire un nuovo deploy
-
-            print("[ActionController] Caricamento ABI contratto da file...")
+                return False  
             abi = json.load(open('on_chain/contract_abi.json'))
-            print(f"[ActionController] ABI caricata, {len(abi)} elementi")
-
             self.contract = self.w3.eth.contract(address=address, abi=abi)
-            log_msg(f"Contract loaded at {address}")
             return True
 
          except Exception as e:
             log_error(f"Errore caricamento contratto: {e}")
-            print(Fore.RED + f"[ActionController] Errore caricamento contratto: {e}" + Style.RESET_ALL)
+            print(Fore.RED + f"Errore caricamento contratto: {e}" + Style.RESET_ALL)
             self.contract = None
-            return False  # Fa partire un nuovo deploy
+            return False 
         else:
-            print("[ActionController] Il contratto non è stato ancora deployato.")
+            print("The contract has not yet been deployed.")
         return False
 
 
     def deploy_and_initialize(self, source_path='../../on_chain/CarbonCreditRecords.sol'):
-        print("[ActionController] Inizio deploy e inizializzazione contratto...")
+        print("Starting deployment and contract initialization...")
         controller = DeployController()
 
         path = os.path.abspath(os.path.join(os.path.dirname(__file__), source_path))
-        print(f"[ActionController] Percorso assoluto contratto: {path}")
 
         try:
             controller.compile_and_deploy(path)
             self.contract = controller.contract
-            print(f"[ActionController] Contract deployed at {self.contract.address}")
-
             os.makedirs('on_chain', exist_ok=True)
             with open('on_chain/contract_address.txt', 'w') as f:
                 f.write(self.contract.address)
             with open('on_chain/contract_abi.json', 'w') as f:
-                
                 json.dump(self.contract.abi, f)
-
-            print("[ActionController] Indirizzo e ABI salvati su file.")
         except Exception as e:
-            print(f"[ActionController] Deploy fallito: {e}")
+            print(f"Deploy fallito: {e}")
 
     def read_data(self, function_name, *args):
         """
@@ -116,35 +103,25 @@ class ActionController:
             raise ValueError("Invalid 'from_address' provided. It must be a non-empty string representing an Ethereum address.")"""
         
         try:
-                private_key = "02f55087030340d96a19dd0c0c16e798cb028da49df8747883b1c2afeb1ea8a2"
+                private_key = os.getenv('ADMIN_PRIVATE_KEY')
                 function = getattr(self.contract.functions, function_name)(*args)
-                gas_estimate = function.estimate_gas({'from': "0x2579257Ceb6F9B7041023a111E076606f72Db7Ce"})
+                gas_estimate = function.estimate_gas({'from': os.getenv('ADMIN_ADDRESS')})
            
                 transaction = function.build_transaction({
-                'from': "0x2579257Ceb6F9B7041023a111E076606f72Db7Ce",
-                'nonce': self.w3.eth.get_transaction_count("0x2579257Ceb6F9B7041023a111E076606f72Db7Ce"),
+                'from': os.getenv('ADMIN_ADDRESS'),
+                'nonce': self.w3.eth.get_transaction_count(os.getenv('ADMIN_ADDRESS')),
                 'gas': int(gas_estimate),
-                'gasPrice': self.w3.to_wei('5', 'gwei')
+                'gasPrice': self.w3.eth.gas_price
                 })
                 
                 signed_txn = self.w3.eth.account.sign_transaction(transaction, private_key=private_key)
                 tx_hash = self.w3.eth.send_raw_transaction(signed_txn.raw_transaction)
                 receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
-                print(f"Transaction {function_name} executed. Tx Hash: {tx_hash.hex()}, Gas: {gas_estimate}, Gas Price: {gas_price or self.w3.eth.gas_price}")
-                log_msg(f"Transaction {function_name} executed. Tx Hash: {tx_hash.hex()}, Gas: {gas_estimate}, Gas Price: {gas_price or self.w3.eth.gas_price}")
                 
-                user_data = self.contract.functions.users(from_address).call()
-                print(f"Name: {user_data[0]}")
-                print(f"Last Name: {user_data[1]}")
-                print(f"Role: {user_data[2]}")
-                print(f"Is Registered: {user_data[3]}")
-                is_authorized = self.contract.functions.authorizedEditors(from_address).call()
-                print(f"Is authorized editor? {is_authorized}")
-
                 return receipt
 
         except Exception as e:
-                log_error(f"Error executing {function_name} from {from_address}. Error: {str(e)}")
+                log_error(f"Error executing registration. Error: {str(e)}")
                 raise e
         
     def write_data(self, function_name, from_address, *args, gas_price=None, nonce=None):
@@ -166,7 +143,7 @@ class ActionController:
             raise ValueError("Invalid 'from_address' provided. It must be a non-empty string representing an Ethereum address.")"""
         
         try:
-            private_key = getpass.getpass('Inserisci la chiave privata per confermare la transazione: ')
+            private_key = getpass.getpass('Insert private key to confirm the transaction: ')
             function = getattr(self.contract.functions, function_name)(*args)
             gas_estimate = function.estimate_gas({'from': from_address})
            
@@ -174,14 +151,12 @@ class ActionController:
             'from': from_address,
             'nonce': self.w3.eth.get_transaction_count(from_address),
             'gas': int(gas_estimate),
-            'gasPrice': self.w3.to_wei('0', 'gwei')
+            'gasPrice': self.w3.eth.gas_price
             })
             
             signed_txn = self.w3.eth.account.sign_transaction(transaction, private_key=private_key)
             tx_hash = self.w3.eth.send_raw_transaction(signed_txn.raw_transaction)
             receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
-            print(f"Transaction {function_name} executed. Tx Hash: {tx_hash.hex()}, Gas: {gas_estimate}, Gas Price: {gas_price or self.w3.eth.gas_price}")
-            log_msg(f"Transaction {function_name} executed. Tx Hash: {tx_hash.hex()}, Gas: {gas_estimate}, Gas Price: {gas_price or self.w3.eth.gas_price}")
 
             return receipt
 
@@ -216,14 +191,12 @@ class ActionController:
             'from': from_address,
             'nonce': self.w3.eth.get_transaction_count(from_address),
             'gas': int(gas_estimate),
-            'gasPrice': self.w3.to_wei('0', 'gwei')
+            'gasPrice': self.w3.eth.gas_price
             })
             
             signed_txn = self.w3.eth.account.sign_transaction(transaction, private_key=private_key)
             tx_hash = self.w3.eth.send_raw_transaction(signed_txn.raw_transaction)
             receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
-            print(f"Transaction {function_name} executed. Tx Hash: {tx_hash.hex()}, Gas: {gas_estimate}, Gas Price: {gas_price or self.w3.eth.gas_price}")
-            log_msg(f"Transaction {function_name} executed. Tx Hash: {tx_hash.hex()}, Gas: {gas_estimate}, Gas Price: {gas_price or self.w3.eth.gas_price}")
 
             return receipt
 

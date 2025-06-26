@@ -6,13 +6,10 @@ and displays the menu to the user.
 
 from cli.cli import CommandLineInterface
 from session.session import Session
-from dotenv import load_dotenv
-import os
-
 
 if __name__ == "__main__":
+    
     new_session = Session()
-    cli = CommandLineInterface(new_session)
-    load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+    cli = CommandLineInterface(new_session)  
     while True:
         cli.print_menu()

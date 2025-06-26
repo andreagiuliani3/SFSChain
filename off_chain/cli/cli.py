@@ -5,11 +5,9 @@ from eth_keys import *
 from controllers.controller import Controller
 from singleton.action_controller_instance import action_controller_instance as act_controller
 from controllers.deploy_controller import DeployController
-from session.session import Session
 from database.database_operation import DatabaseOperations
 from cli.utils import Utils
 from colorama import Fore, Style
-
 
 
 class CommandLineInterface:
@@ -452,8 +450,8 @@ class CommandLineInterface:
         address = self.controller.get_public_key_by_username(username)
         balance2 = act_controller.check_balance(address)
         print(Fore.CYAN + "\nBalance:\n" + Style.RESET_ALL)
-        print("Your balance is: ", balance)
-        print("Your balance is: ", balance2)
+        print(f"Your balance is: {balance} credits ")
+        print(f"Your balance is: {balance2} credits ")
         
     def view_user_report(self, username):
         """

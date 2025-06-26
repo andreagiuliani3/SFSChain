@@ -490,26 +490,20 @@ class Utils:
                 else: print("You can't give a credit to yourself!")
             proceed = input("Do you want to proceed with the operation? (Y/n): ")
             if proceed.strip().upper() == "Y":
-                creation_date = date.today()
-                operation = " Credit give to: "+username_credit
-                credit_code = self.controller.give_credit(username_credit, credit)
-                credit_user_code = self.controller.delete_credit(username, credit)
-                operation_code = self.controller.insert_operation_info(creation_date, username, user_role, operation, co2 = 0)
                 addres_user = self.controller.get_public_key_by_username(username)
                 addres_credit = self.controller.get_public_key_by_username(username_credit)
-                print("1: "+addres_user)
-                print("2: "+addres_credit)
-                act_controller.transfer_token(addres_user, addres_credit, credit) 
-                if operation_code == 0 and credit_code == 0 and credit_user_code == 0:
-                    print(Fore.GREEN + 'Your credit is succesfully give to: ', username_credit + Style.RESET_ALL)
-                elif operation_code == 0 or credit_code == -1 or credit_user_code == -1:
+                print(f"{Fore.YELLOW}You will give credits to the address: {addres_credit}{Style.RESET_ALL}")
+                receipt = act_controller.transfer_token(addres_user, addres_credit, credit) 
+                if receipt.status == 1:
+                    print(Fore.GREEN + 'Your credits has been successfully given to: ', username_credit + Style.RESET_ALL)
+                else:
                     print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
             elif proceed.strip().upper() == "N":
                     print(Fore.RED + "Operation Cancelled." + Style.RESET_ALL)
             else:
                     print(Fore.RED + 'Wrong input, please insert Y or N!' + Style.RESET_ALL)
         else:
-            print("\nYou can't give you don't have enough balance!")
+            print(Fore.RED + 'Action denied: insufficient balance.' + Style.RESET_ALL)
     
     def create_report(self, username):
         creation_date = datetime.today()

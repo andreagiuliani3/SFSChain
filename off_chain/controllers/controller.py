@@ -80,17 +80,6 @@ class Controller:
         if insertion_code == 0:
             user = self.db_ops.get_user_by_username(username)
             self.session.set_user(user)
-            print(Fore.GREEN + 'DONE' + Style.RESET_ALL)
- 
-        return insertion_code
-    
-    def insert_operation_info(self, creation_date: str, username: str, user_role: str, operation: str, co2: int):
-        insertion_code = self.db_ops.insert_operation(creation_date, username, user_role, operation, co2)
- 
-        if insertion_code == 0:
-            operation = self.db_ops.get_operation_by_username(operation, creation_date)
-            self.session.set_operation(operation)
-            print(Fore.GREEN + 'Your operation has been registered' + Style.RESET_ALL)
  
         return insertion_code
     
@@ -276,12 +265,6 @@ class Controller:
     def get_credit_by_username(self, username):
         return self.db_ops.get_credit_by_username(username)
    
-    def give_credit(self, username, credit):
-        return self.db_ops.give_credit(username, credit)
-    
-    def delete_credit(self,username, credit):
-        return self.db_ops.delete_credit(username, credit)
-    
     def get_report_by_username(self, username):
         return self.db_ops.get_report_by_username(username)
     

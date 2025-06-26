@@ -295,61 +295,6 @@ class DatabaseOperations:
             print(f"Errore di integrità: {e}")
             return -1
     
-    def delete_credit(self,username, credit):
-        user_credit = self.get_credit_by_username(username)-credit
-        try:
-            
-            self.cur.execute("""
-                UPDATE Users
-                SET carbon_credit = ?
-                WHERE username = ?""", (user_credit, username))
-            
-            self.conn.commit()
-            return 0
-        except Exception as e:
-            self.conn.rollback()
-            print("Errore durante il trasferimento crediti:", e)
-            return -1
-
-    def give_credit(self, username, credit):
-        user_credit = self.get_credit_by_username(username) + credit
-        try:
-
-            self.cur.execute("""
-                UPDATE Users
-                SET carbon_credit = ?
-                WHERE username = ?""", (user_credit, username))
-            
-            self.conn.commit()
-            return 0
-        except Exception as e:
-            self.conn.rollback()
-            print("Errore durante il trasferimento crediti:", e)
-            return -1
-
-    def insert_operation(self, creation_date, username, role, operation, co2):
-        """
-        Inserts a new operation record into the Operations table in the database.
-
-        Returns:
-            int: 0 if the insertion was successful, -1 if an error occurred.
-        """
-        try:
-            self.cur.execute("""
-                INSERT INTO Operations (creation_date, username, role, operation, co2)
-                VALUES (?, ?, ?, ?, ?)""",
-                (creation_date, username, role, operation, co2)
-            )
-            self.conn.commit()
-            return 0
-        except sqlite3.IntegrityError as e:
-            self.conn.rollback()
-            print("Errore di integrità durante insert_operation:", e)
-            return -1
-        except Exception as e:
-            self.conn.rollback()
-            print("Errore generale durante insert_operation:", e)
-            return -1
 
     def get_information_for_credit(self):
         # Esegui la query per ottenere carbon_credit, username, email
