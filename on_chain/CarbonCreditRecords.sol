@@ -6,10 +6,10 @@ import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC2
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
 /// @title MyToken with User Registry and Fungible Tokens + Permit
-/// @notice Gestisce registrazione utenti e token ERC20 fungibili con supporto Permit e trasferimenti tra account
+/// @notice Manages user registration and fungible ERC20 tokens with Permit support and transfers between accounts
 contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
 
-    /// @notice Struttura per memorizzare le informazioni degli utenti
+    /// @notice Structure for storing user information
     struct User {
         string name;
         string lastName;
@@ -17,7 +17,7 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         bool isRegistered;
     }
 
-    /// @notice Struttura per memorizzare le operazioni 
+    /// @notice Structure for storing operations performed by users 
     struct Operation{
         string actionType; 
         string description;
@@ -25,7 +25,7 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         uint256 co2emissions;
  }
     
-    /// @notice Struttura per memorizzare le azioni verdi
+    /// @notice Structure for storing green actions performed by users
     struct GreenAction{
         string description;
         uint256 timestamp; 
@@ -51,9 +51,10 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
     event OperationRegistered(address indexed user, string actionType, string description, uint256 timestamp, uint256 co2emissions);
     event GreenActionRegistered(address indexed user, string description, uint256 timestamp, uint256 co2Saved);
     
-    /// @notice Imposta il deployer come owner e lo autorizza come editor
+
     event Debug(string tag);
 
+    /// @notice Constructor: Initializes the ERC20 token and sets the owner.
     constructor() ERC20("CarbonCredit", "CCT") ERC20Permit("CarbonCredit") {
         owner = msg.sender;
         authorizedEditors[msg.sender] = true;
@@ -61,13 +62,13 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
 
     // Modifiers
 
-    /// @dev Limita l'accesso al solo proprietario
+    /// @dev Limits access to the owner of the contract
     modifier onlyOwner() {
         require(msg.sender == owner, "Caller is not the owner");
         _;
     }
 
-    /// @dev Limita l'accesso al proprietario o editor autorizzato
+    /// @dev Limits access to the owner or an authorized editor
     modifier onlyAuthorized() {
         require(msg.sender == owner || authorizedEditors[msg.sender], "Access denied: caller is not the owner or an authorized editor.");
         _;
@@ -75,26 +76,26 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
 
     // Owner management
 
-    /// @notice Trasferisce la proprietà a un nuovo indirizzo
+    /// @notice Transfer ownership of the contract to a new address
     function transferOwnership(address newOwner) external onlyOwner {
         require(newOwner != address(0), "New owner cannot be zero address");
         emit OwnershipTransferred(owner, newOwner);
         owner = newOwner;
     }
 
-    /// @notice Autorizza un nuovo editor
+    /// @notice Authorizes a new editor
     function authorizeEditor(address editor) external onlyOwner {
         authorizedEditors[editor] = true;
     }
 
-    /// @notice Rimuove l'autorizzazione a un editor
+    /// @notice Revokes an editor's authorization
     function revokeEditor(address editor) external onlyOwner {
         authorizedEditors[editor] = false;
     }
 
     // Functional methods
 
-    /// @notice Registra un nuovo utente e assegna token iniziali
+    /// @notice Registers a new user with initial tokens (only owner)
     function addUser(address userAddress, string memory name, string memory lastName, string memory userRole ) public onlyOwner() {
         require(!users[userAddress].isRegistered, "User already registered");
         users[userAddress] = User(name, lastName, userRole, true);
@@ -104,7 +105,7 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         emit TokensAdded(userAddress, INITIAL_TOKENS_ON_REGISTRATION);
     }
 
-    /// @notice Aggiorna i dati di un utente registrato
+    /// @notice Updates user information (only owner or authorized editor)
     function updateUser(string memory name, string memory lastName, string memory userRole) public onlyAuthorized {
         require(users[msg.sender].isRegistered, "User not registered");
         users[msg.sender].name = name;
@@ -113,6 +114,7 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         emit UserUpdated(msg.sender, name, lastName, userRole);
     }
 
+    /// @notice Registers an operation performed by the user, updating token balance accordingly (only owner or authorized editor)
     function registerOperation(string memory actionType, string memory description, int256 delta, uint256 co2emissions) public onlyAuthorized {
         require(users[msg.sender].isRegistered, "User not registered");
 
@@ -136,10 +138,12 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         emit OperationRegistered(msg.sender, actionType, description, block.timestamp, co2emissions);
     }
 
+    /// @notice Retrieves the operations performed by a user
     function getOperations(address user) external view returns (Operation[] memory) {
         return operations[user];
     }
 
+    /// @notice Registers a green action performed by the user, updating token balance accordingly (only owner or authorized editor)
     function registerGreenAction(string memory description, uint256 co2Saved) public onlyAuthorized {
     require(users[msg.sender].isRegistered, "User not registered");
 
@@ -157,11 +161,12 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
     emit TokensAdded(msg.sender, creditsToAdd);
     }
 
+    /// @notice Retrieves the green actions performed by a user
     function getGreenActions(address user) external view returns (GreenAction[] memory) {
         return greenActions[user];
     }
 
-    /// @notice Aggiunge token (crediti) a un account registrato (solo owner o editor autorizzato)
+    /// @notice Adds tokens (credits) to a registered account (only owner or authorized editor)
     function addToken(address user, uint256 amount) public onlyAuthorized {
         require(users[user].isRegistered, "Recipient not registered");
         require(user != msg.sender, "Cannot mint tokens to yourself"); /// Evita che un utente possa chiamare la funzione per aggiungere token a se stesso
@@ -169,7 +174,7 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         emit TokensAdded(user, amount);
     }
 
-    /// @notice Rimuove token (crediti) da un account registrato (solo owner o editor autorizzato)
+    /// @notice Removes tokens (burns) from a registered account (only owner or authorized editor)
     function removeToken(address from, uint256 amount) public onlyAuthorized {
         require(users[from].isRegistered, "Account not registered");
         require(from != msg.sender, "Cannot burn your own tokens");
@@ -177,7 +182,7 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         emit TokensRemoved(from, amount);
     }
 
-    /// @notice Trasferisce token tra account registrati
+    /// @notice Transfers tokens from the sender to another registered user
     function transferToken(address to, uint256 amount) public onlyAuthorized returns (bool) {
         require(users[msg.sender].isRegistered, "Sender not registered");
         require(users[to].isRegistered, "Receiver not registered");
@@ -186,11 +191,12 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         return success;
     }
 
-    
+    /// @notice Checks the balance of the sender (only owner or authorized editor)
     function checkBalance() public onlyAuthorized view returns (uint) {
          return balanceOf(msg.sender);
     }
 
+    /// @notice Checks if the sender is registered (only owner or authorized editor)
     function isRegistered() public onlyAuthorized() view returns (bool) {
         return users[msg.sender].isRegistered;
     }
