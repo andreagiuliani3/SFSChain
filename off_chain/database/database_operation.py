@@ -12,17 +12,12 @@ from cryptography.fernet import Fernet
 from colorama import Fore, Style, init
 from config import config
 from models.users import User
-from models.operation import Operation
 from models.credentials import Credentials
 from models.report import Report
 from collections import defaultdict
 import datetime
 from singleton.action_controller_instance import action_controller_instance as act_controller 
 from types import SimpleNamespace
-
-
-
-
 
 
 class DatabaseOperations:
@@ -39,14 +34,10 @@ class DatabaseOperations:
         self.conn = sqlite3.connect(config.config["db_path"])
         self.cur = self.conn.cursor()
         self._create_new_table()
-    
-
-
         self.n_param = 2
         self.r_param = 8
         self.p_param = 1
         self.dklen_param = 64
-
         self.today_date = datetime.date.today().strftime('%Y-%m-%d')
 
     def _create_new_table(self):
@@ -71,16 +62,7 @@ class DatabaseOperations:
                     email TEXT NOT NULL,
                     phone TEXT,
                     company_name TEXT,
-                    carbon_credit INTEGER,
                     FOREIGN KEY(username) REFERENCES Credentials(username)
-                    );''')
-        self.cur.execute('''CREATE TABLE IF NOT EXISTS Operations(
-                    id_operation INTEGER PRIMARY KEY AUTOINCREMENT,
-                    creation_date DATE NOT NULL,
-                    username TEXT NOT NULL,
-                    role TEXT CHECK(role IN ('FARMER', 'CARRIER', 'PRODUCER', 'SELLER')) NOT NULL,
-                    operation TEXT NOT NULL,
-                    co2 INTEGER NOT NULL
                     );''')
         self.cur.execute('''CREATE TABLE IF NOT EXISTS Reports(
                     id_report INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -93,38 +75,58 @@ class DatabaseOperations:
                     );''')
         self.conn.commit()
     
-    def register_creds(self, username, hash_password, role, public_key, private_key):
+    
+    def register_user(self, username, name, lastname, user_role, birthday, email, phone, company_name, hash_password, public_key, private_key):
         """
-        Registers new user credentials in the database.
+        Registers a new user into the Users and Credentials table in the database.
         
         Args:
-            username (str): Username of the user.
-            hash_password (str): Password to be hashed and stored.
-            role (str): Role of the user (e.g., FARMER, SELLER, CARRIER, PRODUCER).
-            public_key (str): Public key for user encryption.
-            private_key (str): Private key for user encryption.
+            username : The unique username for the user.
+            name : The first name of the user.
+            lastname : The last name of the user.
+            user_role : The role of the user (e.g., 'FARMER', 'CARRIER', 'PRODUCER', 'SELLER').
+            birthday : The birth date of the user in YYYY-MM-DD format.
+            email : The email address of the user.
+            hash_password : The password of the user, which will be hashed before storage.
+            public_key : The public key of the user, used for encryption and identification.
+            private_key : The private key of the user, which will be encrypted before storage.
+            company_name : The name of the company associated with the user, if applicable.
+            phone : The phone number of the user.
+
         Returns:
-            int: 0 if registration is successful, -1 if username already exists.
+            int: 0 if the insertion was successful, -1 if an integrity error occurred (e.g., duplicate username).
         """
         try:
-            if self.check_username(username) == 0:
-                obfuscated_private_k = self.encrypt_private_k(private_key, hash_password)
-                hashed_passwd = self.hash_function(hash_password)
-                self.cur.execute("""
-                                INSERT INTO Credentials
-                                (username, hash_password, role, public_key, private_key) VALUES (?, ?, ?, ?, ?)""",
-                                (
-                                    username,
-                                    hashed_passwd,
-                                    role,
-                                    public_key,
-                                    obfuscated_private_k
-                                ))
-                self.conn.commit()
-                return 0
-            else:
-                return -1  # Username already exists
-        except sqlite3.IntegrityError:
+            if self.check_username(username) != 0:
+                return -2  
+            obfuscated_private_k = self.encrypt_private_k(private_key, hash_password)
+            hashed_passwd = self.hash_function(hash_password)
+            self.conn.execute("BEGIN")
+
+            self.cur.execute("""
+                            INSERT INTO Credentials
+                            (username, hash_password, role, public_key, private_key) VALUES (?, ?, ?, ?, ?)""",
+                            (
+                                username,
+                                hashed_passwd,
+                                user_role,
+                                public_key,
+                                obfuscated_private_k
+                            ))
+
+            self.cur.execute("""
+                            INSERT INTO Users
+                            (username, name, lastname, user_role, birthday, email, phone, company_name)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?) """,
+                            (
+                                username, name, lastname, user_role, birthday, email, phone, company_name
+                            ))
+            
+            self.conn.commit()
+            return 0
+        except sqlite3.IntegrityError as e:
+            print(f"Integrity error: {e}")
+            self.conn.rollback()
             return -1
     
     def update_user_profile(self, username, name, lastname, birthday, phone):
@@ -132,14 +134,14 @@ class DatabaseOperations:
         Updates an existing user's profile information in the Users table.
 
         Args:
-         username (str): Username of the user.
-            name (str): First name of the user.
-            lastname (str): Last name of the user.
-            birthday (str): Birthday of the user.
-         phone (str): Phone number of the user.
+            username : Username of the user.
+            name : First name of the user.
+            lastname : Last name of the user.
+            birthday : Birthday of the user.
+            phone : Phone number of the user.
 
         Returns:
-         int: 0 if update is successful, -1 on error.
+            int: 0 if the update was successful, -1 if an internal error occurred during the update process.
         """
         try:
             self.cur.execute("""
@@ -248,9 +250,6 @@ class DatabaseOperations:
         Returns:
             bool: True if either the public or private key is found in the database (indicating they are not unique),
                   False if neither key is found (indicating they are unique) or an exception occurs during the query.
-        
-        Exceptions:
-            Exception: Catches and prints any exception that occurs during the database operation, returning False.
         """
         try:
             query = "SELECT public_key, private_key FROM Credentials WHERE public_key=? OR private_key=?"
@@ -260,51 +259,14 @@ class DatabaseOperations:
             print(Fore.RED + f"An error occurred: {e}" + Style.RESET_ALL)
             return False 
         
-    def insert_user(self, username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit):
-        """
-        Inserts a new patient record into the Patients table in the database.
-        DA MODIFICARE
-        Args:
-            username (str): The unique username for the patient.
-            name (str): The first name of the patient.
-            lastname (str): The last name of the patient.
-            birthday (str): The birth date of the patient in YYYY-MM-DD format.
-            birth_place (str): The birthplace of the patient.
-            residence (str): The current residence address of the patient.
-            autonomous (int): An integer (0 or 1) indicating whether the patient is autonomous.
-            phone (str): The phone number of the patient.
-
-        Returns:
-            int: 0 if the insertion was successful, -1 if an integrity error occurred (e.g., duplicate username).
-
-        Exceptions:
-            sqlite3.IntegrityError: Catches and handles integrity errors from the database if, for instance, the
-                                    username is not unique, preventing the patient's data from being inserted.
-        """
-        try:
-            self.cur.execute("""
-                            INSERT INTO Users
-                            (username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) """,
-                            (
-                                username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit
-                            ))
-            self.conn.commit()
-            return 0
-        except sqlite3.IntegrityError as e:
-            print(f"Errore di integrità: {e}")
-            return -1
-    
-
     def get_information_for_credit(self):
-        # Esegui la query per ottenere carbon_credit, username, email
+        
         information_data = self.cur.execute("""
             SELECT username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit
             FROM Users
-        """).fetchall()  # fetchall() restituisce tutte le righe
+        """).fetchall()  
 
         if information_data:
-            # Restituisci una lista di Users, una per ogni riga
             return [User(*row) for row in information_data]
 
         return None
@@ -338,49 +300,30 @@ class DatabaseOperations:
         Returns:
             User|None: A User object containing the user's details if the user exists, otherwise None.
         """
-        # Query the database for the user by username
         user_data = self.cur.execute("""
-                                    SELECT username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit
+                                    SELECT username, name, lastname, user_role, birthday, email, phone, company_name
                                     FROM Users
                                     WHERE username = ?
                                     """, (username,)).fetchone()
 
         if user_data:
-            # Return a user object with the fetched data (you may want to define a User class)
-            return User(*user_data)  # Assuming 'User' is a class that takes the tuple fields as arguments
+           return User(*user_data)  
         
-        return None  # Return None if the user does not exist
+        return None  
     
-    def get_operation_by_username(self, username, creation_date):
-        """
-        Retrieves a user's detailed information from the Users table based on their username.
-
-        Args:
-            username (str): The username of the user whose detailed information is being requested.
-
-        Returns:
-            User|None: A User object containing the user's details if the user exists, otherwise None.
-        """
-        # Query the database for the user by username
-        operation_data = self.cur.execute("""
-                                    SELECT creation_date, username, role, operation, co2
-                                    FROM Operations
-                                    WHERE username = ? AND creation_date = ?
-                                    """, (username,creation_date)).fetchone()
-
-        if operation_data:
-            # Return a user object with the fetched data (you may want to define a User class)
-            return Operation(*operation_data)  # Assuming 'User' is a class that takes the tuple fields as arguments
-        
-        return None  # Return None if the user does not exist
-    
-    
-
+     
     def get_all_actions_grouped_by_date(self, username, start_date, end_date):
-        user_address = self.get_public_key_by_username(username)
-
-        raw_ops = act_controller.contract.functions.getOperations(user_address).call()
+        """
+        Retrieves all actions performed by a user within a specified date range, grouped by date.
         
+        Args:
+            username (str): The username of the user whose actions are to be retrieved.
+            start_date (str): The start date of the range in YYYY-MM-DD format.
+            end_date (str): The end date of the range in YYYY-MM-DD format.
+        """ 
+        
+        user_address = self.get_public_key_by_username(username)
+        raw_ops = act_controller.contract.functions.getOperations(user_address).call()
         raw_green = act_controller.contract.functions.getGreenActions(user_address).call()
 
         grouped = defaultdict(list)
@@ -424,11 +367,24 @@ class DatabaseOperations:
     
         
     def insert_report(self, creation_date, username, start_date, end_date):
+        """
+        Inserts a report into the Reports table based on the operations performed by a user within a specified date range.
+        
+        Args:
+            creation_date (str): The date when the report is created, in YYYY-MM-DD format.
+            username (str): The username of the user for whom the report is generated.
+            start_date (str): The start date of the range in YYYY-MM-DD format.
+            end_date (str): The end date of the range in YYYY-MM-DD format.
+        
+        Returns:
+            int: 1 if the report was successfully inserted, -1 if an error occurred during the insertion.
+        """
+
         try:
             operations = self.get_all_actions_grouped_by_date(username, start_date, end_date)
 
             if not operations:
-                print(f"Nessuna operazione trovata per l'utente {username} tra {start_date} e {end_date}.")
+                print(Fore.RED + f"No operations found for user {username} between {start_date} and {end_date}." + Style.RESET_ALL)
                 return 0
 
             for op in operations:
@@ -438,90 +394,92 @@ class DatabaseOperations:
                 """, (creation_date, op.creation_date, op.username, op.role, op.operations, op.co2))
             
             self.conn.commit()
-            return 0
+            return 1
 
         except sqlite3.IntegrityError as e:
             self.conn.rollback()
-            print("Errore di integrità durante insert_report_info:", e)
+            print("Integrity error while insert_report_info:", e)
             return -1
 
         except Exception as e:
             self.conn.rollback()
-            print("Errore generale durante insert_report_info:", e)
+            print("Integrity error while insert_report_info:", e)
             return -1
 
         
     def get_report_by_username(self, username):
+        """
+        Retrieves all reports associated with a specific username from the Reports table.
+        
+        Args:
+            username (str): The username of the user whose reports are to be retrieved.
+        
+        Returns:
+            list|None: A list of Report objects if reports are found for the specified user, 
+                       or None if no reports are found.
+        """
         report_data = self.cur.execute("""
                                 SELECT id_report, creation_date, operation_date, username, role, operations, co2
                                 FROM Reports
                                 WHERE username = ?
-                                """, (username,)).fetchall()  # fetchall() restituisce tutte le righe
+                                """, (username,)).fetchall()  
 
         if report_data:
-            # Restituisci una lista di Report, una per ogni riga
-            return [Report(*row) for row in report_data]
+           return [Report(*row) for row in report_data]
 
         return None
     
     def get_report_by_date(self, username, creation_date):
+        """
+        Retrieves reports for a specific user on a specific creation date from the Reports table.
+        
+        Args:
+            username (str): The username of the user whose reports are to be retrieved.
+            creation_date (str): The creation date of the report in YYYY-MM-DD format.
+        
+        Returns:
+            list|None: A list of Report objects if reports are found for the specified user and date, 
+                       or None if no reports are found.
+        """
         report_data = self.cur.execute("""
                                 SELECT id_report, creation_date, operation_date, username, role, operations, co2
                                 FROM Reports
                                 WHERE username = ? AND creation_date = ?
-                                """, (username, creation_date)).fetchall()  # fetchall() restituisce tutte le righe
+                                """, (username, creation_date)).fetchall()  
 
         if report_data:
-            # Restituisci una lista di Report, una per ogni riga
-            return [Report(*row) for row in report_data]
+           return [Report(*row) for row in report_data]
 
         return None
 
 
-
-    
     def get_role_by_username(self, username):
         """
         Retrieves the role of a user from the database based on their username.
-
+        
         Args:
             username (str): The username of the user whose role is to be determined.
-
+        
         Returns:
             str|None: The role of the user as a string if found (e.g., 'FARMER', 'CARRIER', 'PRODUCER', 'SELLER'), 
                     or None if the username does not correspond to any known user in the system.
         """
-        # Execute the query to get the role of the user
         role = self.cur.execute("""
                                 SELECT role
                                 FROM Credentials
                                 WHERE username = ?
                                 """, (username,)).fetchone()
-
-        # If a role is found, return it as a string, otherwise return None
         if role:
-            return role[0]  # role[0] is the actual role value from the tuple
-        return None
-
-    def get_credit_by_username(self, username):
-        credits = self.cur.execute("""
-                                SELECT carbon_credit
-                                FROM Users
-                                WHERE username = ?
-                                """, (username,)).fetchone()
-
-        # If a role is found, return it as a string, otherwise return None
-        if credits:
-            return credits[0]  # role[0] is the actual role value from the tuple
+            return role[0]  
         return None
             
     def get_public_key_by_username(self, username):
         """
         Retrieve the public key for a given username from the Credentials table.
-
+        
         Args:
             username (str): The username of the user whose public key is to be retrieved.
-
+        
         Returns:
             str: The public key of the user if found, None otherwise.
         """
@@ -529,16 +487,16 @@ class DatabaseOperations:
             self.cur.execute("SELECT public_key FROM Credentials WHERE username = ?", (username,))
             result = self.cur.fetchone()
             if result:
-                return result[0]  # Return the public key
+                return result[0]  
             else:
-                return None  # Public key not found
+                return None  
         except Exception as e:
             print(Fore.RED + f"An error occurred while retrieving public key: {e}" + Style.RESET_ALL)
             return None
 
     def hash_function(self, password: str):
-
-        """Hashes the supplied password using the scrypt algorithm.
+        """
+        Hashes the supplied password using the scrypt algorithm.
     
         Args:
             password: The password to hash.
@@ -627,10 +585,6 @@ class DatabaseOperations:
         Returns:
             int: 0 if the password change was successful, -1 if the user's credentials could not be found or the old
              password was incorrect.
-
-        Raises:
-            Exception: Propagates any exceptions that occur during the database update operation, such as database
-                   connection issues or SQL errors.
         """
         creds = self.get_creds_by_username(username)
         if creds is not None:

@@ -1,7 +1,7 @@
 from colorama import Fore, Style
 
 class User:
-    def __init__(self, username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit):
+    def __init__(self, username, name, lastname, user_role, birthday, email, phone, company_name):
 
         super().__init__()
         self.username = username
@@ -11,7 +11,6 @@ class User:
         self.phone = phone
         self.email = email
         self.birthday = birthday
-        self.carbon_credit = carbon_credit
         self.user_role = user_role
 
     def get_username(self): return self.username
@@ -30,7 +29,6 @@ class User:
 
     def get_user_role(self): return self.user_role
 
-    def get_carbon_credit(self): return self.carbon_credit
 
 
     def set_username(self, username): self.username = username
@@ -49,7 +47,6 @@ class User:
 
     def set_user_role(self, user_role): self.user_role = user_role
 
-    def set_carbon_credit(self, carbon_credit): self.carbon_credit = carbon_credit
 
     def save(self):
         """
@@ -61,10 +58,10 @@ class User:
                 # Insert new Users record
                 self.cur.execute("""
                             INSERT INTO Users
-                            (username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) """,
+                            (username, name, lastname, user_role, birthday, email, phone, company_name)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?) """,
                             (
-                                self.username, self.name, self.lastname, self.user_role, self.birthday, self.email, self.phone, self.company_name, self.carbon_credit
+                                self.username, self.name, self.lastname, self.user_role, self.birthday, self.email, self.phone, self.company_name
                             ))
             else:
                 # Update existing Users details

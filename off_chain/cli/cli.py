@@ -63,6 +63,8 @@ class CommandLineInterface:
                     res_code = self.login_menu()
                     if res_code == 0:
                         self.print_menu()
+                    elif res_code == -3:
+                        print(Fore.CYAN + "Login cancelled. Returning to previous menu..." + Style.RESET_ALL)
             elif choice == 3:
                     print('Bye Bye!')
                     exit()
@@ -77,20 +79,24 @@ class CommandLineInterface:
     
     def registration_menu(self):
         """
-        This method prompts users to decide whether to proceed with deployment and 
-        initialization of the smart contract. It then collects wallet credentials, 
-        personal information, and role selection from the user for registration. 
-        The method validates user inputs and interacts with the Controller to perform 
-        registration actions.
+        Prompts user for wallet credentials, personal info, and role selection for registration.
+        Allows exiting at any input step by typing 'exit'.
         """
 
+        print(Fore.YELLOW + "Type 'exit' at any prompt to cancel and go back.\n" + Style.RESET_ALL)
         print('Please, enter your wallet credentials.')
         attempts = 0
+
         while True:
             public_key = input('Public Key: ')
+            if public_key.lower() == 'exit': return -1
+
             private_key = getpass.getpass('Private Key: ')
+            if private_key.lower() == 'exit': return -1
+
             confirm_private_key = getpass.getpass('Confirm Private Key: ')
-            
+            if confirm_private_key.lower() == 'exit': return -1
+
             if private_key == confirm_private_key:
                 if self.controller.check_keys(public_key, private_key):
                     print(Fore.RED + 'A wallet with these keys already exists. Please enter a unique set of keys.' + Style.RESET_ALL)
@@ -98,7 +104,7 @@ class CommandLineInterface:
                     if attempts >= 3:
                         print(Fore.RED + "Maximum retry attempts reached. Redeploying..." + Style.RESET_ALL)
                         act_controller.deploy_and_initialize('../../on_chain/CarbonCredit.sol')
-                        attempts = 0  # Reset attempts after deployment
+                        attempts = 0
                 else:
                     try:
                         pk_bytes = decode_hex(private_key)
@@ -109,84 +115,103 @@ class CommandLineInterface:
                         else:
                             break
                     except Exception:
-                        print(Fore.RED + 'Oops, there is no wallet with the matching public and private key provided.\n' + Style.RESET_ALL)
+                        print(Fore.RED + 'Invalid private key format.\n' + Style.RESET_ALL)
             else:
                 print(Fore.RED + 'Private key and confirmation do not match. Try again.\n' + Style.RESET_ALL)
 
         if is_address(public_key) and (public_key == pk):
-
             print('Enter your personal information.')
 
             while True:
                 username = input('Username: ')
-                if self.controller.check_username(username) == 0: break
-                else: print(Fore.RED + 'Your username has been taken.\n' + Style.RESET_ALL)
+                if username.lower() == 'exit': return -1
 
-            while True: 
-                role = input("Insert your role: \n (F) Farmer \n (P) Producer \n (C) Carrier \n (S) Seller \n Your choice: ").strip().upper()
-    
-                if role == 'F':
-                    user_role = 'FARMER'
-                    confirm = input("Do you confirm you're a Farmer? (Y/n): ").strip().upper()
-                    if confirm == 'Y':
-                        break
-                    else:
-                        print(Fore.RED + "Role not confirmed. Retry\n" + Style.RESET_ALL)
-
-                elif role == 'P':
-                    user_role = 'PRODUCER'
-                    confirm = input("Do you confirm you're a Producer? (Y/n): ").strip().upper()
-                    if confirm == 'Y':
-                        break
-                    else:
-                        print(Fore.RED + "Role not confirmed. Retry\n" + Style.RESET_ALL)
-
-                elif role == 'C':
-                    user_role = 'CARRIER'
-                    confirm = input("Do you confirm you're a Carrier? (Y/n): ").strip().upper()
-                    if confirm == 'Y':
-                        break
-                    else:
-                        print(Fore.RED + "Role not confirmed. Retry\n" + Style.RESET_ALL)
-
-                elif role == 'S':
-                    user_role = 'SELLER'
-                    confirm = input("Do you confirm you're a Seller? (Y/n): ").strip().upper()
-                    if confirm == 'Y':
-                        break
-                    else:
-                        print(Fore.RED + "Role not confirmed. Retry\n" + Style.RESET_ALL)
-
+                if self.controller.check_username(username) == 0:
+                    break
                 else:
-                    print(Fore.RED + "You have to select a role between Farmer (F), Producer (P), Carrier (C), or Seller (S). Retry\n" + Style.RESET_ALL)
+                    print(Fore.RED + 'Your username has been taken.\n' + Style.RESET_ALL)
+
+            while True:
+                role = input("Insert your role: \n (F) Farmer \n (P) Producer \n (C) Carrier \n (S) Seller \n Your choice: ").strip().upper()
+                if role.lower() == 'exit': return -1
+
+                roles = {'F': 'FARMER', 'P': 'PRODUCER', 'C': 'CARRIER', 'S': 'SELLER'}
+                if role in roles:
+                    user_role = roles[role]
+                    confirm = input(f"Do you confirm you're a {user_role.title()}? (Y/n): ").strip().upper()
+                    if confirm == 'Y':
+                        break
+                    elif confirm.lower() == 'exit':
+                        return -1
+                    else:
+                        print(Fore.RED + "Role not confirmed. Retry\n" + Style.RESET_ALL)
+                else:
+                    print(Fore.RED + "You must select a valid role. Retry\n" + Style.RESET_ALL)
 
             while True:
                 while True:
                     password = getpass.getpass('Password: ')
+                    if password.lower() == 'exit': return -1
+
                     passwd_regex = r'^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?!.*\s).{8,100}$'
                     if not re.fullmatch(passwd_regex, password):
-                        print(Fore.RED + 'Password must contain at least 8 characters, at least one digit, at least one uppercase letter, one lowercase letter, and at least one special character.\n' + Style.RESET_ALL)
-                    else: break
+                        print(Fore.RED + 'Password must be at least 8 characters long and include digits, upper and lower case letters, and a special character.\n' + Style.RESET_ALL)
+                    else:
+                        break
 
                 confirm_password = getpass.getpass('Confirm Password: ')
-                
+                if confirm_password.lower() == 'exit': return -1
+
                 if password != confirm_password:
                     print(Fore.RED + 'Password and confirmation do not match. Try again\n' + Style.RESET_ALL)
                 else:
                     break
 
-            reg_code = self.controller.registration(username, password, user_role, public_key, private_key)
-            if reg_code == 0:
-                self.insert_user_info(username, user_role, private_key)
-            elif reg_code == -1:
-                print(Fore.RED + 'Your username has been taken.\n' + Style.RESET_ALL)
-        
+            while True:
+                name = input('Name: ')
+                if self.controller.check_null_info(name): break
+                else: print(Fore.RED + '\nPlease insert information.' + Style.RESET_ALL)
+            while True:
+                lastname = input('Lastname: ')
+                if self.controller.check_null_info(lastname): break
+                else: print(Fore.RED + '\nPlease insert information.' + Style.RESET_ALL)
+            while True:
+                birthday = input('Date of birth (YYYY-MM-DD): ')
+                if self.controller.check_birthdate_format(birthday): break
+                else: print(Fore.RED + "\nInvalid birthdate or incorrect format." + Style.RESET_ALL)
+            while True:
+                email = input('E-mail: ')
+                if self.controller.check_null_info(email):
+                    if self.controller.check_unique_email(email) == 0: break
+                    else: print(Fore.RED + "This e-mail has already been inserted. \n" + Style.RESET_ALL)
+                else: print(Fore.RED + '\nPlease insert information.' + Style.RESET_ALL)
+            company_name = input('Company name: ')
+            while True:
+                phone = input('Phone number: ')
+                if self.controller.check_phone_number_format(phone):
+                    if self.controller.check_unique_phone_number(phone) == 0: break
+                    else: print(Fore.RED + "This phone number has already been inserted. \n" + Style.RESET_ALL)
+                else: print(Fore.RED + "Invalid phone number format.\n" + Style.RESET_ALL)
+            act_controller.add_user(name, lastname, user_role, public_key)
+            registration_code = self.controller.registration(username, name, lastname, user_role, birthday, email, phone, company_name, password, public_key, private_key)
+            if registration_code == 0:
+                print(Fore.GREEN + 'Information saved correctly!' + Style.RESET_ALL)
+                self.user_menu(username,user_role)
+            elif registration_code == -1:
+                print(Fore.RED + 'Internal error!' + Style.RESET_ALL)
+
+                reg_code = self.controller.registration(username, password, user_role, public_key, private_key)
+                if reg_code == 0:
+                    self.insert_user_info(username, user_role)
+                elif reg_code == -2:
+                    print(Fore.RED + 'Your username has been taken.\n' + Style.RESET_ALL)
         else:
-            print(Fore.RED + 'Sorry, but the provided public and private key do not match to any account\n' + Style.RESET_ALL)
-            return
+            print(Fore.RED + 'Sorry, but the provided public and private key do not match.\n' + Style.RESET_ALL)
+            return -1
+
         
     
-    def insert_user_info(self, username, user_role, private_key):
+    def insert_user_info(self, username, user_role):
         """
         This method guides users through the process of providing personal information.
         It validates user inputs and ensures data integrity before inserting the
@@ -224,10 +249,9 @@ class CommandLineInterface:
                 if self.controller.check_unique_phone_number(phone) == 0: break
                 else: print(Fore.RED + "This phone number has already been inserted. \n" + Style.RESET_ALL)
             else: print(Fore.RED + "Invalid phone number format.\n" + Style.RESET_ALL)
-        carbon_credit = 5
         from_address_users = self.controller.get_public_key_by_username(username)
         act_controller.add_user(name, lastname, user_role, from_address_users)
-        insert_code = self.controller.insert_user_info(username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit)
+        insert_code = self.controller.insert_user_info(username, name, lastname, user_role, birthday, email, phone, company_name)
         if insert_code == 0:
             print(Fore.GREEN + 'Information saved correctly!' + Style.RESET_ALL)
             self.user_menu(username,user_role)
@@ -236,40 +260,44 @@ class CommandLineInterface:
 
     def login_menu(self):
         """
-        This method prompts users to provide their credentials (public and private keys,
-        username, and password) for authentication. It verifies the credentials with
-        the Controller and grants access if authentication is successful. The method
-        handles authentication failures, including too many login attempts.
- 
+        Prompts user credentials for authentication.
         Returns:
-            int: An indicator of the login outcome (-1 for authentication failure, -2 for too many login attempts, 0 for successful login).
+            int: -1 = auth failure, -2 = timeout, -3 = user exited, 0 = success
         """
- 
+        print(Fore.YELLOW + "Type 'exit' at any prompt to cancel and go back.\n" + Style.RESET_ALL)
+
         while True:
             if not self.controller.check_attempts() and self.session.get_timeout_left() < 0:
                 self.session.reset_attempts()
- 
+
             if self.session.get_timeout_left() <= 0 and self.controller.check_attempts():
                 public_key = input('Insert public key: ')
+                if public_key.lower() == 'exit': return -3
+
                 private_key = getpass.getpass('Private Key: ')
+                if private_key.lower() == 'exit': return -3
+
                 username = input('Insert username: ')
+                if username.lower() == 'exit': return -3
+
                 passwd = getpass.getpass('Insert password: ')
- 
+                if passwd.lower() == 'exit': return -3
+
                 login_code, user_role = self.controller.login(username, passwd, public_key, private_key)
- 
+
                 if login_code == 0:
-                    print(Fore.GREEN + '\nYou have succesfully logged in!\n' + Style.RESET_ALL)
+                    print(Fore.GREEN + '\nYou have successfully logged in!\n' + Style.RESET_ALL)
                     self.user_menu(username, user_role)
                 elif login_code == -1:
                     print(Fore.RED + '\nThe credentials you entered are wrong\n' + Style.RESET_ALL)
                 elif login_code == -2:
                     print(Fore.RED + '\nToo many login attempts\n' + Style.RESET_ALL)
                     return -1
-               
             else:
-                print(Fore.RED + '\nMax number of attemps reached\n' + Style.RESET_ALL)
+                print(Fore.RED + '\nMax number of attempts reached\n' + Style.RESET_ALL)
                 print(Fore.RED + f'You will be in timeout for: {int(self.session.get_timeout_left())} seconds\n' + Style.RESET_ALL)
                 return -2
+
     
     def user_menu(self, username, user_role):
         """
@@ -441,17 +469,18 @@ class CommandLineInterface:
         print("Last Name: ", userview.get_lastname())
         print("Birth Date: ", userview.get_birthday())
         print("Company Name: ", userview.get_company_name())
-        print("Role: ", userview.get_user_role())  # Corrected field here
+        print("Role: ", userview.get_user_role())  
         print("Phone: ", userview.get_phone())
         input("\nPress Enter to exit\n")
 
     def view_balance(self, username):
-        balance = self.controller.get_credit_by_username(username)
         address = self.controller.get_public_key_by_username(username)
-        balance2 = act_controller.check_balance(address)
+        balance = act_controller.check_balance(address)
         print(Fore.CYAN + "\nBalance:\n" + Style.RESET_ALL)
-        print(f"Your balance is: {balance} credits ")
-        print(f"Your balance is: {balance2} credits ")
+        if balance == 1:
+            print(f"Your balance is: {balance} credit")
+        else:
+            print(f"Your balance is: {balance} credits")
         
     def view_user_report(self, username):
         """
@@ -467,7 +496,7 @@ class CommandLineInterface:
 
         available_dates = sorted({report.get_creation_date() for report in reportview})
 
-        print("\nAvailable reports:")
+        print("\nAvailable reports (sorted by creation date and time):")
         for idx, date in enumerate(available_dates, start=1):
             print(f"{idx}. {date}")
 

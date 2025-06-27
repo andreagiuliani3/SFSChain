@@ -185,18 +185,19 @@ class Utils:
         
         delta = threshold - co2
         if balance - abs(delta) >= 0:
-            act_controller.register_operation(address, operation_desc, description, co2)
-            if delta > 0:
-                act_controller.add_token(delta, address)
-                action = "added to"
-                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
-            elif delta < 0: 
-                act_controller.remove_token(-delta, address)
-                action = "removed from"
-                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+            if receipt_so.status == 1:
+                if delta > 0:
+                    action = "added to"
+                    print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
+                elif delta < 0: 
+                    action = "removed from"
+                    print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
+                else:
+                    print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
+                    action = None
             else:
-                print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
-                action = None
+                print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
         else:
             print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {balance - abs(delta)} MORE CREDITS" + Style.RESET_ALL)
             action = None
@@ -265,18 +266,19 @@ class Utils:
         address = self.controller.get_public_key_by_username(username)
         delta = threshold - co2
         if balance - abs(delta) >= 0:
-            act_controller.register_operation(address, operation_desc, description, co2)
-            if delta > 0:
-                act_controller.add_token(delta, address)
-                action = "added to"
-                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
-            elif delta < 0: 
-                act_controller.remove_token(-delta, address)
-                action = "removed from"
-                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+            if receipt_so.status == 1:
+                if delta > 0:
+                    action = "added to"
+                    print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
+                elif delta < 0: 
+                    action = "removed from"
+                    print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
+                else:
+                    print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
+                    action = None
             else:
-                print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
-                action = None
+                print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
         else:
             print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {balance - abs(delta)} MORE CREDITS" + Style.RESET_ALL)
             action = None
@@ -341,18 +343,19 @@ class Utils:
         address = self.controller.get_public_key_by_username(username)
         delta = threshold - co2
         if balance - abs(delta) >= 0:
-            act_controller.register_operation(address, operation_desc, description, co2)
-            if delta > 0:
-                act_controller.add_token(delta, address)
-                action = "added to"
-                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
-            elif delta < 0: 
-                act_controller.remove_token(-delta, address)
-                action = "removed from"
-                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+            if receipt_so.status == 1:
+                if delta > 0:
+                    action = "added to"
+                    print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
+                elif delta < 0: 
+                    action = "removed from"
+                    print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
+                else:
+                    print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
+                    action = None
             else:
-                print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
-                action = None
+                print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
         else:
             print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {balance - abs(delta)} MORE CREDITS" + Style.RESET_ALL)
             action = None
@@ -416,18 +419,19 @@ class Utils:
         address = self.controller.get_public_key_by_username(username)
         delta = threshold - co2
         if balance - abs(delta) >= 0:
-            act_controller.register_operation(address, operation_desc, description, co2)
-            if delta > 0:
-                act_controller.add_token(delta, address)
-                action = "added to"
-                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
-            elif delta < 0: 
-                act_controller.remove_token(-delta, address)
-                action = "removed from"
-                print(Fore.GREEN + f'Credit has been {action} your wallet.' + Style.RESET_ALL)
+            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+            if receipt_so.status == 1:
+                if delta > 0:
+                    action = "added to"
+                    print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
+                elif delta < 0: 
+                    action = "removed from"
+                    print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
+                else:
+                    print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
+                    action = None
             else:
-                print(Fore.YELLOW + "No credit variation: emission equals threshold." + Style.RESET_ALL)
-                action = None
+                print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
         else:
             print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {balance - abs(delta)} MORE CREDITS" + Style.RESET_ALL)
             action = None
@@ -436,13 +440,13 @@ class Utils:
     def make_green_action(self, username, user_role):
         print(Fore.CYAN + "\nMake a Green Action" + Style.RESET_ALL)
 
-        # Descrizione azione green
+       
         green_action = input("Enter the description of the green action you performed: ").strip()
         if not green_action:
             print(Fore.RED + "Green action description cannot be empty." + Style.RESET_ALL)
             return
 
-        # CO2 risparmiata (tonnellate)
+      
         while True:
             try:
                 co2_saved = int(input("Enter the amount of CO2 saved (in tons): "))
@@ -452,74 +456,105 @@ class Utils:
                     print(Fore.RED + "CO2 saved must be a positive number." + Style.RESET_ALL)
             except ValueError:
                 print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
-
-        # Data azione
-        creation_date = date.today().strftime("%Y-%m-%d")
         
         description = f"Green Action: {green_action}"
-
-        # Inserimento azione green come operazione con emissioni negative (risparmio)
-        insert_code = self.controller.insert_operation_info(
-            creation_date, username, user_role, description, -co2_saved
-        )
-        
-
         address = self.controller.get_public_key_by_username(username)
-        act_controller.register_green_action(address, description, co2_saved)
+        receipt_ga = act_controller.register_green_action(address, description, co2_saved)
 
-        # Aggiunta crediti corrispondenti al risparmio
-        credit_core = self.controller.give_credit(username, co2_saved)
-        act_controller.add_token(co2_saved, address)
-
-        if insert_code == 0 and credit_core == 0:
+        if receipt_ga.status == 1:
             print(Fore.GREEN + f"Green action registered. {co2_saved} tons of CO2 saved credited to your wallet." + Style.RESET_ALL)
         else:
             print(Fore.RED + "Failed to register the green action." + Style.RESET_ALL)
 
 
 
-    def give_credit(self, username, user_role):
-        credit = int(input("How many credit you want to give? "))
-        balance = self.controller.get_credit_by_username(username)
-        if balance>credit:
+    def give_credit(self, username):
+        print(Fore.YELLOW + "Type 'exit' at any prompt to cancel the operation.\n" + Style.RESET_ALL)
+        
+        credit_input = input("How many credits do you want to give? ")
+        if credit_input.lower() == 'exit':
+            print(Fore.RED + "Operation cancelled.\n" + Style.RESET_ALL)
+            return
+
+        if not credit_input.isdigit():
+            print(Fore.RED + "Invalid input. Please enter a numeric value.\n" + Style.RESET_ALL)
+            return
+
+        credit = int(credit_input)
+        if credit == 0:
+            return 
+        address = self.controller.get_public_key_by_username(username)
+        balance = act_controller.check_balance(address)        
+        if balance >= credit:
             while True:
-                username_credit = str(input("Insert the username of the account you want to give credit:\n"))
-                if username != username_credit:
-                    if self.controller.check_username(username_credit) == -1: break
-                    else: print(Fore.RED + 'The username is not correct/not exist.\n' + Style.RESET_ALL)
-                else: print("You can't give a credit to yourself!")
-            proceed = input("Do you want to proceed with the operation? (Y/n): ")
-            if proceed.strip().upper() == "Y":
+                username_credit = input("Insert the username of the account you want to give credit (type 'exit' to go back):\n").strip()
+                if username_credit.lower() == 'exit':
+                    print(Fore.RED + "Operation cancelled.\n" + Style.RESET_ALL)
+                    return 
+                if username_credit != username:
+                    if self.controller.check_username(username_credit) == -1:
+                        break
+                    else:
+                        print(Fore.RED + 'The username is not correct or does not exist.\n' + Style.RESET_ALL)
+                else:
+                    print(Fore.RED + "You can't give credit to yourself!\n" + Style.RESET_ALL)
+
+            proceed = input("Do you want to proceed with the operation? (Y/n): ").strip().upper()
+            if proceed == "EXIT":
+                print(Fore.RED + "Operation cancelled.\n" + Style.RESET_ALL)
+                return
+            elif proceed == "Y":
                 addres_user = self.controller.get_public_key_by_username(username)
                 addres_credit = self.controller.get_public_key_by_username(username_credit)
                 print(f"{Fore.YELLOW}You will give credits to the address: {addres_credit}{Style.RESET_ALL}")
                 receipt = act_controller.transfer_token(addres_user, addres_credit, credit) 
                 if receipt.status == 1:
-                    print(Fore.GREEN + 'Your credits has been successfully given to: ', username_credit + Style.RESET_ALL)
+                    print(Fore.GREEN + f'Your credits have been successfully given to: {username_credit}' + Style.RESET_ALL)
                 else:
                     print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
-            elif proceed.strip().upper() == "N":
-                    print(Fore.RED + "Operation Cancelled." + Style.RESET_ALL)
+            elif proceed == "N":
+                print(Fore.RED + "Operation Cancelled.\n" + Style.RESET_ALL)
             else:
-                    print(Fore.RED + 'Wrong input, please insert Y or N!' + Style.RESET_ALL)
+                print(Fore.RED + 'Wrong input, please insert Y or N!\n' + Style.RESET_ALL)
         else:
-            print(Fore.RED + 'Action denied: insufficient balance.' + Style.RESET_ALL)
+            print(Fore.RED + 'Action denied: insufficient balance.\n' + Style.RESET_ALL)
     
     def create_report(self, username):
-        creation_date = datetime.today()
-        creation_date = creation_date.strftime('%Y-%m-%d %H:%M:%S')
+        print(Fore.YELLOW + "Type 'exit' at any time to cancel the operation.\n" + Style.RESET_ALL)
 
+        creation_date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+
+        # Inserimento data iniziale
         while True:
-            start_date = input("Insert the first day of the operation you want to insert in the report (YYYY-MM-DD): ")
-            if self.controller.check_birthdate_format(start_date): break
-            else: print(Fore.RED + "\nInvalid date or incorrect format." + Style.RESET_ALL)
+            start_date = input("Insert the first day of the operation you want to insert in the report (YYYY-MM-DD): ").strip()
+            if start_date.lower() == "exit":
+                print(Fore.RED + "Operation cancelled.\n" + Style.RESET_ALL)
+                return
+            if self.controller.check_birthdate_format(start_date):
+                break
+            else:
+                print(Fore.RED + "\nInvalid date or incorrect format." + Style.RESET_ALL)
+
+        # Inserimento data finale
         while True:
-            end_date = input("Insert the date of the last operation you want to put into the report (YYYY-MM-DD): ")
-            if self.controller.check_birthdate_format(end_date): break
-            else: print(Fore.RED + "\nInvalid date or incorrect format." + Style.RESET_ALL)
+            end_date = input("Insert the date of the last operation you want to put into the report (YYYY-MM-DD): ").strip()
+            if end_date.lower() == "exit":
+                print(Fore.RED + "Operation cancelled.\n" + Style.RESET_ALL)
+                return
+            if self.controller.check_birthdate_format(end_date):
+                start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+                end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+                if end_dt >= start_dt:
+                    break
+                else:
+                    print(Fore.RED + "\nEnd date must be the same as or after the start date." + Style.RESET_ALL)
+            else:
+                print(Fore.RED + "\nInvalid date or incorrect format." + Style.RESET_ALL)
+
+        # Creazione report
         report_code = self.controller.insert_report_info(creation_date, start_date, end_date, username)
 
-        if report_code == 0:
+        if report_code == 1:
             print(Fore.GREEN + 'Your report is ready' + Style.RESET_ALL)
         else:
             print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)

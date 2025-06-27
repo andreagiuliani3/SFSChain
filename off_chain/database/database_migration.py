@@ -10,7 +10,6 @@ con = sqlite3.connect("SFSchain")
 cur = con.cursor()
 cur.execute("DROP TABLE IF EXISTS Credentials")
 cur.execute("DROP TABLE IF EXISTS Users")
-cur.execute("DROP TABLE IF EXISTS Operations")
 cur.execute("DROP TABLE IF EXISTS Reports")
 
 cur.execute('''CREATE TABLE Credentials(
@@ -30,17 +29,8 @@ cur.execute('''CREATE TABLE IF NOT EXISTS Users(
                     mail TEXT NOT NULL,
                     phone TEXT,
                     company_name TEXT,
-                    carbon_credit INTEGER,
                     FOREIGN KEY(username) REFERENCES Credentials(username)
                     );''')
-cur.execute('''CREATE TABLE Operations(
-            id_operation INTEGER PRIMARY KEY AUTOINCREMENT,
-            creation_date DATE NOT NULL,
-            username TEXT NOT NULL,
-            role TEXT CHECK(role IN ('FARMER', 'CARRIER', 'PRODUCER', 'SELLER')) NOT NULL,
-            operation TEXT NOT NULL,
-            co2 INTEGER NOT NULL
-            );''')
 cur.execute('''CREATE TABLE Reports(
             id_report INTEGER PRIMARY KEY AUTOINCREMENT,
             creation_date TEXT NOT NULL,

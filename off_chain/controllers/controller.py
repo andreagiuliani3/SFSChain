@@ -22,21 +22,7 @@ class Controller:
         self.__n_attempts_limit = 5 # Maximum number of login attempts before lockout.
         self.__timeout_timer = 180 # Timeout duration in seconds.
  
-    def registration(self, username: str, password: str, role: str, public_key: str, private_key: str):
-        """
-        Registers a new user in the database with the given credentials.
        
-        :param username: The user's username.
-        :param password: The user's password.
-        :param role: The user's role in the system.
-        :param public_key: The user's public key.
-        :param private_key: The user's private key.
-        :return: A registration code indicating success or failure.
-        """
-        registration_code = self.db_ops.register_creds(username, password, role, public_key, private_key)
- 
-        return registration_code
-   
     def login(self, username: str, password: str, public_key: str, private_key: str):
         """
         Attempts to log a user in by validating credentials and handling session attempts.
@@ -60,8 +46,10 @@ class Controller:
             return -1, None
         else:
             return -2, None
+        
    
-    def insert_user_info(self, username: str, name: str, lastname: str, user_role: str, birthday: str, mail: str, phone: str, company_name: str, carbon_credit: int):
+    def registration(self, username: str, name: str, lastname: str, user_role: str, birthday: str, 
+                     mail: str, phone: str, company_name: str, password: str, public_key: str, private_key: str):
         """
         Inserts user information into the database.
  
@@ -75,21 +63,22 @@ class Controller:
         :param company_name: The company of the user (if it exists).
         :return: An insertion code indicating success (0) or failure.
         """
-        insertion_code = self.db_ops.insert_user(username, name, lastname, user_role, birthday, mail, phone, company_name, carbon_credit)
+        
+        registration_code = self.db_ops.register_user(username, name, lastname, user_role, birthday, mail, 
+                                                    phone, company_name, password, public_key, private_key)
  
-        if insertion_code == 0:
+        if registration_code == 0:
             user = self.db_ops.get_user_by_username(username)
             self.session.set_user(user)
  
-        return insertion_code
+        return registration_code
     
     def insert_report_info(self, creation_date: str, start_date: str, end_date: str, username: str):
         report_code = self.db_ops.insert_report(creation_date, username, start_date, end_date)
        
-        if report_code == 0:
+        if report_code == 1:
             report = self.db_ops.get_report_by_username(username)
             self.session.set_report(report)
-            print(Fore.GREEN + 'Your report has been created' + Style.RESET_ALL)
         return report_code
     
     def check_null_info(self, info):
@@ -243,12 +232,6 @@ class Controller:
    
     def check_attempts(self):
         if self.session.get_attempts() < self.__n_attempts_limit:
-            return True
-        else:
-            return False
-    
-    def check_balance(self,username):
-        if self.db_ops.get_credit_by_username(username) > 0:
             return True
         else:
             return False

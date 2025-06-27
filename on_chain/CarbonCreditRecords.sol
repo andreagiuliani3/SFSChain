@@ -113,34 +113,49 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         emit UserUpdated(msg.sender, name, lastName, userRole);
     }
 
-    function registerOperation(string memory actionType, string memory description, uint256 co2emissions) public onlyAuthorized {
+    function registerOperation(string memory actionType, string memory description, int256 delta, uint256 co2emissions) public onlyAuthorized {
         require(users[msg.sender].isRegistered, "User not registered");
+
+        if (delta < 0) {
+            uint256 amountToBurn = uint256(-delta);
+            require(balanceOf(msg.sender) >= amountToBurn, "Insufficient credits to burn");
+            _burn(msg.sender, amountToBurn);
+            emit TokensRemoved(msg.sender, amountToBurn);
+        } else if (delta > 0) {
+            _mint(msg.sender, uint256(delta));
+            emit TokensAdded(msg.sender, uint256(delta));
+        }
+
         Operation memory newOperation = Operation({
             actionType: actionType,
             description: description,
             timestamp: block.timestamp,
-            co2emissions: co2emissions 
+            co2emissions: co2emissions
         });
         operations[msg.sender].push(newOperation);
-        emit OperationRegistered(msg.sender, newOperation.actionType, newOperation.description, newOperation.timestamp, newOperation.co2emissions);
+        emit OperationRegistered(msg.sender, actionType, description, block.timestamp, co2emissions);
     }
 
     function getOperations(address user) external view returns (Operation[] memory) {
         return operations[user];
     }
 
-    
-
     function registerGreenAction(string memory description, uint256 co2Saved) public onlyAuthorized {
-        require(users[msg.sender].isRegistered, "User not registered");
-        GreenAction memory newGreenAction = GreenAction({
-            description: description,
-            timestamp: block.timestamp,
-            co2Saved: co2Saved 
-        });
-        greenActions[msg.sender].push(newGreenAction);
-        emit GreenActionRegistered(msg.sender, newGreenAction.description, newGreenAction.timestamp, newGreenAction.co2Saved);
-    } 
+    require(users[msg.sender].isRegistered, "User not registered");
+
+    GreenAction memory newGreenAction = GreenAction({
+        description: description,
+        timestamp: block.timestamp,
+        co2Saved: co2Saved 
+    });
+    greenActions[msg.sender].push(newGreenAction);
+    emit GreenActionRegistered(msg.sender, newGreenAction.description, newGreenAction.timestamp, newGreenAction.co2Saved);
+
+    uint256 creditsToAdd = co2Saved; 
+
+    _mint(msg.sender, creditsToAdd);
+    emit TokensAdded(msg.sender, creditsToAdd);
+    }
 
     function getGreenActions(address user) external view returns (GreenAction[] memory) {
         return greenActions[user];

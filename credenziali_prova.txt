@@ -1,24 +1,24 @@
-username: marco
+username: Marco
 Address: 0xd3237b2285F4c062304d3135F741D00d8cE4AD1e
 Private Key: 0x04c5538fff17e125f34e7f92bdfa353b5f9bd6ee8db1c4e6f6821e5f2fff82f4
-role: farmer
+role: Farmer
 pass: To5sODRnPr+J2IFG
 
 
-username: marcoprova
+username: Andrea
 public: 0x8630Aef947346b2EeC708ce80987E7f98044b755
 private: 0x0e3009bdd17a2056e6f81d6315b79e4f42c54b65ba120898ca4190e3b53828d6
-role: carrier
-pass: To5sODRnPr+J2IFF
+role: Carrier
+pass: To5sODRnPr+J2IFG
 
-username: marcopcportatile
+username: Stefano
 public: 0x645631c6dc133CFE65f78fb3A30D26382097bB8e
 private: 0x23fd0ae40785930941b286ffa95b4144848e25d687659bec1eb71f9c79a38e23
-role: producer
+role: Producer
 pass: Gh2vUKPcSx$M3BRW
 
-username: usernameprova
+username: Lionel
 public: 0x7FcE9220130546be931E336c45296066184D1046
 private: 0x6d850a48edcc3879ef064cd9e887aa3ff0fe945b0f271789b45a36d20380d36f
-role: seller
+role: Seller
 pass: Gh2vUKPcSx$M3BRW
