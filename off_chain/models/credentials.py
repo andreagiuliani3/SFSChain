@@ -29,22 +29,17 @@ class Credentials(Model):
     # Getter methods for each attribute
     def get_id(self):
         return self.id
-   
     def get_username(self):
         return self.username
-   
     def get_hash_password(self):
         return self.hash_password
-   
     def get_role(self):
         return self.role
-   
     def get_public_key(self):
         return self.public_key
-   
     def get_private_key(self):
         return self.private_key
- 
+
     def save(self):
         """
         Saves a new or updates an existing Credentials record in the database.

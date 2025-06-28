@@ -8,7 +8,11 @@ init(convert=True)
 
 class DeployController:
     """
-    Gestisce compilazione e deploy del contratto Solidity tramite Web3.
+    This class is responsible for compiling and deploying smart contracts on the Ethereum blockchain.
+    It uses the `solcx` library to compile Solidity contracts and the `web3` library to interact with the Ethereum network.
+    It handles the compilation of the contract source code, deployment to the blockchain, and provides methods
+    to compile and deploy contracts based on a given Solidity source file.
+    It also ensures that the specified version of the Solidity compiler is installed and set for use.
     """
 
     def __init__(self, solc_version='0.8.19'):
@@ -31,6 +35,10 @@ class DeployController:
 
     
     def compile_and_deploy(self, contract_source_path):
+        """
+        Compiles and deploys a smart contract from the specified Solidity source file.
+        :param contract_source_path: Path to the Solidity source file relative to the shared directory.
+        """
         
         dir_path = os.path.dirname(os.path.realpath(__file__))
         shared_dir_path = os.path.dirname(os.path.dirname(dir_path))
@@ -44,6 +52,10 @@ class DeployController:
         self.deploy_contract(address)
 
     def compile_contract(self, solidity_source):
+        """
+        Compiles the provided Solidity source code using the specified version of the Solidity compiler.
+        :param solidity_source: Solidity source code as a string.
+        """
 
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
         node_modules_path = os.path.join(base_dir, 'node_modules')
@@ -71,6 +83,10 @@ class DeployController:
         
 
     def deploy_contract(self, account_address):
+        """
+        Deploys the compiled smart contract to the Ethereum blockchain using the provided account address.
+        :param account_address: The Ethereum address from which the contract will be deployed.
+        """
 
         contract = self.w3.eth.contract(abi=self.abi, bytecode=self.bytecode)
         gas_estimate = contract.constructor().estimate_gas({'from': account_address})
@@ -88,9 +104,10 @@ class DeployController:
             print(f"Status: {Fore.GREEN + 'SUCCESS' + Style.RESET_ALL if tx_receipt.status == 1 else Fore.RED + 'FAIL' + Style.RESET_ALL}")
             self.contract = self.w3.eth.contract(address=tx_receipt.contractAddress, abi=self.abi)
             print(f"Contract address: {self.contract.address}")
+            
 
             
         except Exception as e:
-            print(Fore.RED + "[DeployController] Errore durante il deploy del contratto:" + Style.RESET_ALL)
+            print(Fore.RED + "Error while deploying contract:" + Style.RESET_ALL)
             print(e)
             raise

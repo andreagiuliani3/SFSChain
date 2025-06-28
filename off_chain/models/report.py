@@ -2,6 +2,13 @@ import datetime
 from models.model_base import Model
 
 class Report(Model):
+    """
+    This class represents the Report model that stores information about operations performed by users,
+    including the report ID, creation date, operation date, username, user role, operations performed
+    and the CO2 emissions associated with those operations.
+    It extends the functionality provided by the Model class.
+    """
+    
     def __init__(self, id_report, creation_date, operation_date, username, user_role, operations, co2):
         super().__init__()
         self.id_report = id_report
@@ -12,6 +19,7 @@ class Report(Model):
         self.operations = operations
         self.co2 = co2
 
+    # Getters for Report attributes
     def get_id_report(self): return self.id_report
     def get_creation_date(self): return self.creation_date
     def get_operation_date(self): return self.operation_date

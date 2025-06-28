@@ -14,13 +14,7 @@ class Utils:
     """
     This class provides various utility methods for handling user input, updating profiles, changing passwords, 
     displaying data, and navigating through pages of the user.
-
-    Attributes:
-        PAGE_SIZE (int): The number of items to display per page.
-        current_page (int): The index of the current page being displayed.
-
     """
-
     init(convert=True)
 
     PAGE_SIZE = 3
@@ -37,7 +31,6 @@ class Utils:
         Attributes:
             session (Session): The session object containing user information.
             controller (Controller): An instance of the Controller class for database interaction.
-            act_controller (ActionController): An instance of the ActionController class for managing actions.
             today_date (str): The current date in string format.
         """
 
@@ -50,12 +43,6 @@ class Utils:
     def change_passwd(self, username):
         """
         Allows the user to change their password.
-
-        Args:
-            username (str): The username of the user whose password is being changed.
-
-        Returns:
-            None
         """
 
         while True:
@@ -90,11 +77,13 @@ class Utils:
             
         
     def update_profile(self, username, user_role):
-    
+        """
+        Allows the user to update their profile information such as name, lastname, birthday, and phone number.
+        It also updates the blockchain with the new information if necessary.
+        """
         print(Fore.CYAN + "\nUpdate profile function" + Style.RESET_ALL)
 
         current = self.controller.get_user_by_username(username)
-
         name = click.prompt('Name ', default=current.get_name())
         lastname = click.prompt('Lastname ', default=current.get_lastname())
 
@@ -110,7 +99,7 @@ class Utils:
                 break
             print(Fore.RED + "Invalid phone number format." + Style.RESET_ALL)
 
-        # Blockchain update (se necessario)
+        # Blockchain update 
         public_key = self.controller.get_public_key_by_username(username)
         act_controller.update_user(name, lastname, user_role, from_address=public_key)
 
@@ -122,7 +111,14 @@ class Utils:
         else:
             print(Fore.RED + "Failed to update profile!" + Style.RESET_ALL)
 
+
     def make_operation_farmer(self, username, user_role):
+        """
+        Allows the farmer to perform various operations related to farming activities.
+        It calculates the CO2 emissions based on the operation type and the number of hectares or units.
+        It also checks the user's balance and updates it accordingly after the operation.
+        """
+
         if user_role != "FARMER":
             print(Fore.RED + "Operation not available for your role." + Style.RESET_ALL)
             return
@@ -145,7 +141,6 @@ class Utils:
         for key, (desc, factor) in operation_factors.items():
             print(f"{key}. {desc} (reference: {factor} tons CO2 per hectare)")
 
-        # Scelta dell’operazione
         while True:
             try:
                 op_choice = int(input("\nSelect the operation (1-5): "))
@@ -158,7 +153,6 @@ class Utils:
 
         operation_desc, co2_per_unit = operation_factors[op_choice]
 
-        # Richiesta numero di unità
         while True:
             try:
                 units = int(input(f"Enter number of hectares (or units) for '{operation_desc}': "))
@@ -169,10 +163,8 @@ class Utils:
             except ValueError:
                 print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
 
-        # Calcolo soglia dinamica
         threshold = co2_per_unit * units
 
-        # Emissioni effettive inserite
         while True:
             try:
                 co2 = int(input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): "))
@@ -188,9 +180,11 @@ class Utils:
             receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
             if receipt_so.status == 1:
                 if delta > 0:
+                    delta = abs(delta)
                     action = "added to"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
                 elif delta < 0: 
+                    delta = abs(delta)
                     action = "removed from"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
                 else:
@@ -199,16 +193,23 @@ class Utils:
             else:
                 print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
         else:
-            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {balance - abs(delta)} MORE CREDITS" + Style.RESET_ALL)
+            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
             action = None
 
     
     def make_operation_producer(self, username, user_role):
+        """
+        Allows the producer to perform various operations related to production activities.
+        It calculates the CO2 emissions based on the operation type and the number of units processed.
+        It also checks the user's balance and updates it accordingly after the operation.
+        """
+
         if user_role != "PRODUCER":
             print(Fore.RED + "Operation not available for your role." + Style.RESET_ALL)
             return
 
-        balance = self.controller.get_credit_by_username(username)
+        address = self.controller.get_public_key_by_username(username)
+        balance = act_controller.check_balance(address)
         if balance <= 0:
             print(Fore.RED + 'WARNING: YOUR BALANCE IS ZERO OR BELOW!' + Style.RESET_ALL)
 
@@ -224,7 +225,6 @@ class Utils:
         for key, (desc, factor) in operation_factors.items():
             print(f"{key}. {desc} (reference: {factor} tons CO2 per unit)")
 
-        # Scelta dell’operazione
         while True:
             try:
                 op_choice = int(input("\nSelect the operation (1-4): "))
@@ -237,7 +237,6 @@ class Utils:
 
         operation_desc, co2_per_unit = operation_factors[op_choice]
 
-        # Richiesta numero di unità
         while True:
             try:
                 units = int(input(f"Enter number of units (e.g., lots or batches) for '{operation_desc}': "))
@@ -248,10 +247,8 @@ class Utils:
             except ValueError:
                 print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
 
-        # Calcolo soglia dinamica
         threshold = co2_per_unit * units
 
-        # Emissioni effettive inserite
         while True:
             try:
                 co2 = int(input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): "))
@@ -260,18 +257,17 @@ class Utils:
                 print(Fore.RED + "Please enter a valid integer." + Style.RESET_ALL)
         
         description = f"{operation_desc} ({units} hectares)"
-        
-        
-
         address = self.controller.get_public_key_by_username(username)
         delta = threshold - co2
         if balance - abs(delta) >= 0:
             receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
             if receipt_so.status == 1:
                 if delta > 0:
+                    delta = abs(delta)
                     action = "added to"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
                 elif delta < 0: 
+                    delta = abs(delta)
                     action = "removed from"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
                 else:
@@ -280,16 +276,23 @@ class Utils:
             else:
                 print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
         else:
-            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {balance - abs(delta)} MORE CREDITS" + Style.RESET_ALL)
+            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
             action = None
 
     
     def make_operation_carrier(self, username, user_role):
+        """
+        Allows the carrier to perform various operations related to transportation activities.
+        It calculates the CO2 emissions based on the operation type and the number of shipment units.
+        It also checks the user's balance and updates it accordingly after the operation.
+        """
+
         if user_role != "CARRIER":
             print(Fore.RED + "Operation not available for your role." + Style.RESET_ALL)
             return
 
-        balance = self.controller.get_credit_by_username(username)
+        address = self.controller.get_public_key_by_username(username)
+        balance = act_controller.check_balance(address)
         if balance <= 0:
             print(Fore.RED + 'WARNING: YOUR BALANCE IS ZERO OR BELOW!' + Style.RESET_ALL)
 
@@ -304,7 +307,6 @@ class Utils:
         for key, (desc, factor) in operation_factors.items():
             print(f"{key}. {desc} (reference: {factor} tons CO2 per shipment unit)")
 
-        # Scelta dell’operazione
         while True:
             try:
                 op_choice = int(input("\nSelect the operation (1-3): "))
@@ -317,7 +319,6 @@ class Utils:
 
         operation_desc, co2_per_unit = operation_factors[op_choice]
 
-        # Richiesta numero di unità
         while True:
             try:
                 units = int(input(f"Enter number of units (e.g., shipments or pallets) for '{operation_desc}': "))
@@ -337,18 +338,17 @@ class Utils:
                 print(Fore.RED + "Please enter a valid integer." + Style.RESET_ALL)
 
         description = f"{operation_desc} ({units} hectares)"
-       
-        
-
         address = self.controller.get_public_key_by_username(username)
         delta = threshold - co2
         if balance - abs(delta) >= 0:
             receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
             if receipt_so.status == 1:
                 if delta > 0:
+                    delta = abs(delta)
                     action = "added to"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
                 elif delta < 0: 
+                    delta = abs(delta)
                     action = "removed from"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
                 else:
@@ -357,17 +357,23 @@ class Utils:
             else:
                 print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
         else:
-            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {balance - abs(delta)} MORE CREDITS" + Style.RESET_ALL)
+            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
             action = None
 
 
-
     def make_operation_seller(self, username, user_role):
+        """
+        Allows the seller to perform various operations related to sales activities.
+        It calculates the CO2 emissions based on the operation type and the number of units sold.
+        It also checks the user's balance and updates it accordingly after the operation.
+        """
+
         if user_role != "SELLER":
             print(Fore.RED + "Operation not available for your role." + Style.RESET_ALL)
             return
 
-        balance = self.controller.get_credit_by_username(username)
+        address = self.controller.get_public_key_by_username(username)
+        balance = act_controller.check_balance(address)
         if balance <= 0:
             print(Fore.RED + 'WARNING: YOUR BALANCE IS ZERO OR BELOW!' + Style.RESET_ALL)
 
@@ -415,16 +421,17 @@ class Utils:
                 print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
 
         description = f"{operation_desc} ({units} hectares)"
-        
         address = self.controller.get_public_key_by_username(username)
         delta = threshold - co2
         if balance - abs(delta) >= 0:
             receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
             if receipt_so.status == 1:
                 if delta > 0:
+                    delta = abs(delta)
                     action = "added to"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
                 elif delta < 0: 
+                    delta = abs(delta)
                     action = "removed from"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
                 else:
@@ -433,20 +440,24 @@ class Utils:
             else:
                 print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
         else:
-            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {balance - abs(delta)} MORE CREDITS" + Style.RESET_ALL)
+            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
             action = None
 
 
-    def make_green_action(self, username, user_role):
+    def make_green_action(self, username):
+        """
+        Allows the user to register a green action they performed, such as recycling or planting a tree.
+        It prompts the user for a description of the action and the amount of CO2 saved.
+        It also checks the user's balance and updates it accordingly after the action.
+        """
+
         print(Fore.CYAN + "\nMake a Green Action" + Style.RESET_ALL)
 
-       
         green_action = input("Enter the description of the green action you performed: ").strip()
         if not green_action:
             print(Fore.RED + "Green action description cannot be empty." + Style.RESET_ALL)
             return
 
-      
         while True:
             try:
                 co2_saved = int(input("Enter the amount of CO2 saved (in tons): "))
@@ -469,6 +480,13 @@ class Utils:
 
 
     def give_credit(self, username):
+        """
+        Allows the user to give credits to another user.
+        It prompts the user for the amount of credits they want to give and the username of the recipient.
+        It checks the user's balance and ensures that the recipient's username is valid.
+        If the operation is successful, it transfers the credits to the recipient's account.
+        """
+
         print(Fore.YELLOW + "Type 'exit' at any prompt to cancel the operation.\n" + Style.RESET_ALL)
         
         credit_input = input("How many credits do you want to give? ")
@@ -518,13 +536,20 @@ class Utils:
                 print(Fore.RED + 'Wrong input, please insert Y or N!\n' + Style.RESET_ALL)
         else:
             print(Fore.RED + 'Action denied: insufficient balance.\n' + Style.RESET_ALL)
+
     
     def create_report(self, username):
+        """
+        Allows the user to create a report of their operations within a specified date range.
+        It prompts the user for the start and end dates of the operations they want to include in the report.
+        It validates the date formats and ensures that the end date is not before the start date.
+        If the report is successfully created, it notifies the user.
+        """
+
         print(Fore.YELLOW + "Type 'exit' at any time to cancel the operation.\n" + Style.RESET_ALL)
 
         creation_date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
 
-        # Inserimento data iniziale
         while True:
             start_date = input("Insert the first day of the operation you want to insert in the report (YYYY-MM-DD): ").strip()
             if start_date.lower() == "exit":
@@ -535,7 +560,6 @@ class Utils:
             else:
                 print(Fore.RED + "\nInvalid date or incorrect format." + Style.RESET_ALL)
 
-        # Inserimento data finale
         while True:
             end_date = input("Insert the date of the last operation you want to put into the report (YYYY-MM-DD): ").strip()
             if end_date.lower() == "exit":
@@ -551,7 +575,6 @@ class Utils:
             else:
                 print(Fore.RED + "\nInvalid date or incorrect format." + Style.RESET_ALL)
 
-        # Creazione report
         report_code = self.controller.insert_report_info(creation_date, start_date, end_date, username)
 
         if report_code == 1:

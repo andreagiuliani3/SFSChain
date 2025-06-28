@@ -32,14 +32,15 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         uint256 co2Saved;
     } 
 
+    /// @notice Address of the contract owner
     address public owner;
+
     mapping(address => User) public users;
     mapping(address => bool) public authorizedEditors;
-    mapping(address => uint256) public balance;
     mapping(address => Operation[]) public operations;
     mapping(address => GreenAction[]) public greenActions;
 
-
+    /// @notice Initial amount of tokens granted to a user upon registration
     uint256 public constant INITIAL_TOKENS_ON_REGISTRATION = 10;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -50,9 +51,6 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
     event TokensRemoved(address indexed from, uint256 amount);
     event OperationRegistered(address indexed user, string actionType, string description, uint256 timestamp, uint256 co2emissions);
     event GreenActionRegistered(address indexed user, string description, uint256 timestamp, uint256 co2Saved);
-    
-
-    event Debug(string tag);
 
     /// @notice Constructor: Initializes the ERC20 token and sets the owner.
     constructor() ERC20("CarbonCredit", "CCT") ERC20Permit("CarbonCredit") {
@@ -114,7 +112,7 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         emit UserUpdated(msg.sender, name, lastName, userRole);
     }
 
-    /// @notice Registers an operation performed by the user, updating token balance accordingly (only owner or authorized editor)
+    /// @notice Registers an operation and updates the user’s token balance and history (only owner or authorized editor)
     function registerOperation(string memory actionType, string memory description, int256 delta, uint256 co2emissions) public onlyAuthorized {
         require(users[msg.sender].isRegistered, "User not registered");
 
@@ -143,7 +141,7 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
         return operations[user];
     }
 
-    /// @notice Registers a green action performed by the user, updating token balance accordingly (only owner or authorized editor)
+    /// @notice Registers a green action, adds token credits, and stores the action in user history (only owner or authorized editor)
     function registerGreenAction(string memory description, uint256 co2Saved) public onlyAuthorized {
     require(users[msg.sender].isRegistered, "User not registered");
 
@@ -197,7 +195,7 @@ contract CarbonCreditRecords is ERC20, ERC20Burnable, ERC20Permit {
     }
 
     /// @notice Checks if the sender is registered (only owner or authorized editor)
-    function isRegistered() public onlyAuthorized() view returns (bool) {
+    function isRegistered() public view returns (bool) {
         return users[msg.sender].isRegistered;
     }
 }

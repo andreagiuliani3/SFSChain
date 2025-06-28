@@ -34,15 +34,27 @@ class Session:
         self.__user = user
 
     def get_operation(self):
+        """
+        Returns the current operation being performed in the session.
+        """
         return self._operation
     
     def set_operation(self, operation):
+        """
+        Sets the operation for the session.
+        """
         self._operation = operation
 
     def get_report(self):
+        """
+        Returns the report associated with the session.
+        """
         return self._report
     
     def set_report(self, report):
+        """
+        Sets the report for the session.
+        """ 
         self._report = report
 
     def get_attempts(self):

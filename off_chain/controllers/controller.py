@@ -7,7 +7,7 @@ from models.credentials import Credentials
  
 class Controller:
     """
-    Controller handles user and medical data interactions with the database.
+    Controller class to manage user authentication, registration, and session handling.
     """
     init(convert=True)
  
@@ -53,15 +53,18 @@ class Controller:
         """
         Inserts user information into the database.
  
-        :param user_role: The role of the user.
-        :param username: The username of the user.
-        :param name: The first name of the user.
-        :param lastname: The last name of the user.
-        :param birthday: The birthday of the user (format YYYY-MM-DD).
-        :param mail: Email of the user.
-        :param phone: Phone number of the user.
-        :param company_name: The company of the user (if it exists).
-        :return: An insertion code indicating success (0) or failure.
+        :param username: The user's username.
+        :param name: The user's first name. 
+        :param lastname: The user's last name.
+        :param user_role: The user's role (e.g., admin, user).
+        :param birthday: The user's birthday in 'YYYY-MM-DD' format.
+        :param mail: The user's email address.
+        :param phone: The user's phone number.
+        :param company_name: The user's company name.
+        :param password: The user's password.
+        :param public_key: The user's public key.
+        :param private_key: The user's private key.
+        :return: A registration code indicating the result of the operation.
         """
         
         registration_code = self.db_ops.register_user(username, name, lastname, user_role, birthday, mail, 
@@ -73,13 +76,19 @@ class Controller:
  
         return registration_code
     
+    
     def insert_report_info(self, creation_date: str, start_date: str, end_date: str, username: str):
+        """
+        Inserts report information into the database and updates the session with the report details.
+        """
+
         report_code = self.db_ops.insert_report(creation_date, username, start_date, end_date)
        
         if report_code == 1:
             report = self.db_ops.get_report_by_username(username)
             self.session.set_report(report)
         return report_code
+    
     
     def check_null_info(self, info):
         """
@@ -92,6 +101,7 @@ class Controller:
             return True
         else:
             return False
+        
        
     def check_birthdate_format(self, date_string):
         """
@@ -110,6 +120,7 @@ class Controller:
                 return False
         except ValueError:
             return False
+        
  
     def check_tpdate_format(self, date_string, check_today = 0):
         """
@@ -134,6 +145,7 @@ class Controller:
             else: return True
         except ValueError:
             return False
+        
        
     def check_date_order(self, first_date_string, second_date_string):
         """
@@ -156,6 +168,7 @@ class Controller:
             return second_date > first_date
         except ValueError:
             return False
+        
        
     def check_phone_number_format(self, phone_number):
         """
@@ -169,6 +182,7 @@ class Controller:
             if 7 <= len(phone_number) <= 15:
                 return True
         return False
+    
    
     def check_email_format(self, email):
         """
@@ -183,32 +197,35 @@ class Controller:
             return True
         else:
             return False
-       
-    def possessive_suffix(self, name):
-        """
-        Determines the appropriate possessive suffix for a given name based on its final character.
- 
-        :param name: The name string to which the possessive suffix will be applied.
-        :return: Returns "'s" if the last character of the name is not 's', otherwise returns "'" to form the possessive correctly.
-        """
-        if name[-1].lower() != 's':
-            return"'s"
-        else:
-            return "'"
-       
+
     def check_username(self, username):
+        """
+        Checks if a username already exists in the database.
+        """
         return self.db_ops.check_username(username)
    
     def check_keys(self, public_key, private_key):
+        """
+        Checks if the provided public and private keys exist in the database.
+        """
         return self.db_ops.key_exists(public_key, private_key)
    
     def check_passwd(self, username, password):
+        """
+        Checks if the provided username and password match the credentials stored in the database.
+        """
         return self.db_ops.check_passwd(username, password)
    
     def check_unique_phone_number(self, phone):
+        """
+        Checks if a phone number is unique in the database.
+        """
         return self.db_ops.check_unique_phone_number(phone)
    
     def check_unique_email(self, mail):
+        """
+        Checks if an email address is unique in the database.
+        """
         return self.db_ops.check_unique_email(mail)
    
     def change_passwd(self, username, old_pass, new_pass):
@@ -228,34 +245,58 @@ class Controller:
                 return -2
    
     def get_user_by_username(self, username):
+        """
+        Retrieves user information from the database based on the provided username.
+        """
         return self.db_ops.get_user_by_username(username)
    
     def check_attempts(self):
+        """
+        Checks if the number of login attempts is below the limit set for the session.
+        """
         if self.session.get_attempts() < self.__n_attempts_limit:
             return True
         else:
             return False
         
     def get_creds_by_username(self, username):
+        """
+        Retrieves credentials for a user based on their username.
+        """
         return self.db_ops.get_creds_by_username(username)
     
     def get_public_key_by_username(self, username):
+        """
+        Retrieves the public key associated with a given username.
+        """
         return self.db_ops.get_public_key_by_username(username)
     
     def get_role_by_username(self, username):
+        """
+        Retrieves the role of a user based on their username.
+        """
         return self.db_ops.get_role_by_username(username)
-    
-    def get_credit_by_username(self, username):
-        return self.db_ops.get_credit_by_username(username)
    
     def get_report_by_username(self, username):
+        """
+        Retrieves the report associated with a given username.
+        """
         return self.db_ops.get_report_by_username(username)
     
     def get_report_by_date(self, username, creation_date):
+        """
+        Retrieves a report for a user based on the creation date of the report.
+        """
         return self.db_ops.get_report_by_date(username, creation_date)
     
     def get_information_for_credit(self):
+        """
+        Retrieves information necessary for calculating carbon credits.
+        """
         return self.db_ops.get_information_for_credit()
     
     def update_user_profile(self, username, name, lastname, birthday, phone):
+        """
+        Updates the user's profile information in the database.
+        """
         return self.db_ops.update_user_profile(username, name, lastname, birthday, phone)

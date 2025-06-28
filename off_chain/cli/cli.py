@@ -8,9 +8,17 @@ from controllers.deploy_controller import DeployController
 from database.database_operation import DatabaseOperations
 from cli.utils import Utils
 from colorama import Fore, Style
+from tabulate import tabulate
 
 
 class CommandLineInterface:
+    """
+    This class implements the command line interface for the Carbon Credit Management System.
+    It provides methods for user registration, login, and various functionalities based on user roles.
+    It allows users to register a new account, log in, view and update their profile, check their balance,
+    perform operations, generate reports, and ask for carbon credits from other users.
+    It also handles user input validation and provides a menu-driven interface for easy navigation.
+    """
 
     def __init__(self, session):
 
@@ -48,7 +56,6 @@ class CommandLineInterface:
         
             """ + Style.RESET_ALL)
         
-        
         for key in self.menu.keys():
             print(key, '--' ,self.menu[key])
 
@@ -74,7 +81,6 @@ class CommandLineInterface:
         except ValueError:
             print(Fore.RED + 'Wrong input. Please enter a number!\n'+ Style.RESET_ALL)
             return
-    
     
     
     def registration_menu(self):
@@ -210,57 +216,11 @@ class CommandLineInterface:
             return -1
 
         
-    
-    def insert_user_info(self, username, user_role):
-        """
-        This method guides users through the process of providing personal information.
-        It validates user inputs and ensures data integrity before inserting the
-        information into the system. Additionally, it registers the user entity
-        on the blockchain.
- 
-        Args:
-            username (str): The username of the users.
-            role (str): The role of the user.
-        """
- 
-        print("\nProceed with the insertion of a few personal information.")
-        while True:
-            name = input('Name: ')
-            if self.controller.check_null_info(name): break
-            else: print(Fore.RED + '\nPlease insert information.' + Style.RESET_ALL)
-        while True:
-            lastname = input('Lastname: ')
-            if self.controller.check_null_info(lastname): break
-            else: print(Fore.RED + '\nPlease insert information.' + Style.RESET_ALL)
-        while True:
-            birthday = input('Date of birth (YYYY-MM-DD): ')
-            if self.controller.check_birthdate_format(birthday): break
-            else: print(Fore.RED + "\nInvalid birthdate or incorrect format." + Style.RESET_ALL)
-        while True:
-            email = input('E-mail: ')
-            if self.controller.check_null_info(email):
-                if self.controller.check_unique_email(email) == 0: break
-                else: print(Fore.RED + "This e-mail has already been inserted. \n" + Style.RESET_ALL)
-            else: print(Fore.RED + '\nPlease insert information.' + Style.RESET_ALL)
-        company_name = input('Company name: ')
-        while True:
-            phone = input('Phone number: ')
-            if self.controller.check_phone_number_format(phone):
-                if self.controller.check_unique_phone_number(phone) == 0: break
-                else: print(Fore.RED + "This phone number has already been inserted. \n" + Style.RESET_ALL)
-            else: print(Fore.RED + "Invalid phone number format.\n" + Style.RESET_ALL)
-        from_address_users = self.controller.get_public_key_by_username(username)
-        act_controller.add_user(name, lastname, user_role, from_address_users)
-        insert_code = self.controller.insert_user_info(username, name, lastname, user_role, birthday, email, phone, company_name)
-        if insert_code == 0:
-            print(Fore.GREEN + 'Information saved correctly!' + Style.RESET_ALL)
-            self.user_menu(username,user_role)
-        elif insert_code == -1:
-            print(Fore.RED + 'Internal error!' + Style.RESET_ALL)
-
     def login_menu(self):
         """
         Prompts user credentials for authentication.
+        Allows exiting at any input step by typing 'exit'.
+
         Returns:
             int: -1 = auth failure, -2 = timeout, -3 = user exited, 0 = success
         """
@@ -303,14 +263,12 @@ class CommandLineInterface:
         """
         This method presents users with a menu of options tailored to their role.
 
-        Args:
-            username (str): The username of the logged-in user.
         """
         user_options = {
             1: "Profile",
             2: "Operation",
             3: "Report",
-            4: "Ask for credit",  # Triggers the sub-menu
+            4: "Ask for credit", 
             5: "Log out"
         }
 
@@ -324,10 +282,8 @@ class CommandLineInterface:
                 if choice in user_options:
                     if choice == 1:
                         self.profile_submenu(username, user_role)
-
                     elif choice == 2:
                         self.credit_submenu(username, user_role)
-
                     elif choice == 3:
                         self.report_submenu(username)
                     elif choice == 4:
@@ -344,6 +300,7 @@ class CommandLineInterface:
 
             except ValueError:
                 print(Fore.RED + "Invalid Input! Please enter a valid number." + Style.RESET_ALL)
+
 
     def profile_submenu(self, username, user_role):
         """
@@ -407,7 +364,7 @@ class CommandLineInterface:
                     if choice == 1:
                         self.view_balance(username)
                     elif choice == 2:
-                        self.util.give_credit(username, user_role)
+                        self.util.give_credit(username)
                     elif choice == 3:
                         if user_role == 'FARMER':
                             self.util.make_operation_farmer(username, user_role)   
@@ -418,11 +375,12 @@ class CommandLineInterface:
                         elif user_role == 'SELLER':
                             self.util.make_operation_seller(username, user_role)
                     elif choice == 4:
-                        self.util.make_green_action(username, user_role)
+                        self.util.make_green_action(username)
                 else:
                     print(Fore.RED + "Invalid choice! Please try again." + Style.RESET_ALL)
             except ValueError:
                 print(Fore.RED + "Invalid Input! Please enter a valid number." + Style.RESET_ALL)
+
 
     def report_submenu(self, username):
         """
@@ -455,12 +413,12 @@ class CommandLineInterface:
             except ValueError:
                 print(Fore.RED + "Invalid Input! Please enter a valid number." + Style.RESET_ALL)
 
+
     def view_userview(self, username):
         """
         This method retrieves and displays the profile information of the user 
         identified by the given username. It presents details such as username, 
-        name, lastname, birthday, birth place, residence, autonomous status, 
-        and phone number.
+        name, lastname, birthday, company name, role and phone number.
         """
         userview = self.controller.get_user_by_username(username)
         print(Fore.CYAN + "\nUser INFO\n" + Style.RESET_ALL)
@@ -473,7 +431,12 @@ class CommandLineInterface:
         print("Phone: ", userview.get_phone())
         input("\nPress Enter to exit\n")
 
+
     def view_balance(self, username):
+        """
+        This method retrieves and displays the balance of the user identified by the given username.
+        It fetches the user's public key and checks the balance using the action controller.
+        """
         address = self.controller.get_public_key_by_username(username)
         balance = act_controller.check_balance(address)
         print(Fore.CYAN + "\nBalance:\n" + Style.RESET_ALL)
@@ -481,13 +444,11 @@ class CommandLineInterface:
             print(f"Your balance is: {balance} credit")
         else:
             print(f"Your balance is: {balance} credits")
+
         
     def view_user_report(self, username):
         """
         Visualize the user report and allow the user to select a specific report by number.
-
-        Args:
-            username (str): The username of the logged-in user.
         """
         reportview = self.controller.get_report_by_username(username)
         if not reportview:
@@ -522,20 +483,35 @@ class CommandLineInterface:
         if reportdateview:
             if len(reportdateview) > 1:
                 print("There is more than one report for this date:\n")
+
+            table_data = []
             for report in reportdateview:
-                print("Date: ", report.get_operation_date())
-                print("Operations: ", report.get_operations())
-                print("Total Emissions (co2): ", report.get_co2())
+                operations_raw = report.get_operations()
+                operations = operations_raw.split(" | ") if isinstance(operations_raw, str) else [str(operations_raw)]
+
+                for i, op in enumerate(operations):
+                    row = [
+                        report.get_operation_date() if i == 0 else "",
+                        op.strip(),
+                        report.get_co2() if i == 0 else ""
+                    ]
+                    table_data.append(row)
+
+            headers = ["Date", "Operation", "Total CO₂ Emissions"]
+            print(tabulate(table_data, headers=headers, tablefmt="fancy_grid"))
+
         else:
             print("Report not found.")
 
         input("\nPress Enter to return to the menu...\n")
 
     def ask_for_credit(self):
+        """
+        This method retrieves and displays a list of users who have carbon credits available.
+        """
         informationview = self.controller.get_information_for_credit()
-        print("You can see a list of user with the amount of credit and their email. Try to contact them and ask for credit")
+        print("You can see a list of user and their email. Try to contact them and ask for credit")
         if informationview:
             for users in informationview:
-                print("\nCredit: ", users.get_carbon_credit())
                 print("Username: ", users.get_username())
                 print("Email: ", users.get_email())

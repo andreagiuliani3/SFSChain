@@ -262,7 +262,7 @@ class DatabaseOperations:
     def get_information_for_credit(self):
         
         information_data = self.cur.execute("""
-            SELECT username, name, lastname, user_role, birthday, email, phone, company_name, carbon_credit
+            SELECT username, name, lastname, user_role, birthday, email, phone, company_name
             FROM Users
         """).fetchall()  
 
