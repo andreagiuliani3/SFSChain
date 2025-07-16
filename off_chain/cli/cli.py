@@ -1,5 +1,6 @@
 import getpass
 import re
+from session.session import Session
 from eth_utils import *
 from eth_keys import *
 from controllers.controller import Controller
@@ -20,7 +21,7 @@ class CommandLineInterface:
     It also handles user input validation and provides a menu-driven interface for easy navigation.
     """
 
-    def __init__(self, session):
+    def __init__(self, session: Session):
 
         self.session = session
         self.controller = Controller(session)
@@ -106,11 +107,6 @@ class CommandLineInterface:
             if private_key == confirm_private_key:
                 if self.controller.check_keys(public_key, private_key):
                     print(Fore.RED + 'A wallet with these keys already exists. Please enter a unique set of keys.' + Style.RESET_ALL)
-                    attempts += 1
-                    if attempts >= 3:
-                        print(Fore.RED + "Maximum retry attempts reached. Redeploying..." + Style.RESET_ALL)
-                        act_controller.deploy_and_initialize('../../on_chain/CarbonCredit.sol')
-                        attempts = 0
                 else:
                     try:
                         pk_bytes = decode_hex(private_key)
@@ -205,11 +201,7 @@ class CommandLineInterface:
                 self.user_menu(username,user_role)
             elif registration_code == -1:
                 print(Fore.RED + 'Internal error!' + Style.RESET_ALL)
-
-                reg_code = self.controller.registration(username, password, user_role, public_key, private_key)
-                if reg_code == 0:
-                    self.insert_user_info(username, user_role)
-                elif reg_code == -2:
+            elif registration_code == -2:
                     print(Fore.RED + 'Your username has been taken.\n' + Style.RESET_ALL)
         else:
             print(Fore.RED + 'Sorry, but the provided public and private key do not match.\n' + Style.RESET_ALL)
@@ -227,10 +219,13 @@ class CommandLineInterface:
         print(Fore.YELLOW + "Type 'exit' at any prompt to cancel and go back.\n" + Style.RESET_ALL)
 
         while True:
-            if not self.controller.check_attempts() and self.session.get_timeout_left() < 0:
+           
+            if not self.controller.check_attempts() and self.session.get_timeout_left() <= 0:
                 self.session.reset_attempts()
+                
 
             if self.session.get_timeout_left() <= 0 and self.controller.check_attempts():
+
                 public_key = input('Insert public key: ')
                 if public_key.lower() == 'exit': return -3
 
@@ -350,7 +345,7 @@ class CommandLineInterface:
         }
 
         while True:
-            print(Fore.CYAN + "\nCREDIT MENU (press Enter to go back)" + Style.RESET_ALL)
+            print(Fore.CYAN + "\nOPERATION MENU (press Enter to go back)" + Style.RESET_ALL)
             for key, value in report_options.items():
                 print(f"{key} -- {value}")
 
@@ -388,8 +383,8 @@ class CommandLineInterface:
         Press Enter without typing anything to go back.
         """
         report_options = {
-            1: "View Reports",
-            2: "Generate New Report"
+            1: "Generate New Report",
+            2: "View Report"
         }
 
         while True:
@@ -404,10 +399,10 @@ class CommandLineInterface:
             try:
                 choice = int(choice)
                 if choice in report_options:
-                    if choice == 1:
-                        self.view_user_report(username)
-                    elif choice == 2:
+                    if choice == 1:                        
                         self.util.create_report(username)
+                    elif choice == 2:
+                        self.view_user_report(username)
                 else:
                     print(Fore.RED + "Invalid choice! Please try again." + Style.RESET_ALL)
             except ValueError:

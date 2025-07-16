@@ -1,5 +1,6 @@
 import os
 import json
+import sys
 from colorama import Fore, Style, init
 from controllers.deploy_controller import DeployController
 from session.logging import log_msg, log_error
@@ -63,22 +64,38 @@ class ActionController:
         Args:
             source_path (str): The path to the Solidity source file.
         """
-
         print("Starting deployment and contract initialization...")
         controller = DeployController()
-
         path = os.path.abspath(os.path.join(os.path.dirname(__file__), source_path))
 
-        try:
-            controller.compile_and_deploy(path)
-            self.contract = controller.contract
-            os.makedirs('on_chain', exist_ok=True)
-            with open('on_chain/contract_address.txt', 'w') as f:
-                f.write(self.contract.address)
-            with open('on_chain/contract_abi.json', 'w') as f:
-                json.dump(self.contract.abi, f)
-        except Exception as e:
-            print(f"Deploy fallito: {e}")
+        while True:
+            try:
+                controller.compile_and_deploy(path)
+                self.contract = controller.contract
+                os.makedirs('on_chain', exist_ok=True)
+
+                with open('on_chain/contract_address.txt', 'w') as f:
+                    f.write(self.contract.address)
+
+                with open('on_chain/contract_abi.json', 'w') as f:
+                    json.dump(self.contract.abi, f)
+
+                print("Deploy and initialization completed successfully.")
+                break
+
+            except Exception as e:
+                print(f"Deploy failed: {e}")
+                
+                # Ciclo di validazione input
+                while True:
+                    choice = input("Do you want to retry? (Y = Yes / N = No): ").strip().upper()
+                    if choice == 'Y':
+                        break  
+                    elif choice == 'N':
+                        print("Exiting...")
+                        sys.exit(1)
+                    else:
+                        print("Invalid input. Please enter 'Y' or 'N'.")  
 
 
     def read_data(self, function_name, *args):
