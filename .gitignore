@@ -1,0 +1,12 @@
+*.pyc
+.DS_Store
+node_modules
+package-lock.json
+package.json
+truffle-config.js
+*.vscode
+*.venv
+accounts.txt
+*contract_address.txt
+*.log
+*.pytest_cache

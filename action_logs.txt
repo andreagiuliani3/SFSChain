@@ -1,0 +1,3 @@
+2025-07-17 11:21:08,182 - INFO - Transaction addUser executed. From: 0x2579257Ceb6F9B7041023a111E076606f72Db7Ce, Tx Hash: b6bf57860b30c07b5647cc3a95369eb30f688d3209af7cb54d62868fec48639f, Gas: 196527, Gas Price: 0
+2025-07-17 11:21:40,181 - INFO - Transaction registerOperation executed. From: 0xd3237b2285F4c062304d3135F741D00d8cE4AD1e, Tx Hash: f21cf64f637c8ae1d73af29d775d5221d187a6cce42e0fd2b146eb04cfe29d8d, Gas: 165128, Gas Price: 0
+2025-07-18 15:04:14,164 - INFO - Transaction addUser executed. From: 0x2579257Ceb6F9B7041023a111E076606f72Db7Ce, Tx Hash: 0fc5b1128ea3a2392c7001f8278e5eddfde0b82c7b22b4ba9334a6f6106d0a6c, Gas: 196527, Gas Price: 0

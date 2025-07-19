@@ -1,0 +1,87 @@
+networks:
+  besu-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+
+services:
+  node1:
+    build: ./SFSC-Network/Node-1
+    container_name: besu-node-1
+    ports:
+      - "8545:8545"
+      - "30303:30303"
+    volumes:
+      - ./SFSC-Network/Node-1/data:/opt/besu/data
+      - ./SFSC-Network/genesis.json:/opt/besu/genesis.json
+    networks:
+      besu-net:
+        ipv4_address: 172.30.0.2
+
+  node2:
+    build: ./SFSC-Network/Node-2
+    container_name: besu-node-2
+    ports:
+      - "8546:8546"
+      - "30304:30304"
+    volumes:
+      - ./SFSC-Network/Node-2/data:/opt/besu/data
+      - ./SFSC-Network/genesis.json:/opt/besu/genesis.json
+    networks:
+      besu-net:
+        ipv4_address: 172.30.0.3
+
+  node3:
+    build: ./SFSC-Network/Node-3
+    container_name: besu-node-3
+    ports:
+      - "8547:8547"
+      - "30305:30305"
+    volumes:
+      - ./SFSC-Network/Node-3/data:/opt/besu/data
+      - ./SFSC-Network/genesis.json:/opt/besu/genesis.json
+    networks:
+      besu-net:
+        ipv4_address: 172.30.0.4
+
+  node4:
+    build: ./SFSC-Network/Node-4
+    container_name: besu-node-4
+    ports:
+      - "8548:8548"
+      - "30306:30306"
+    volumes:
+      - ./SFSC-Network/Node-4/data:/opt/besu/data
+      - ./SFSC-Network/genesis.json:/opt/besu/genesis.json
+    networks:
+      besu-net:
+        ipv4_address: 172.30.0.5
+  
+  sfsc-app:
+    build:
+      context: ./
+    stdin_open: true
+    tty: true
+    restart: always
+    command: >
+      sh -c "
+        echo 'Waiting for Besu to be ready...';
+        until curl -s -X POST --data '{\"jsonrpc\":\"2.0\",\"method\":\"eth_chainId\",\"params\":[],\"id\":1}' http://node1:8545 -H \"Content-Type: application/json\" | grep -q 'result'; do
+          echo 'Besu not ready yet...';
+          sleep 5;
+        done;
+        echo 'Besu is ready, starting the application...';
+        python /app/off_chain/main.py
+      "
+    container_name: sfsc-app
+    depends_on:
+      - node1
+      - node2
+      - node3
+      - node4
+    networks:
+      besu-net:
+        ipv4_address: 172.30.0.10
+
+        

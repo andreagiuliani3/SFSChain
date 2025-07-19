@@ -86,7 +86,6 @@ class ActionController:
             except Exception as e:
                 print(f"Deploy failed: {e}")
                 
-                # Ciclo di validazione input
                 while True:
                     choice = input("Do you want to retry? (Y = Yes / N = No): ").strip().upper()
                     if choice == 'Y':
