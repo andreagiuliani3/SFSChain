@@ -117,7 +117,7 @@ At this point, the program is ready to be used. After executing the previous com
 
 Upon the very first startup of the program, it will perform an application check mechanism from Docker to verify that Ganache is ready to listen. If there are no errors, SFSChain will start correctly and run the first homepage.
 
-![first look](https://raw.githubusercontent.com/andreagiuliani3/Software-Security-BESU/main/first_look.png)
+![first look](https://github.com/andreagiuliani3/Software-Security-BESU/blob/main/first_look.png)
 
 Now, you can *register* a new account as a Farmer, Carrier, Seller or Producer, or *login* if you are already enrolled, and start exploring every feature of our application.
 You can find some test credentials in `credenziali_prova.txt`, inside this repository.
