@@ -7,3 +7,4 @@ docker-compose build (al momento impiega quasi 5 minuti a causa, soprattutto, de
 docker-compose run -it sfsc-app
 
 (Besu impiega qualche secondo ad avviarsi)
+
