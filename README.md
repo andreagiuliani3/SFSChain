@@ -113,7 +113,7 @@ At this point, the program is ready to be used. After executing the previous com
 
 ### First look
 
-Upon the very first startup of the program, it will perform an application check mechanism from Docker to verify that Ganache is ready to listen. If there are no errors, ADIChain will start correctly and run the first homepage.
+Upon the very first startup of the program, it will perform an application check mechanism from Docker to verify that Ganache is ready to listen. If there are no errors, SFSChain will start correctly and run the first homepage.
 
 ![]( https://github.com/andreagiuliani3/Software-Security-BESU/blob/master/first_look.png)
 
