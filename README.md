@@ -117,7 +117,6 @@ At this point, the program is ready to be used. After executing the previous com
 
 Upon the very first startup of the program, it will perform an application check mechanism from Docker to verify that Ganache is ready to listen. If there are no errors, SFSChain will start correctly and run the first homepage.
 
-![first look](https://github.com/andreagiuliani3/Software-Security-BESU/blob/main/first_look.png)
 <p align="center">
   <img src="https://github.com/andreagiuliani3/Software-Security-BESU/blob/main/first_look.png" alt="first look" width="600">
 </p>
