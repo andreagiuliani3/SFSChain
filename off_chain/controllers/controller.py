@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
-from colorama import Fore, Style, init
+from colorama import init, Fore, Style
+init(strip=False, convert=False)
 from database.database_operation import DatabaseOperations
 from session.session import Session
 from models.credentials import Credentials
@@ -9,7 +10,7 @@ class Controller:
     """
     Controller class to manage user authentication, registration, and session handling.
     """
-    init(convert=True)
+    
  
     def __init__(self, session: Session):
         """

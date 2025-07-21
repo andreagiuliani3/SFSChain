@@ -1,10 +1,11 @@
 import os
-from colorama import Fore, Style, init
+from colorama import init, Fore, Style
+init(strip=False, convert=False)
 from solcx import compile_standard, get_installed_solc_versions, install_solc, set_solc_version
 from config.web3_provider import get_web3
 from packaging.version import Version
 
-init(convert=True)
+
 
 class DeployController:
     """

@@ -1,7 +1,8 @@
 import os
 import json
 import sys
-from colorama import Fore, Style, init
+from colorama import init, Fore, Style
+init(strip=False, convert=False)
 from controllers.deploy_controller import DeployController
 from session.logging import log_msg, log_error
 from web3 import Web3
@@ -13,7 +14,7 @@ import time
 
 
 
-init(convert=True)
+
 
 class ActionController:
     """

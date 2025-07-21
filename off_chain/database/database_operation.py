@@ -9,7 +9,8 @@ import os
 import hashlib
 import base64
 from cryptography.fernet import Fernet
-from colorama import Fore, Style, init
+from colorama import init, Fore, Style
+init(strip=False, convert=False)
 from config import config
 from models.users import User
 from models.credentials import Credentials
@@ -25,7 +26,7 @@ class DatabaseOperations:
     Handles all interactions with the database for user data manipulation and retrieval.
     This class manages the connection to the database and executes SQL queries to manage the data.
     """
-    init(convert=True)
+    
 
     def __init__(self):
         """

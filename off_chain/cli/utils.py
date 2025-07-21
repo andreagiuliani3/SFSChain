@@ -1,7 +1,8 @@
 import re
 import click
 import getpass
-from colorama import Fore, Style, init
+from colorama import init, Fore, Style
+init(strip=False, convert=False)
 from datetime import date
 from controllers.action_controller import *
 from controllers.controller import Controller
@@ -15,7 +16,6 @@ class Utils:
     This class provides various utility methods for handling user input, updating profiles, changing passwords, 
     displaying data, and navigating through pages of the user.
     """
-    init(convert=True)
 
     PAGE_SIZE = 3
     current_page = 0

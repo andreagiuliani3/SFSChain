@@ -8,7 +8,8 @@ from singleton.action_controller_instance import action_controller_instance as a
 from controllers.deploy_controller import DeployController
 from database.database_operation import DatabaseOperations
 from cli.utils import Utils
-from colorama import Fore, Style
+from colorama import init, Fore, Style
+init(strip=False, convert=False)
 from tabulate import tabulate
 
 

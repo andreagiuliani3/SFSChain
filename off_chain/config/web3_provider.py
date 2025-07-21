@@ -1,6 +1,7 @@
 from web3 import Web3
 from web3.middleware import ExtraDataToPOAMiddleware
-from colorama import Fore, Style
+from colorama import init, Fore, Style
+init(strip=False, convert=False)
 import random
 import sys
 import os
