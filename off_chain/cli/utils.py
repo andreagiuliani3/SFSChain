@@ -176,25 +176,33 @@ class Utils:
         address = self.controller.get_public_key_by_username(username)
         
         delta = threshold - co2
-        if balance - abs(delta) >= 0:
-            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
-            if receipt_so.status == 1:
-                if delta > 0:
-                    delta = abs(delta)
+
+        if delta > 0:
+                receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+                if receipt_so.status == 1:
                     action = "added to"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
-                elif delta < 0: 
+                else:
+                    print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+        elif delta < 0:
+            if balance - abs(delta) >= 0:
+                receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+                if receipt_so.status == 1:
                     delta = abs(delta)
                     action = "removed from"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
                 else:
-                    print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
-                    action = None
+                    print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+            else:
+                print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
+                action = None
+        else:
+            if receipt_so.status == 1:
+                print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
+                action = None
             else:
                 print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
-        else:
-            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
-            action = None
+        
 
     
     def make_operation_producer(self, username, user_role):
@@ -259,25 +267,32 @@ class Utils:
         description = f"{operation_desc} ({units} hectares)"
         address = self.controller.get_public_key_by_username(username)
         delta = threshold - co2
-        if balance - abs(delta) >= 0:
-            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
-            if receipt_so.status == 1:
-                if delta > 0:
-                    delta = abs(delta)
+
+        if delta > 0:
+                receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+                if receipt_so.status == 1:
                     action = "added to"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
-                elif delta < 0: 
+                else:
+                    print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+        elif delta < 0:
+            if balance - abs(delta) >= 0:
+                receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+                if receipt_so.status == 1:
                     delta = abs(delta)
                     action = "removed from"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
                 else:
-                    print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
-                    action = None
+                    print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+            else:
+                print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
+                action = None
+        else:
+            if receipt_so.status == 1:
+                print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
+                action = None
             else:
                 print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
-        else:
-            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
-            action = None
 
     
     def make_operation_carrier(self, username, user_role):
@@ -340,25 +355,32 @@ class Utils:
         description = f"{operation_desc} ({units} hectares)"
         address = self.controller.get_public_key_by_username(username)
         delta = threshold - co2
-        if balance - abs(delta) >= 0:
-            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
-            if receipt_so.status == 1:
-                if delta > 0:
-                    delta = abs(delta)
+
+        if delta > 0:
+                receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+                if receipt_so.status == 1:
                     action = "added to"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
-                elif delta < 0: 
+                else:
+                    print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+        elif delta < 0:
+            if balance - abs(delta) >= 0:
+                receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+                if receipt_so.status == 1:
                     delta = abs(delta)
                     action = "removed from"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
                 else:
-                    print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
-                    action = None
+                    print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+            else:
+                print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
+                action = None
+        else:
+            if receipt_so.status == 1:
+                print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
+                action = None
             else:
                 print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
-        else:
-            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
-            action = None
 
 
     def make_operation_seller(self, username, user_role):
@@ -423,26 +445,32 @@ class Utils:
         description = f"{operation_desc} ({units} hectares)"
         address = self.controller.get_public_key_by_username(username)
         delta = threshold - co2
-        if balance - abs(delta) >= 0:
-            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
-            if receipt_so.status == 1:
-                if delta > 0:
-                    delta = abs(delta)
+
+        if delta > 0:
+                receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+                if receipt_so.status == 1:
                     action = "added to"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
-                elif delta < 0: 
+                else:
+                    print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+        elif delta < 0:
+            if balance - abs(delta) >= 0:
+                receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+                if receipt_so.status == 1:
                     delta = abs(delta)
                     action = "removed from"
                     print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
                 else:
-                    print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
-                    action = None
+                    print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+            else:
+                print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
+                action = None
+        else:
+            if receipt_so.status == 1:
+                print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
+                action = None
             else:
                 print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
-        else:
-            print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
-            action = None
-
 
     def make_green_action(self, username):
         """
