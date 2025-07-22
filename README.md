@@ -106,7 +106,7 @@ After this set-up, the application should run properly.
 Once the setup has been completed, you can proceed with running the main application interface with the following command:
 
 ```bash
-docker exec -it sfsc-app python
+docker exec -it sfsc-app python /app/off_chain/main.py
 ```
 
 Remember to include `-it`, because `-i` ensures that the container's *STDIN* is kept open and `-t` allocates a *pseudo-TTY*, which is essential for interacting with the application via terminal. Together, these flags allow you to interact with the `adichain` service through a command line interface.
@@ -115,7 +115,7 @@ At this point, the program is ready to be used. After executing the previous com
 
 ### First look
 
-Upon the very first startup of the program, it will perform an application check mechanism from Docker to verify that Ganache is ready to listen. If there are no errors, SFSChain will start correctly and run the first homepage.
+Upon the very first startup of the program, it will perform an application check mechanism from Docker to verify that Besu is ready to listen. If there are no errors, SFSChain will start correctly and run the first homepage.
 
 <p align="center">
   <img src="https://github.com/andreagiuliani3/Software-Security-BESU/blob/main/first_look.png" alt="first look" width="600">
