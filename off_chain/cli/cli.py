@@ -5,7 +5,7 @@ from eth_utils import *
 from eth_keys import *
 from controllers.controller import Controller
 from singleton.action_controller_instance import action_controller_instance as act_controller
-from controllers.deploy_controller import DeployController
+# from controllers.deploy_controller import DeployController
 from database.database_operation import DatabaseOperations
 from cli.utils import Utils
 from colorama import init, Fore, Style
@@ -26,7 +26,7 @@ class CommandLineInterface:
 
         self.session = session
         self.controller = Controller(session)
-        self.deploy_controller = DeployController()
+       # self.deploy_controller = DeployController()
         self.ops = DatabaseOperations()
         self.util = Utils(session)
 
@@ -37,8 +37,8 @@ class CommandLineInterface:
             3: 'Exit',
         }
 
-    PAGE_SIZE = 3 
-    current_page = 0
+    #PAGE_SIZE = 3 
+    #current_page = 0
 
     def print_menu(self):
         """
@@ -93,7 +93,7 @@ class CommandLineInterface:
 
         print(Fore.YELLOW + "Type 'exit' at any prompt to cancel and go back.\n" + Style.RESET_ALL)
         print('Please, enter your wallet credentials.')
-        attempts = 0
+        # attempts = 0
 
         while True:
             public_key = input('Public Key: ')
@@ -185,8 +185,10 @@ class CommandLineInterface:
             while True:
                 email = input('E-mail: ')
                 if self.controller.check_null_info(email):
-                    if self.controller.check_unique_email(email) == 0: break
-                    else: print(Fore.RED + "This e-mail has already been inserted. \n" + Style.RESET_ALL)
+                    if self.controller.check_email_format(email):
+                        if self.controller.check_unique_email(email) == 0: break
+                        else: print(Fore.RED + "This e-mail has already been inserted. \n" + Style.RESET_ALL)
+                    else: print(Fore.RED + "Invalid e-mail format.\n" + Style.RESET_ALL)
                 else: print(Fore.RED + '\nPlease insert information.' + Style.RESET_ALL)
             company_name = input('Company name: ')
             while True:
@@ -360,7 +362,12 @@ class CommandLineInterface:
                     if choice == 1:
                         self.view_balance(username)
                     elif choice == 2:
-                        self.util.give_credit(username)
+                        address = self.controller.get_public_key_by_username(username)
+                        balance = act_controller.check_balance(address)    
+                        if balance > 0:
+                            self.util.give_credit(username)
+                        else:
+                            print(Fore.RED + "You have no credits to give." + Style.RESET_ALL)
                     elif choice == 3:
                         if user_role == 'FARMER':
                             self.util.make_operation_farmer(username, user_role)   

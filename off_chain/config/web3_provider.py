@@ -56,8 +56,8 @@ def get_web3():
                 _w3_instance = w3
                 return _w3_instance
             else:
-                print(Fore.RED + "No available Ethereum nodes. Retrying in 5 seconds... (Press Ctrl+C to exit)" + Style.RESET_ALL)
-                time.sleep(5)
+                print(Fore.RED + "No available Ethereum nodes. Retrying in 10 seconds... (Press Ctrl+C to exit)" + Style.RESET_ALL)
+                time.sleep(10)
     except KeyboardInterrupt:
         print(Fore.CYAN + "\nConnection attempt aborted by user. Exiting..." + Style.RESET_ALL)
         sys.exit(1)

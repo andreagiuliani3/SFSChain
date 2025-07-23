@@ -4,7 +4,6 @@ Private Key: 0x04c5538fff17e125f34e7f92bdfa353b5f9bd6ee8db1c4e6f6821e5f2fff82f4
 role: Farmer
 pass: To5sODRnPr+J2IFG
 
-
 username: Andrea
 public: 0x8630Aef947346b2EeC708ce80987E7f98044b755
 private: 0x0e3009bdd17a2056e6f81d6315b79e4f42c54b65ba120898ca4190e3b53828d6

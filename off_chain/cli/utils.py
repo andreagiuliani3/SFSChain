@@ -3,11 +3,10 @@ import click
 import getpass
 from colorama import init, Fore, Style
 init(strip=False, convert=False)
-from datetime import date
+from datetime import *
 from controllers.action_controller import *
 from controllers.controller import Controller
 from singleton.action_controller_instance import action_controller_instance as act_controller
-from database.database_operation import DatabaseOperations
 from session.session import Session
 
 
@@ -17,9 +16,6 @@ class Utils:
     This class provides various utility methods for handling user input, updating profiles, changing passwords, 
     displaying data, and navigating through pages of the user.
     """
-
-    PAGE_SIZE = 3
-    current_page = 0
     
     def __init__(self, session: Session):
 
@@ -37,7 +33,6 @@ class Utils:
 
         self.session = session
         self.controller = Controller(session)
-        self.database_operation = DatabaseOperations()
         self.today_date = str(date.today())
         
 
@@ -102,10 +97,12 @@ class Utils:
 
         # Blockchain update 
         public_key = self.controller.get_public_key_by_username(username)
-        act_controller.update_user(name, lastname, user_role, from_address=public_key)
+        receipt_so = act_controller.update_user(name, lastname, user_role, from_address=public_key)
 
-        # DB update
-        result = self.controller.update_user_profile(username, name, lastname, birthday, phone)
+        if receipt_so.status == 1:
+            result = self.controller.update_user_profile(username, name, lastname, birthday, phone)
+        else:
+            result = -1
 
         if result == 0:
             print(Fore.GREEN + "Profile updated successfully!" + Style.RESET_ALL)
@@ -123,11 +120,16 @@ class Utils:
         if user_role != "FARMER":
             print(Fore.RED + "Operation not available for your role." + Style.RESET_ALL)
             return
+
+        print(Fore.YELLOW + "You can type 'exit' at any prompt to cancel the operation." + Style.RESET_ALL)
+
         address = self.controller.get_public_key_by_username(username)
         balance = act_controller.check_balance(address)
-        print(f"Your balance is {balance}")
+      
         if balance <= 0:
             print(Fore.RED + 'WARNING: YOUR BALANCE IS ZERO OR BELOW!' + Style.RESET_ALL)
+        else: print(Fore.MAGENTA + f"Your balance is {balance}" + Style.RESET_ALL)
+
 
         print(Fore.CYAN + "\nAvailable FARMER Operations:" + Style.RESET_ALL)
 
@@ -143,8 +145,12 @@ class Utils:
             print(f"{key}. {desc} (reference: {factor} tons CO2 per hectare)")
 
         while True:
+            op_input = input("\nSelect the operation (1-5): ").strip()
+            if op_input.lower() == "exit":
+                print(Fore.YELLOW + "Operation aborted by user." + Style.RESET_ALL)
+                return
             try:
-                op_choice = int(input("\nSelect the operation (1-5): "))
+                op_choice = int(op_input)
                 if op_choice in operation_factors:
                     break
                 else:
@@ -155,8 +161,12 @@ class Utils:
         operation_desc, co2_per_unit = operation_factors[op_choice]
 
         while True:
+            units_input = input(f"Enter number of hectares (or units) for '{operation_desc}': ").strip()
+            if units_input.lower() == "exit":
+                print(Fore.YELLOW + "Operation aborted by user." + Style.RESET_ALL)
+                return
             try:
-                units = int(input(f"Enter number of hectares (or units) for '{operation_desc}': "))
+                units = int(units_input)
                 if units > 0:
                     break
                 else:
@@ -167,24 +177,28 @@ class Utils:
         threshold = co2_per_unit * units
 
         while True:
+            co2_input = input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): ").strip()
+            if co2_input.lower() == "exit":
+                print(Fore.YELLOW + "Operation aborted by user." + Style.RESET_ALL)
+                return
             try:
-                co2 = int(input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): "))
+                co2 = int(co2_input)
                 break
             except ValueError:
                 print(Fore.RED + "Please enter a valid integer." + Style.RESET_ALL)
 
         description = f"{operation_desc} ({units} hectares)"
         address = self.controller.get_public_key_by_username(username)
-        
+
         delta = threshold - co2
 
         if delta > 0:
-                receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
-                if receipt_so.status == 1:
-                    action = "added to"
-                    print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
-                else:
-                    print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+            if receipt_so.status == 1:
+                action = "added to"
+                print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
+            else:
+                print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
         elif delta < 0:
             if balance - abs(delta) >= 0:
                 receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
@@ -204,6 +218,7 @@ class Utils:
                 action = None
             else:
                 print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+
         
 
     
@@ -218,10 +233,15 @@ class Utils:
             print(Fore.RED + "Operation not available for your role." + Style.RESET_ALL)
             return
 
+        print(Fore.YELLOW + "You can type 'exit' at any prompt to cancel the operation." + Style.RESET_ALL)
+
         address = self.controller.get_public_key_by_username(username)
         balance = act_controller.check_balance(address)
+      
         if balance <= 0:
             print(Fore.RED + 'WARNING: YOUR BALANCE IS ZERO OR BELOW!' + Style.RESET_ALL)
+        else: print(Fore.MAGENTA + f"Your balance is {balance}" + Style.RESET_ALL)
+
 
         print(Fore.CYAN + "\nAvailable PRODUCER Operations:" + Style.RESET_ALL)
 
@@ -236,8 +256,12 @@ class Utils:
             print(f"{key}. {desc} (reference: {factor} tons CO2 per unit)")
 
         while True:
+            op_input = input("\nSelect the operation (1-4): ").strip()
+            if op_input.lower() == "exit":
+                print(Fore.YELLOW + "Operation aborted by user." + Style.RESET_ALL)
+                return
             try:
-                op_choice = int(input("\nSelect the operation (1-4): "))
+                op_choice = int(op_input)
                 if op_choice in operation_factors:
                     break
                 else:
@@ -248,8 +272,12 @@ class Utils:
         operation_desc, co2_per_unit = operation_factors[op_choice]
 
         while True:
+            units_input = input(f"Enter number of units (e.g., lots or batches) for '{operation_desc}': ").strip()
+            if units_input.lower() == "exit":
+                print(Fore.YELLOW + "Operation aborted by user." + Style.RESET_ALL)
+                return
             try:
-                units = int(input(f"Enter number of units (e.g., lots or batches) for '{operation_desc}': "))
+                units = int(units_input)
                 if units > 0:
                     break
                 else:
@@ -260,23 +288,27 @@ class Utils:
         threshold = co2_per_unit * units
 
         while True:
+            co2_input = input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): ").strip()
+            if co2_input.lower() == "exit":
+                print(Fore.YELLOW + "Operation aborted by user." + Style.RESET_ALL)
+                return
             try:
-                co2 = int(input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): "))
+                co2 = int(co2_input)
                 break
             except ValueError:
                 print(Fore.RED + "Please enter a valid integer." + Style.RESET_ALL)
-        
+
         description = f"{operation_desc} ({units} hectares)"
         address = self.controller.get_public_key_by_username(username)
         delta = threshold - co2
 
         if delta > 0:
-                receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
-                if receipt_so.status == 1:
-                    action = "added to"
-                    print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
-                else:
-                    print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+            if receipt_so.status == 1:
+                action = "added to"
+                print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
+            else:
+                print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
         elif delta < 0:
             if balance - abs(delta) >= 0:
                 receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
@@ -309,10 +341,15 @@ class Utils:
             print(Fore.RED + "Operation not available for your role." + Style.RESET_ALL)
             return
 
+        print(Fore.YELLOW + "You can type 'exit' at any prompt to cancel the operation." + Style.RESET_ALL)
+
         address = self.controller.get_public_key_by_username(username)
         balance = act_controller.check_balance(address)
+
         if balance <= 0:
             print(Fore.RED + 'WARNING: YOUR BALANCE IS ZERO OR BELOW!' + Style.RESET_ALL)
+        else: print(Fore.MAGENTA + f"Your balance is {balance}" + Style.RESET_ALL)
+
 
         print(Fore.CYAN + "\nAvailable CARRIER Operations:" + Style.RESET_ALL)
 
@@ -326,8 +363,12 @@ class Utils:
             print(f"{key}. {desc} (reference: {factor} tons CO2 per shipment unit)")
 
         while True:
+            op_input = input("\nSelect the operation (1-3): ").strip()
+            if op_input.lower() == "exit":
+                print(Fore.YELLOW + "Operation aborted by user." + Style.RESET_ALL)
+                return
             try:
-                op_choice = int(input("\nSelect the operation (1-3): "))
+                op_choice = int(op_input)
                 if op_choice in operation_factors:
                     break
                 else:
@@ -338,8 +379,12 @@ class Utils:
         operation_desc, co2_per_unit = operation_factors[op_choice]
 
         while True:
+            units_input = input(f"Enter number of units (e.g., shipments or pallets) for '{operation_desc}': ").strip()
+            if units_input.lower() == "exit":
+                print(Fore.YELLOW + "Operation aborted by user." + Style.RESET_ALL)
+                return
             try:
-                units = int(input(f"Enter number of units (e.g., shipments or pallets) for '{operation_desc}': "))
+                units = int(units_input)
                 if units > 0:
                     break
                 else:
@@ -348,9 +393,14 @@ class Utils:
                 print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
 
         threshold = co2_per_unit * units
+
         while True:
+            co2_input = input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): ").strip()
+            if co2_input.lower() == "exit":
+                print(Fore.YELLOW + "Operation aborted by user." + Style.RESET_ALL)
+                return
             try:
-                co2 = int(input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): "))
+                co2 = int(co2_input)
                 break
             except ValueError:
                 print(Fore.RED + "Please enter a valid integer." + Style.RESET_ALL)
@@ -360,12 +410,12 @@ class Utils:
         delta = threshold - co2
 
         if delta > 0:
-                receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
-                if receipt_so.status == 1:
-                    action = "added to"
-                    print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
-                else:
-                    print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+            if receipt_so.status == 1:
+                action = "added to"
+                print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
+            else:
+                print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
         elif delta < 0:
             if balance - abs(delta) >= 0:
                 receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
@@ -385,6 +435,7 @@ class Utils:
                 action = None
             else:
                 print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+
 
 
     def make_operation_seller(self, username, user_role):
@@ -398,10 +449,14 @@ class Utils:
             print(Fore.RED + "Operation not available for your role." + Style.RESET_ALL)
             return
 
+        print(Fore.YELLOW + "You can type 'exit' at any prompt to cancel the operation." + Style.RESET_ALL)
+
         address = self.controller.get_public_key_by_username(username)
         balance = act_controller.check_balance(address)
         if balance <= 0:
             print(Fore.RED + 'WARNING: YOUR BALANCE IS ZERO OR BELOW!' + Style.RESET_ALL)
+        else: print(Fore.MAGENTA + f"Your balance is {balance}" + Style.RESET_ALL)
+
 
         print(Fore.CYAN + "\nAvailable SELLER Operations:" + Style.RESET_ALL)
 
@@ -415,8 +470,12 @@ class Utils:
             print(f"{key}. {desc} (reference: {factor} tons CO2 per unit)")
 
         while True:
+            op_input = input("\nSelect the operation (1-3): ").strip()
+            if op_input.lower() == "exit":
+                print(Fore.YELLOW + "Operation aborted by user." + Style.RESET_ALL)
+                return
             try:
-                op_choice = int(input("\nSelect the operation (1-3): "))
+                op_choice = int(op_input)
                 if op_choice in operation_factors:
                     break
                 else:
@@ -427,8 +486,12 @@ class Utils:
         operation_desc, co2_per_unit = operation_factors[op_choice]
 
         while True:
+            units_input = input(f"Enter number of units for '{operation_desc}': ").strip()
+            if units_input.lower() == "exit":
+                print(Fore.YELLOW + "Operation aborted by user." + Style.RESET_ALL)
+                return
             try:
-                units = int(input(f"Enter number of units for '{operation_desc}': "))
+                units = int(units_input)
                 if units > 0:
                     break
                 else:
@@ -436,12 +499,15 @@ class Utils:
             except ValueError:
                 print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
 
-        
         threshold = co2_per_unit * units
- 
+
         while True:
+            co2_input = input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): ").strip()
+            if co2_input.lower() == "exit":
+                print(Fore.YELLOW + "Operation aborted by user." + Style.RESET_ALL)
+                return
             try:
-                co2 = int(input(f"Insert actual CO2 emission for '{operation_desc}' (in tons): "))
+                co2 = int(co2_input)
                 break
             except ValueError:
                 print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
@@ -451,12 +517,12 @@ class Utils:
         delta = threshold - co2
 
         if delta > 0:
-                receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
-                if receipt_so.status == 1:
-                    action = "added to"
-                    print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
-                else:
-                    print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
+            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
+            if receipt_so.status == 1:
+                action = "added to"
+                print(Fore.GREEN + f'The operation has been correctly recorded. {delta} credits has been {action} your wallet.' + Style.RESET_ALL)
+            else:
+                print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
         elif delta < 0:
             if balance - abs(delta) >= 0:
                 receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
@@ -477,6 +543,7 @@ class Utils:
             else:
                 print(Fore.RED + 'Operation Failed!' + Style.RESET_ALL)
 
+
     def make_green_action(self, username):
         """
         Allows the user to register a green action they performed, such as recycling or planting a tree.
@@ -485,22 +552,30 @@ class Utils:
         """
 
         print(Fore.CYAN + "\nMake a Green Action" + Style.RESET_ALL)
+        print(Fore.YELLOW + "You can type 'exit' at any prompt to cancel the action." + Style.RESET_ALL)
 
         green_action = input("Enter the description of the green action you performed: ").strip()
+        if green_action.lower() == "exit":
+            print(Fore.YELLOW + "Operation aborted by user." + Style.RESET_ALL)
+            return
         if not green_action:
             print(Fore.RED + "Green action description cannot be empty." + Style.RESET_ALL)
             return
 
         while True:
+            co2_input = input("Enter the amount of CO2 saved (in tons): ").strip()
+            if co2_input.lower() == "exit":
+                print(Fore.YELLOW + "Green action cancelled by user." + Style.RESET_ALL)
+                return
             try:
-                co2_saved = int(input("Enter the amount of CO2 saved (in tons): "))
+                co2_saved = int(co2_input)
                 if co2_saved > 0:
                     break
                 else:
                     print(Fore.RED + "CO2 saved must be a positive number." + Style.RESET_ALL)
             except ValueError:
                 print(Fore.RED + "Please enter a valid number." + Style.RESET_ALL)
-        
+
         description = f"Green Action: {green_action}"
         address = self.controller.get_public_key_by_username(username)
         receipt_ga = act_controller.register_green_action(address, description, co2_saved)
@@ -509,7 +584,6 @@ class Utils:
             print(Fore.GREEN + f"Green action registered. {co2_saved} tons of CO2 saved credited to your wallet." + Style.RESET_ALL)
         else:
             print(Fore.RED + "Failed to register the green action." + Style.RESET_ALL)
-
 
 
     def give_credit(self, username):

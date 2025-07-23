@@ -8,9 +8,6 @@ from session.logging import log_msg, log_error
 from web3 import Web3
 from config.web3_provider import get_web3
 import getpass
-from collections import defaultdict
-from datetime import datetime
-import time
 import re
 from types import SimpleNamespace as FailedReceipt
 
@@ -99,26 +96,6 @@ class ActionController:
                         sys.exit(1)
                     else:
                         print("Invalid input. Please enter 'Y' or 'N'.")  
-
-
-    def read_data(self, function_name, *args):
-        """
-        Reads data from a contract's function.
-
-        Args:
-            function_name (str): The function name to call.
-            *args: Arguments required by the function.
-
-        Returns:
-            The return value of the function call.
-        """
-        try:
-            function = getattr(self.contract.functions, function_name)(*args)
-            
-            return function.call()
-        except Exception as e:
-            log_error(f"Error calling {function_name} with args {args}: {str(e)}")
-            raise
 
 
     def write_data_user(self, function_name, *args): 
@@ -215,103 +192,7 @@ class ActionController:
             log_error(f"Error executing {function_name} from {from_address}. Error: {str(e)}")
             raise e
         
-    def write_data_admin(self, function_name, from_address, *args):
-        """
-        Writes data to a contract's function. It is used for: adding and removing tokens. Actions are performed by the admin.
-
-        Args:
-            function_name (str): The function name to call on the contract.
-            from_address (str): The Ethereum address to send the transaction from.
-            *args: Arguments required by the function.
-
-        Returns:
-            The transaction receipt object.
-        """
-        
-        try:
-            private_key = os.getenv('ADMIN_PRIVATE_KEY')
-            function = getattr(self.contract.functions, function_name)(*args)
-            gas_estimate = function.estimate_gas({'from': from_address})
-           
-            transaction = function.build_transaction({
-            'from': from_address,
-            'nonce': self.w3.eth.get_transaction_count(from_address),
-            'gas': int(gas_estimate),
-            'gasPrice': self.w3.eth.gas_price
-            })
-            
-            signed_txn = self.w3.eth.account.sign_transaction(transaction, private_key=private_key)
-            tx_hash = self.w3.eth.send_raw_transaction(signed_txn.raw_transaction)
-            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
-            log_msg(f"Transaction {function_name} executed. From: {from_address}, Tx Hash: {tx_hash.hex()}, Gas: {gas_estimate}, Gas Price: {self.w3.eth.gas_price}")
-
-            return receipt
-
-        except Exception as e:
-            log_error(f"Error executing {function_name} from {from_address}. Error: {str(e)}")
-            raise e
-        
-
-
-    def get_operation_by_username_grouped_by_date(self, username, start_date, end_date):
-        """
-        Retrieves all operations for a given user, grouped by date.
-        Args:
-            username (str): The username of the user whose operations are to be retrieved.
-            start_date (str): The start date in 'YYYY-MM-DD' format.
-            end_date (str): The end date in 'YYYY-MM-DD'
-        Returns:
-            list: A list of dictionaries, each containing the date, username, role, operations, and total CO2 emissions for that day.
-        """
-
-        all_ops = self.get_all_operations_for_user(username)  
-        
-        
-        start_ts = int(datetime.strptime(start_date, '%Y-%m-%d').timestamp())
-        end_ts = int(datetime.strptime(end_date, '%Y-%m-%d').timestamp()) + 86399  
-        filtered_ops = [op for op in all_ops if start_ts <= op['timestamp'] <= end_ts]
-        
-        grouped_ops = defaultdict(list)
-        for op in filtered_ops:
-            day = datetime.utcfromtimestamp(op['timestamp']).strftime('%Y-%m-%d')
-            grouped_ops[day].append(op)
-        
-        
-        result = []
-        for day, ops_list in grouped_ops.items():
-            operations_str = "; ".join(f"{o['actionType']} - {o['description']} (CO2: {o['co2emissions']})" for o in ops_list)
-            total_co2 = sum(o['co2emissions'] for o in ops_list)
-            
-            role = self.get_user_role(username)  
-            
-            result.append({
-                'creation_date': day,
-                'username': username,
-                'role': role,
-                'operations': operations_str,
-                'co2': total_co2
-            })
-        return result
     
-    def listen_to_event(self, event_name, handler, poll_interval=10):
-        """
-        Listens to a specific event from the contract and calls the handler function when the event is received.
-        """
-        print(f"Starting event listening {event_name} with polling interval {poll_interval}s")
-        filter_ = getattr(self.contract.events, event_name).create_filter(fromBlock='latest')
-        while True:
-            for evt in filter_.get_new_entries():
-                print(f"Event {event_name} received: {evt}")
-                handler(evt)
-            time.sleep(poll_interval)
-
-    def handle_action_logged(self, event):
-        """
-        Handles the 'ActionLogged' event by printing the event details and logging the message.
-        """
-        print(f"New Action logged event: {event['args']}")
-        log_msg(f"New Action Logged: {event['args']}")
-
     def add_user(self, name: str, last_name: str, user_role: str, from_address: str):
         """
         Calls addUser(name, lastName)
@@ -326,26 +207,6 @@ class ActionController:
         """
         from_address = Web3.to_checksum_address(from_address)
         return self.write_data('updateUser', from_address, name, last_name, user_role)
-    
-
-    def add_token(self, amount: int, to_address: str):
-        """
-        Calls addToken(to, amount)
-        """
-        to_address = Web3.to_checksum_address(to_address)
-        from_address = os.getenv('ADMIN_ADDRESS')
-        from_address= Web3.to_checksum_address(from_address)
-        return self.write_data_admin('addToken', from_address, to_address, amount)
-    
-    
-    def remove_token(self, amount: int, to_address: str):
-        """
-        Calls addToken(to, amount)
-        """
-        to_address = Web3.to_checksum_address(to_address)
-        from_address = os.getenv('ADMIN_ADDRESS')
-        from_address= Web3.to_checksum_address(from_address)
-        return self.write_data_admin('removeToken', from_address, to_address, amount)
     
 
     def transfer_token(self, from_address: str, to_address: str, amount: int):
@@ -380,11 +241,4 @@ class ActionController:
         address = Web3.to_checksum_address(address)
         function = getattr(self.contract.functions, 'checkBalance')()
         return function.call({'from': address})
-    
-    
-    def is_registered(self, address: str):
-        """
-        Calls isRegistered(address)
-        """
-        address = Web3.to_checksum_address(address)
-        return self.read_data('isRegistered', address)
+

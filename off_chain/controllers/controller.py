@@ -122,55 +122,7 @@ class Controller:
         except ValueError:
             return False
         
- 
-    def check_tpdate_format(self, date_string, check_today = 0):
-        """
-        Validates that a provided date string is in the correct format ('YYYY-MM-DD') and optionally checks if the date is today or in the future.
- 
-        :param date_string: The date string to validate, which can be a string or a datetime object. If it is a datetime object, it is formatted to a string.
-        :param check_today: A flag indicating the type of validation. If set to 0 (default), the function checks if the date is today or in the future.
-                            If set to any other value, the function simply checks the format without considering the date's relation to today.
-        :return: Returns True if the date string is correctly formatted and, if check_today is 0, represents today's or a future date.
-                 Returns False if the date is not in the correct format, is in the past (when check_today is 0), or on any parsing failure.
-        """
-        try:
-            if not isinstance(date_string, str):
-                date_string = date_string.strftime('%Y-%m-%d')
-            date = datetime.strptime(date_string, '%Y-%m-%d')
-            current_date = datetime.now()
-            if check_today == 0:
-                if date >= current_date:
-                    return True
-                else:
-                    return False
-            else: return True
-        except ValueError:
-            return False
         
-       
-    def check_date_order(self, first_date_string, second_date_string):
-        """
-        Checks if the second date is chronologically after the first date.
- 
-        :param first_date_string: The first date as a string or a datetime object. If it is a datetime object, it will be formatted to a string.
-        :param second_date_string: The second date as a string or a datetime object. If it is a datetime object, it will be formatted to a string.
-        :return: Returns True if the second date is later than the first date.
-                 Returns False if either date is not in the correct 'YYYY-MM-DD' format or if the second date is not after the first date.
-        """
-        try:
-            if not isinstance(first_date_string, str):
-                first_date_string = first_date_string.strftime('%Y-%m-%d')
-            if not isinstance(second_date_string, str):
-                second_date_string = second_date_string.strftime('%Y-%m-%d')
-           
-            first_date = datetime.strptime(first_date_string, '%Y-%m-%d')
-            second_date = datetime.strptime(second_date_string, '%Y-%m-%d')
-           
-            return second_date > first_date
-        except ValueError:
-            return False
-        
-       
     def check_phone_number_format(self, phone_number):
         """
         Validates that a given phone number is in a correct numerical format and within the expected length range.
@@ -186,13 +138,14 @@ class Controller:
     
    
     def check_email_format(self, email):
-        """
+        """ 
         Validates that a given email address conforms to a standard email format.
  
         :param email: The email string to validate.
         :return: Returns True if the email matches the standard email format pattern.
-                 Returns False if the email does not match this pattern.
+                 Returns False if the email does not match this pattern. 
         """
+        
         email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if re.match(email_pattern, email):
             return True
