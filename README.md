@@ -6,16 +6,18 @@
 
 ## Table of Contents
 
-- [Introduction](#introduction)
+- [SFSChain](#sfschain)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
     - [Overview](#overview)
     - [Technologies Used to Develop](#technologies-used-to-develop)
-- [Installation](#installation)
+  - [Installation](#installation)
     - [Requirements](#requirements)
     - [Setup in UNIX-like OS's](#setup-in-unix-like-oss)
     - [Setup in Windows](#setup-in-windows)
-- [How to use it](#how-to-use-it)
+  - [How to use it](#how-to-use-it)
     - [First look](#first-look)
-- [Contributors](#contributors)
+  - [Contributors](#contributors)
 
 ## Introduction
 
@@ -81,25 +83,13 @@ docker-compose up -d
 
 You could also check if services were built properly by running `docker-compose logs`. Also, make sure your user has the proper privileges to run Docker commands. Otherwise, you can address this issue by prefixing each command with `sudo`.
 
-> **NOTE:** The application has been tested on [Ubuntu](https://ubuntu.com/) and [Kali Linux](https://www.kali.org/).
+> **NOTE:** The application has been tested on [Ubuntu](https://ubuntu.com/).
 
 ### Setup in Windows
 
 To setup the application on Windows, you can basically run the same commands previously listed in your **Windows PowerShell**. Make sure you open the Shell in the project's directory.
 
 If the docker commands do not work due to the missing *engine*, you will probably need to start [Docker Desktop](https://www.docker.com/products/docker-desktop/) in the background, which is the fastest way to start docker on Windows systems. 
-
-### Setup in macOS
-
-The application on macOS systems works in the same way as previously described. You can test it on your terminal following the UNIX-like setup. 
-
-If `docker-compose` does not run at first, you probably need to set up an environment variable to set the Docker platform. You should run the following command:
-
-```bash
-sudo DOCKER_DEFAULT_PLATFORM=linux/amd64 docker-compose run -it sfsc-app
-```
-
-After this set-up, the application should run properly.
 
 ## How to use it
 
@@ -109,7 +99,7 @@ Once the setup has been completed, you can proceed with running the main applica
 docker exec -it sfsc-app python /app/off_chain/main.py
 ```
 
-Remember to include `-it`, because `-i` ensures that the container's *STDIN* is kept open and `-t` allocates a *pseudo-TTY*, which is essential for interacting with the application via terminal. Together, these flags allow you to interact with the `adichain` service through a command line interface.
+Remember to include `-it`, because `-i` ensures that the container's *STDIN* is kept open and `-t` allocates a *pseudo-TTY*, which is essential for interacting with the application via terminal. Together, these flags allow you to interact with the `sfschain` service through a command line interface.
 
 At this point, the program is ready to be used. After executing the previous command and successfully deploying the entire infrastructure, you can interact with the application through the terminal that opens after deployment.
 
@@ -138,6 +128,3 @@ Meet the team :
 | ⭐ **Andrea Giuliani**    | [Click here](https://github.com/andreagiuliani3) |
 | ⭐ **Marco Di Vita**      | [Click here](https://github.com/divitamarco) |
 | ⭐ **Stefano Marinucci**  | [Click here](https://github.com/MarraX99) |
-
-
-
