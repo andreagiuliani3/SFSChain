@@ -11,6 +11,7 @@ from database.database_operation import DatabaseOperations
 from session.session import Session
 
 
+
 class Utils:
     """
     This class provides various utility methods for handling user input, updating profiles, changing passwords, 
@@ -197,6 +198,7 @@ class Utils:
                 print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
                 action = None
         else:
+            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
             if receipt_so.status == 1:
                 print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
                 action = None
@@ -288,6 +290,7 @@ class Utils:
                 print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
                 action = None
         else:
+            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
             if receipt_so.status == 1:
                 print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
                 action = None
@@ -376,6 +379,7 @@ class Utils:
                 print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
                 action = None
         else:
+            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
             if receipt_so.status == 1:
                 print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
                 action = None
@@ -466,6 +470,7 @@ class Utils:
                 print(Fore.RED + f"WARNING: YOUR BALANCE IS INSUFFICIENT! YOU NEED {abs(delta) - balance} MORE CREDITS" + Style.RESET_ALL)
                 action = None
         else:
+            receipt_so = act_controller.register_operation(address, operation_desc, description, delta, co2)
             if receipt_so.status == 1:
                 print(Fore.YELLOW + "The operation has been correctly recorded. No credit variation: emission equals threshold." + Style.RESET_ALL)
                 action = None

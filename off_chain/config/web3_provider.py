@@ -5,6 +5,7 @@ init(strip=False, convert=False)
 import random
 import sys
 import os
+import time
 from dotenv import load_dotenv
 
 
@@ -31,8 +32,7 @@ def try_connect():
         if w3.is_connected():
             print(Fore.GREEN + f"Connected to ethereum node: {node_url}" + Style.RESET_ALL)
             return w3
-        else:
-            print(Fore.YELLOW + f"Connection failed: {node_url}" + Style.RESET_ALL)
+        
 
     return None
 
@@ -40,21 +40,24 @@ def try_connect():
 def get_web3():
     """
     Returns a Web3 instance connected to an Ethereum node.
-    If no instance exists, it attempts to connect to a node.
-    If all connection attempts fail, it prompts the user to retry or exit.
+    If no instance exists, it attempts to connect to a node every 5 seconds.
+    The user can exit at any time with Ctrl+C.
     """
     global _w3_instance
     if _w3_instance is not None:
         return _w3_instance
 
-    while True:
-        w3 = try_connect()
-        if w3:
-            _w3_instance = w3
-            return _w3_instance
-        else:
-            print(Fore.RED + "\nError: No available Ethereum nodes." + Style.RESET_ALL)
-            choice = input("Type [R] to try again, [E] to exit: ").strip().lower()
-            if choice != 'r':
-                print("Exiting...")
-                sys.exit(1)
+    print(Fore.YELLOW + "Attempting to connect to an Ethereum node..." + Style.RESET_ALL)
+
+    try:
+        while True:
+            w3 = try_connect()
+            if w3:
+                _w3_instance = w3
+                return _w3_instance
+            else:
+                print(Fore.RED + "No available Ethereum nodes. Retrying in 5 seconds... (Press Ctrl+C to exit)" + Style.RESET_ALL)
+                time.sleep(5)
+    except KeyboardInterrupt:
+        print(Fore.CYAN + "\nConnection attempt aborted by user. Exiting..." + Style.RESET_ALL)
+        sys.exit(1)

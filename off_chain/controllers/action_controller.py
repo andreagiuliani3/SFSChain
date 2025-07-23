@@ -11,6 +11,9 @@ import getpass
 from collections import defaultdict
 from datetime import datetime
 import time
+import re
+from types import SimpleNamespace as FailedReceipt
+
 
 
 
@@ -169,7 +172,28 @@ class ActionController:
         """
         
         try:
-            private_key = getpass.getpass('Insert private key to confirm the transaction: ')
+            max_attempts = 3
+            private_key = None
+
+            for _ in range(max_attempts):
+                input_key = getpass.getpass('Insert private key to confirm the transaction: ').strip()
+
+                if re.fullmatch(r'0x[a-fA-F0-9]{64}', input_key):
+                    private_key = input_key
+                    break
+                else:
+                    print(f"{Fore.YELLOW}Invalid private key format. Please try again.{Style.RESET_ALL}")
+            
+            if private_key is None:
+                print(f"{Fore.RED}Too many invalid attempts. Transaction aborted.{Style.RESET_ALL}")
+                return FailedReceipt(status=0)
+
+            account = self.w3.eth.account.from_key(private_key)
+
+            if account.address.lower() != from_address.lower():
+                print(f"{Fore.RED}That private key doesn't match your account. Transaction cancelled.{Style.RESET_ALL}")
+                return FailedReceipt(status=0)
+        
             function = getattr(self.contract.functions, function_name)(*args)
             gas_estimate = function.estimate_gas({'from': from_address})
            

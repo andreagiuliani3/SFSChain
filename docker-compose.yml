@@ -61,19 +61,11 @@ services:
   sfsc-app:
     build:
       context: ./
+    volumes:
+      - ./:/app/
     stdin_open: true
     tty: true
     restart: always
-    command: >
-      sh -c "
-        echo 'Waiting for Besu to be ready...';
-        until curl -s -X POST --data '{\"jsonrpc\":\"2.0\",\"method\":\"eth_chainId\",\"params\":[],\"id\":1}' http://node1:8545 -H \"Content-Type: application/json\" | grep -q 'result'; do
-          echo 'Besu not ready yet...';
-          sleep 5;
-        done;
-        echo 'Besu is ready, starting the application...';
-        python /app/off_chain/main.py
-      "
     container_name: sfsc-app
     depends_on:
       - node1
