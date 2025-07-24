@@ -12,9 +12,6 @@ services:
     ports:
       - "8545:8545"
       - "30303:30303"
-    volumes:
-      - ./SFSC-Network/Node-1/data:/opt/besu/data
-      - ./SFSC-Network/genesis.json:/opt/besu/genesis.json
     networks:
       besu-net:
         ipv4_address: 172.30.0.2
@@ -25,9 +22,6 @@ services:
     ports:
       - "8546:8546"
       - "30304:30304"
-    volumes:
-      - ./SFSC-Network/Node-2/data:/opt/besu/data
-      - ./SFSC-Network/genesis.json:/opt/besu/genesis.json
     networks:
       besu-net:
         ipv4_address: 172.30.0.3
@@ -38,9 +32,6 @@ services:
     ports:
       - "8547:8547"
       - "30305:30305"
-    volumes:
-      - ./SFSC-Network/Node-3/data:/opt/besu/data
-      - ./SFSC-Network/genesis.json:/opt/besu/genesis.json
     networks:
       besu-net:
         ipv4_address: 172.30.0.4
@@ -51,9 +42,6 @@ services:
     ports:
       - "8548:8548"
       - "30306:30306"
-    volumes:
-      - ./SFSC-Network/Node-4/data:/opt/besu/data
-      - ./SFSC-Network/genesis.json:/opt/besu/genesis.json
     networks:
       besu-net:
         ipv4_address: 172.30.0.5
@@ -61,8 +49,6 @@ services:
   sfsc-app:
     build:
       context: ./
-    volumes:
-      - ./:/app/
     stdin_open: true
     tty: true
     restart: always
