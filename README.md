@@ -103,6 +103,21 @@ Remember to include `-it`, because `-i` ensures that the container's *STDIN* is 
 
 At this point, the program is ready to be used. After executing the previous command and successfully deploying the entire infrastructure, you can interact with the application through the terminal that opens after deployment.
 
+### Key Pair Generation and Test Credentials
+
+To interact with the application, each user must be associated with a public/private key pair.  
+You have two options:
+
+1. **Use the provided test credentials**  
+   You can find some test credentials in the file `credenziali_prova.txt`, already included in this repository. These contain pre-generated public/private key pairs you can use to test the application immediately.
+
+2. **Generate your own key pair**  
+   If you prefer to generate a new key pair, you can use the script `keygenerator.py` included in the project root.  
+   Run the following command:
+
+   ```bash
+   python keygenerator.py
+
 ### First look
 
 Upon the very first startup of the program, it will perform an application check mechanism from Docker to verify that Besu is ready to listen. If there are no errors, SFSChain will start correctly and run the first homepage.
@@ -113,11 +128,7 @@ Upon the very first startup of the program, it will perform an application check
 
 
 Now, you can *register* a new account as a Farmer, Carrier, Seller or Producer, or *login* if you are already enrolled, and start exploring every feature of our application.
-You can find some test credentials in `credenziali_prova.txt`, inside this repository.
 **Enjoy it!**
-
-> **NOTE:**  If you want to test the entire application, you **need** to have both a public key and a private key once the deployment has been completed during the registration phase.
-These keys refer to a Besu node account, so it is recommended to use credenziali_prova.txt. 
 
 
 ## Contributors
