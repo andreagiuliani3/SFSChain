@@ -1,20 +1,20 @@
 networks:
   besu-net:
-    driver: bridge
+    driver: bridge  # Use bridge network driver to isolate Besu nodes network
     ipam:
       config:
-        - subnet: 172.30.0.0/16
+        - subnet: 172.30.0.0/16  # Custom subnet for the Besu network to avoid conflicts
 
 services:
   node1:
-    build: ./SFSC-Network/Node-1
-    container_name: besu-node-1
+    build: ./SFSC-Network/Node-1  # Build Docker image from Node-1 directory
+    container_name: besu-node-1   # Explicit container name for easy identification
     ports:
-      - "8545:8545"
-      - "30303:30303"
+      - "8545:8545"    # Expose RPC port for JSON-RPC API
+      - "30303:30303"  # Expose P2P port for node communication
     networks:
       besu-net:
-        ipv4_address: 172.30.0.2
+        ipv4_address: 172.30.0.2  # Static IP inside the custom subnet for node1
 
   node2:
     build: ./SFSC-Network/Node-2
@@ -48,18 +48,16 @@ services:
   
   sfsc-app:
     build:
-      context: ./
-    stdin_open: true
-    tty: true
-    restart: always
+      context: ./  # Build from the root project directory
+    stdin_open: true  # Keep STDIN open to allow interactive terminal access
+    tty: true         # Allocate a pseudo-TTY for terminal interactions
+    restart: always   # Always restart the container unless explicitly stopped
     container_name: sfsc-app
     depends_on:
       - node1
       - node2
       - node3
-      - node4
+      - node4          # Ensure blockchain nodes are started before the app
     networks:
       besu-net:
-        ipv4_address: 172.30.0.10
-
-        
+        ipv4_address: 172.30.0.10  # Static IP for the app container inside the custom subnet
