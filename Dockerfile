@@ -1,15 +1,16 @@
 FROM python:3.12.6-slim
 
-# Imposta la working directory
+# Set the working directory inside the container
 WORKDIR /app
 
+# Set terminal environment variable for color support
 ENV TERM=xterm-256color
 
-# Copia tutto il resto del progetto
+# Copy the entire project into the container's /app directory
 COPY ./ /app
 
-# Installa le dipendenze Node.js e Python
-# Installa curl, gnupg (per aggiungere repo Node), build-essential (utile per compilare moduli)
+# Install Node.js and Python dependencies
+# Install curl and gnupg (needed to add Node.js repo), build-essential (for building modules)
 RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
@@ -19,9 +20,11 @@ RUN apt-get update && apt-get install -y \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
+# Install Node.js packages defined in package.json
 RUN npm install
+
+# Install Python packages defined in requirements.txt without cache
 RUN pip install --no-cache-dir -r requirements.txt
 
-
-# Comando di avvio
+# Command to start the application
 CMD ["python", "/app/off_chain/main.py"]
