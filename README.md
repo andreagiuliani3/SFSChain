@@ -81,6 +81,20 @@ Now, you can initiate the process of creating and starting the Docker containers
 docker-compose up -d
 ```
 
+> ⚠️ **IMPORTANT NOTE ON NETWORK CONFIGURATION**  
+> This project uses a **custom Docker subnet** defined in `docker-compose.yml` and referenced in the `static-nodes.json` files to enable peer-to-peer communication among the Besu nodes.  
+>  
+> If you encounter network-related errors when starting the containers (e.g., address conflicts or connectivity issues), it's likely due to a **conflict with an existing Docker network** or service on your machine.  
+>  
+> In that case, you can:
+> - Change the subnet in both `docker-compose.yml` and in each `static-nodes.json` file,
+> - The `static-nodes.json` files are located in the `data` directory of each node (e.g. `SFSC-Network/Node-1/data/static-nodes.json`, `SFSC-Network/Node-2/data/static-nodes.json`, etc.),
+> - Then restart everything with:
+>   ```bash
+>   docker-compose down
+>   docker-compose up -d
+>   ```
+
 You could also check if services were built properly by running `docker-compose logs`. Also, make sure your user has the proper privileges to run Docker commands. Otherwise, you can address this issue by prefixing each command with `sudo`.
 
 > **NOTE:** The application has been tested on [Ubuntu](https://ubuntu.com/).
