@@ -22,7 +22,7 @@
 ## Introduction
 
 Welcome to SFSChain, a decentralized DApp platform built on blockchain technology.
-SFS stands for Sustainable Food Supply, which is the core theme of this university project, developed as part of the course "Software Security and Blockchain".
+SFSChain stands for Sustainable Food Supply Chain, which is the core theme of this university project, developed as part of the course "Software Security and Blockchain".
 The platform showcases how blockchain can enable secure, transparent, and traceable management of CO₂ emissions across the food supply chain, promoting sustainability and accountability among all stakeholders.
 
 ### Overview
@@ -33,7 +33,7 @@ SFSChain is a university project aimed at enabling secure and transparent manage
 
 - [Python](https://www.python.org/) -> Main programming language
 - [Sqlite3](https://www.sqlite.org/) -> Database used
-- [Ganache](https://archive.trufflesuite.com/ganache/) -> Personal blockchain as Ethereum simulator used in Class
+- [Ganache](https://archive.trufflesuite.com/ganache/) -> Personal blockchain as Ethereum simulator used in Class (current code does not work with Ganache)
 - [Web3](https://web3py.readthedocs.io/en/stable/) -> Python library for interacting with Ethereum
 - [Docker](https://www.docker.com/) and [Docker-compose](https://docs.docker.com/compose/) -> Containerization
 - [Solidity](https://soliditylang.org/) -> Smart contract development
@@ -60,13 +60,13 @@ sudo apt install git
 First, you need to clone this repository. In order to do that, you can open your command shell and run this command:
 
 ```bash
-git clone https://github.com/andreagiuliani3/Software-Security-BESU
+git clone https://github.com/andreagiuliani3/SFSChain
 ```
 
 Then, make sure you are placed in the right directory:
 
 ```bash
-cd Software-Security-Besu
+cd SFSChain
 ```
 
 You can run the following command if you want to re-build Docker's image:
@@ -89,11 +89,19 @@ docker-compose up -d
 > In that case, you can:
 > - Change the subnet in both `docker-compose.yml` and in each `static-nodes.json` file,
 > - The `static-nodes.json` files are located in the `data` directory of each node (e.g. `SFSC-Network/Node-1/data/static-nodes.json`, `SFSC-Network/Node-2/data/static-nodes.json`, etc.),
-> - Then restart everything with:
->   ```bash
->   docker-compose down
->   docker-compose up -d
->   ```
+> - You can perform this change:
+>   - **Directly inside the Docker container** related to the application, in which case a simple restart is sufficient:
+>     ```bash
+>     docker-compose down
+>     docker-compose up -d
+>     ```
+>   - **Or on the local files (outside the container)**, but in this case you must **rebuild** the containers to apply the changes:
+>     ```bash
+>     docker-compose down
+>     docker-compose build
+>     docker-compose up -d
+>     ```
+
 
 You could also check if services were built properly by running `docker-compose logs`. Also, make sure your user has the proper privileges to run Docker commands. Otherwise, you can address this issue by prefixing each command with `sudo`.
 
