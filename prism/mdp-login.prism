@@ -1,0 +1,69 @@
+mdp
+const int attempts_limit = 5;
+const int login_code_success = 0;
+const int login_code_fail = -1;
+const int login_code_attempts_limit = -2;
+const int login_code_null = -3;
+const int field_ok = 0;
+const int field_wrong = 1;
+const int field_exit = 2;
+const int field_null = -1;
+
+module Login
+ attempts : [0..attempts_limit] init 0;
+ timeout_limit: bool init false;
+ login_status : [login_code_null..login_code_success] init login_code_null;
+ public_key : [field_null..field_exit] init field_null;
+ private_key : [field_null..field_exit] init field_null;
+ username : [field_null..field_exit] init field_null;
+ password : [field_null..field_exit] init field_null;
+
+ // The user enters his public key
+ [] public_key=field_null & private_key=field_null & username=field_null & password=field_null & !timeout_limit & attempts<attempts_limit ->
+  0.8:(public_key'=field_ok)&(login_status'=login_code_null) + 0.1:(public_key'=field_wrong)&(login_status'=login_code_null)
+  + 0.1:(public_key'=field_exit)&(login_status'=login_code_null);
+ [] public_key=field_null & private_key=field_null & username=field_null & password=field_null & !timeout_limit & attempts=attempts_limit ->
+  0.8:(public_key'=field_ok)&(login_status'=login_code_null)&(attempts'=0) + 0.1:(public_key'=field_wrong)&(login_status'=login_code_null)&(attempts'=0)
+  + 0.1:(public_key'=field_exit)&(login_status'=login_code_null)&(attempts'=0);
+
+ // The user enters his private key
+ [] public_key=field_ok & private_key=field_null & username=field_null & password=field_null -> 0.8:(private_key'=field_ok)
+  + 0.1:(private_key'=field_wrong) + 0.1:(private_key'=field_exit);
+ [] public_key=field_wrong & private_key=field_null & username=field_null & password=field_null -> 0.1:(private_key'=field_ok)
+  + 0.1:(private_key'=field_wrong) + 0.8:(private_key'=field_exit);
+ [] public_key=field_exit -> (public_key'=field_null)&(private_key'=field_null)&(password'=field_null)&(username'=field_null);
+ 
+ // The user enters his username
+ [] public_key=field_ok & private_key=field_ok & username=field_null & password=field_null -> 0.7:(username'=field_ok)
+  + 0.2:(username'=field_wrong) + 0.1:(username'=field_exit);
+ [] (public_key=field_wrong | private_key=field_wrong) & username=field_null & password=field_null -> 0.2:(username'=field_ok)
+  + 0.1:(username'=field_wrong) + 0.7:(username'=field_exit);
+ [] private_key=field_exit -> (public_key'=field_null)&(private_key'=field_null)&(password'=field_null)&(username'=field_null);
+
+ // The user enters his password
+ [] public_key=field_ok & private_key=field_ok & username=field_ok & password=field_null -> 0.7:(password'=field_ok)
+  + 0.2:(password'=field_wrong) + 0.1:(password'=field_exit);
+ [] (public_key=field_wrong | private_key=field_wrong | username=field_wrong) & password=field_null -> 0.2:(password'=field_ok)
+  + 0.1:(password'=field_wrong) + 0.7:(password'=field_exit);
+ [] username=field_exit | password=field_exit -> (public_key'=field_null)&(private_key'=field_null)&(password'=field_null)&(username'=field_null);
+
+ [] (public_key=field_wrong | private_key=field_wrong | username=field_wrong | password=field_wrong) & attempts=attempts_limit ->
+  (login_status'=login_code_attempts_limit)&(timeout_limit'=true)&(public_key'=field_null)&(private_key'=field_null)
+  &(username'=field_null)&(password'=field_null); // login_fail_attempts_limit
+
+ [] (public_key=field_wrong | private_key=field_wrong | username=field_wrong | password=field_wrong) & attempts<attempts_limit ->
+  (attempts'=attempts+1)&(login_status'=login_code_fail)&(public_key'=field_null)&(private_key'=field_null)
+  &(username'=field_null)&(password'=field_null); // login_fail_no_attempts_limit
+
+ // login_success
+ [] public_key=field_ok & private_key=field_ok & username=field_ok & password=field_ok & attempts<attempts_limit -> (login_status'=login_code_success);
+
+ [] attempts=attempts_limit -> (timeout_limit'=true)&(login_status'=login_code_fail)&(public_key'=field_null)&(private_key'=field_null)
+  &(username'=field_null)&(password'=field_null);
+endmodule
+
+// Labels
+label "login_success" = (login_status=login_code_success);
+label "login_fail_attempts_limit" = (timeout_limit)&(login_status=login_code_attempts_limit);
+label "login_fail_no_attempts_limit" = (login_status=login_code_fail);
+label "final_state" = (login_status=login_code_success)|((timeout_limit)&(login_status!=login_code_success));
