@@ -51,7 +51,6 @@ services:
       context: ./  # Build from the root project directory
     stdin_open: true  # Keep STDIN open to allow interactive terminal access
     tty: true         # Allocate a pseudo-TTY for terminal interactions
-    restart: always   # Always restart the container unless explicitly stopped
     container_name: sfsc-app
     depends_on:
       - node1
